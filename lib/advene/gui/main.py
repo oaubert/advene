@@ -3750,9 +3750,11 @@ class AdveneGUI:
                 self.undo()
                 return True
             elif event.keyval == Gdk.KEY_w:
-                nb = win.get_focus().get_ancestor(Gtk.Notebook)
-                if nb:
-                    nb.remove_page(nb.get_current_page())
+                focus = win.get_focus()
+                if focus is not None:
+                    nb = focus.get_ancestor(Gtk.Notebook)
+                    if nb:
+                        nb.remove_page(nb.get_current_page())
                 return True
             elif event.keyval == Gdk.KEY_Page_Up:
                 nb = win.get_focus().get_ancestor(Gtk.Notebook)
