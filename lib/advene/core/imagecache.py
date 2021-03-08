@@ -96,6 +96,8 @@ class ImageCache:
     not_yet_available_image.contenttype = 'image/png'
     not_yet_available_image.timestamp = -1
     not_yet_available_image.is_default = True
+    # Try at most 20 times to re-fetch images
+    MAX_IMAGECACHE_REFETCH_COUNT = 20
 
     def __init__ (self, uri=None, name=None, precision=20, framerate=None):
         """Initialize the Imagecache
@@ -114,6 +116,11 @@ class ImageCache:
         self.uri = uri
 
         self._dict = defaultdict(lambda: self.not_yet_available_image)
+
+        # Store requested_timestamps (not yet valid timestamps)
+        self.requested_timestamps = set()
+        # How many times did we re-try to capture screenshots?
+        self.refetch_count = 0
 
         self._modified=False
 
@@ -218,7 +225,12 @@ class ImageCache:
         else:
             key = self.round_timestamp(key)
         logger.debug("Getting key %d", key)
-        return self._dict.get(key, self.not_yet_available_image)
+        img = self._dict.get(key, None)
+        if img is None:
+            # Missing timestamp.
+            self.requested_timestamps.add(key)
+            img = self.not_yet_available_image
+        return img
 
     def __setitem__ (self, key, value):
         """Set the snapshot for the image corresponding to the position key.
@@ -247,6 +259,7 @@ class ImageCache:
                 value.timestamp = key
                 value.contenttype = 'image/png'
             self._dict[key] = value
+            self.requested_timestamps.discard(key)
             return value
         else:
             return self.not_yet_available_image
@@ -269,6 +282,11 @@ class ImageCache:
         @return: a list of keys
         """
         return list(self._dict.keys())
+
+    def missing_snapshots (self):
+        """Return the list of timestamps queried but missing a snapshot.
+        """
+        return self.requested_timestamps
 
     def save(self, name):
         """Save the content of the cache under a specified name (id).

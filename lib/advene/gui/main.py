@@ -3217,6 +3217,16 @@ class AdveneGUI:
         if s:
             if s.timestamp_queue.empty():
                 self.snapshotter_monitor_icon.set_state('idle')
+                # Since the snapshotter is idle, check
+                # imagecache.missing_snapshots.
+                ic = c.package.imagecache
+                if (len(ic.missing_snapshots()) > 0
+                    and ic.refetch_count < ic.MAX_IMAGECACHE_REFETCH_COUNT):
+                    # There are some missing snapshots, try to get
+                    # them again.
+                    for t in sorted(ic.missing_snapshots()):
+                        c.update_snapshot(t)
+                    ic.refetch_count += 1
             else:
                 self.snapshotter_monitor_icon.set_state('running')
         else:
