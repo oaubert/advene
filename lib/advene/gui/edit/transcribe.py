@@ -1224,6 +1224,15 @@ class TranscriptionEdit(AdhocView):
         if c.gui and c.gui.process_player_shortcuts(win, event):
             return True
 
+        if event.keyval == Gdk.KEY_Escape:
+            # Escape: either play or pause+go back in time
+            if p.is_playing():
+                self.controller.update_status('pause')
+                self.controller.update_status("seek_relative", -config.data.preferences['time-increment'], notify=False)
+            else:
+                self.controller.update_status('start')
+            return True
+
         if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             if event.keyval == Gdk.KEY_Return:
                 # Insert current timestamp mark
