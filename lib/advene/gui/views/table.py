@@ -578,7 +578,7 @@ class AnnotationTable(AdhocView):
                 retval = True
             elif button == 1 and col.get_title() == _("Snapshot"):
                 # Click on snapshot -> play
-                self.controller.update_status("set", node.fragment.begin)
+                self.controller.update_status("seek", node.fragment.begin)
                 # Allow further processing
                 retval = False
         return retval
