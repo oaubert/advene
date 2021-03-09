@@ -43,9 +43,11 @@ from gi.repository import Gdk
 
 try:
     gi.require_version('Gst', '1.0')
+    gi.require_version('GstVideo', '1.0')
     gi.require_version('GstPbutils', '1.0')
     from gi.repository import Gst
     from gi.repository import GstPbutils
+    from gi.repository import GstVideo
     Gst.init(None)
 except (ImportError, ValueError):
     Gst=None
@@ -83,6 +85,7 @@ class Player:
     UndefinedStatus=4
 
     def __init__(self):
+        self.xid = None
         self.mute_volume=None
 
         self.pipeline=None
@@ -105,12 +108,14 @@ class Player:
             audiosrc = 'autoaudiosrc'
         videosrc='autovideosrc'
         videosink='autovideosink'
+        if config.data.player['vout'] == 'gtk':
+            videosink = 'gtksink'
 
         if not config.data.player['record-video']:
             # Generate black image
             videosrc = 'videotestsrc pattern=2'
 
-        pipeline_def = '%(videosrc)s name=videosrc ! tee name=tee ! queue ! videoconvert ! video/x-raw,width=352,pixel-aspect-ratio=(fraction)1/1 ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location=%(videofile)s  %(audiosrc)s name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! videoconvert ! %(videosink)s name=sink sync=false' % locals()
+        pipeline_def = f'{videosrc} name=videosrc ! tee name=tee ! queue ! videoconvert ! videoscale ! video/x-raw,width=480 ! theoraenc drop-frames=1 ! queue ! oggmux name=mux ! filesink location={videofile}  {audiosrc} name=audiosrc ! audioconvert ! audiorate ! queue ! vorbisenc quality=0.5 ! mux.  tee. ! queue ! videoscale ! videoconvert ! {videosink} name=sink sync=false'
         logger.debug("Launching pipeline %s", pipeline_def)
         self.pipeline = Gst.parse_launch(pipeline_def)
         self.imagesink = self.pipeline.get_by_name('sink')
@@ -120,34 +125,14 @@ class Player:
         # Asynchronous XOverlay support.
         bus = self.pipeline.get_bus()
         bus.enable_sync_message_emission()
-        def on_sync_message(bus, message):
-            s = message.get_structure()
-            if s is None:
-                return
-            logger.debug("sync message %s", s.get_name())
-            if s.get_name() == 'prepare-window-handle':
-                self.set_visual(self.xid, message.src)
-
-        def on_bus_message_error(bus, message):
-            s = message.get_structure()
-            if s is None:
-                return True
-            title, message = message.parse_error()
-            logger.error("%s: %s", title, message)
-            return True
-
-        def on_bus_message_warning(bus, message):
-            s = message.get_structure()
-            if s is None:
-                return True
-            title, message = message.parse_warning()
-            logger.warning("%s: %s", title, message)
-            return True
-
-        bus.connect('sync-message::element', on_sync_message)
+        bus.connect('sync-message::element', self.on_sync_message)
         bus.add_signal_watch()
-        bus.connect('message::error', on_bus_message_error)
-        bus.connect('message::warning', on_bus_message_warning)
+        bus.connect('message::error', self.on_bus_message_error)
+        bus.connect('message::warning', self.on_bus_message_warning)
+
+    def reset_pipeline(self):
+        self.build_pipeline()
+        self.set_widget(None, self.container)
 
     def current_status(self):
         if self.pipeline is None:
@@ -195,7 +180,7 @@ class Player:
             # Already started
             return
         self.videofile = time.strftime("/tmp/advene_record-%Y%m%d-%H%M%S.ogg")
-        self.build_pipeline()
+        self.reset_pipeline()
         if self.pipeline is None:
             return
         self.pipeline.set_state(Gst.State.PLAYING)
@@ -231,7 +216,7 @@ class Player:
             logger.warning("%s already exists. We will not overwrite, so using %s instead ", item, self.videofile)
         else:
             self.videofile = item
-        self.build_pipeline()
+        self.reset_pipeline()
         return self.get_video_info()
 
     def get_uri(self):
@@ -353,6 +338,30 @@ class Player:
         self.stream_duration = s.length
         self.current_position_value = int(s.position)
 
+    def reparent(self, xid, sink=None):
+        if sink is None:
+            sink = self.real_imagesink
+        else:
+            self.real_imagesink = sink
+        logger.debug("Reparent %s", xid)
+        # See https://bugzilla.gnome.org/show_bug.cgi?id=599885
+        if xid:
+            self.log("Reparent " + hex(xid))
+            Gdk.Display().get_default().sync()
+            try:
+                sink.set_window_handle(xid)
+                sink.set_property('force-aspect-ratio', True)
+                sink.expose()
+            except AttributeError:
+                logger.warning("cannot set video output widget")
+
+    def set_visual(self, xid):
+        if not xid:
+            return True
+        self.xid = xid
+        self.reparent(xid)
+        return True
+
     def set_widget(self, widget, container):
         handle = None
 
@@ -360,9 +369,15 @@ class Player:
             # Special case: we use a gtk sink, so we get a Gtk widget
             # and not the XOverlay API
             try:
+                logger.debug("Packing gtk widget %s", self.imagesink.props.widget)
+                # Store container for pipeline resets
+                self.container = container
+                # Remove old widgets
+                container.foreach(container.remove)
                 container.pack_start(self.imagesink.props.widget, True, True, 0)
                 self.imagesink.props.widget.show()
-                widget.hide()
+                if widget is not None:
+                    widget.hide()
             except:
                 logger.exception("Embedding error")
             return
@@ -384,18 +399,6 @@ class Player:
         widget.show()
         self.set_visual(handle)
 
-    def set_visual(self, xid, realsink=None):
-        if realsink is None:
-            realsink = self.imagesink
-        self.xid = xid
-        if xid and hasattr(realsink, 'set_window_handle'):
-            logger.info("Reparent %s", hex(xid))
-            Gdk.Display().get_default().sync()
-            realsink.set_window_handle(xid)
-        if hasattr(realsink.props, 'force-aspect-ratio'):
-            realsink.set_property('force-aspect-ratio', True)
-        return True
-
     def restart_player(self):
         # FIXME: destroy the previous player
         self.pipeline.set_state(Gst.State.READY)
@@ -403,6 +406,33 @@ class Player:
         self.build_pipeline()
         self.set_uri(self.videofile)
         self.position_update()
+        return True
+
+    def on_sync_message(self, bus, message):
+        s = message.get_structure()
+        logger.debug("sync message %s", s)
+        if s is None:
+            return True
+        if GstVideo.is_video_overlay_prepare_window_handle_message(message):
+            imagesink = message.src
+            imagesink.set_property("force-aspect-ratio", True)
+            self.reparent(self.xid, imagesink)
+        return True
+
+    def on_bus_message_error(self, bus, message):
+        s = message.get_structure()
+        if s is None:
+            return True
+        title, message = message.parse_error()
+        logger.error("%s: %s", title, message)
+        return True
+
+    def on_bus_message_warning(self, bus, message):
+        s = message.get_structure()
+        if s is None:
+            return True
+        title, message = message.parse_warning()
+        logger.warning("%s: %s", title, message)
         return True
 
     def sound_mute(self):
