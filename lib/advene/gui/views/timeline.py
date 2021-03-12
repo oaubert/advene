@@ -248,7 +248,6 @@ class TimeLine(AdhocView):
             'background': name2color('red'),
             'white': name2color('white'),
             }
-
         self.locked_inspector = False
 
         def handle_autoscroll_combo(combo):
@@ -1226,14 +1225,16 @@ class TimeLine(AdhocView):
                                                            force_create=True)
         return at
 
-    def annotation_drag_begin(self, widget, context):
-        """Handle drag begin for annotations.
-        """
-        # Determine in which part of the annotation we clicked.
-        widget._drag_fraction = self.annotation_fraction(widget)
-        return False
-
     def annotation_drag_received(self, widget, context, x, y, selection, targetType, time):
+        wid = self.is_resize_annotation(context)
+        logger.warning(f"annotation_drag_received {wid}")
+        if wid:
+            if self.annotation_fraction(widget) < .5:
+                wid.set_resize_time(widget.annotation.fragment.begin)
+            else:
+                wid.set_resize_time(widget.annotation.fragment.end)
+            return True
+
         if targetType == config.data.target_type['annotation']:
             source=self.controller.package.annotations.get(str(selection.get_data(), 'utf8').split('\n')[0])
             dest=widget.annotation
@@ -1696,6 +1697,18 @@ class TimeLine(AdhocView):
                 self.controller.create_annotation(begin, typ, content=content)
         return False
 
+    def annotation_drag_end(self, widget, context):
+        """Handle drag end for annotations.
+        """
+        attr = widget.is_resizing()
+        if attr and widget.resize_time is not None:
+            ann = widget.annotation
+            self.controller.notify('EditSessionStart', element=ann, immediate=True)
+            setattr(ann.fragment, attr, widget.resize_time)
+            self.controller.notify('AnnotationEditEnd', annotation=ann)
+            self.controller.notify('EditSessionEnd', element=ann)
+        return False
+
     def legend_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation-type to the legend
         """
@@ -1765,6 +1778,7 @@ class TimeLine(AdhocView):
         """Handle button presses on annotation widgets.
         """
         widget._single_click_guard=False
+        widget._click_fraction = self.annotation_fraction(widget)
         if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
             self.annotation_cb(widget, annotation, event.x)
             return True
@@ -1773,7 +1787,7 @@ class TimeLine(AdhocView):
             return True
         elif event.button == 1 and event.type == Gdk.EventType.BUTTON_PRESS and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Control + click : set annotation begin/end time to current time
-            f=self.annotation_fraction(widget)
+            f = widget._click_fraction
             if f < .40:
                 at='begin'
             elif f > .60:
@@ -2057,7 +2071,7 @@ class TimeLine(AdhocView):
             return False
         b.connect('focus-in-event', focus_in)
 
-        b.connect('drag-begin', self.annotation_drag_begin)
+        b.connect('drag-end', self.annotation_drag_end)
         # The button can receive drops (to create relations)
         b.connect('drag-data-received', self.annotation_drag_received)
         b.drag_dest_set(Gtk.DestDefaults.MOTION |
@@ -2067,6 +2081,16 @@ class TimeLine(AdhocView):
                         Gdk.DragAction.LINK | Gdk.DragAction.COPY | Gdk.DragAction.MOVE | Gdk.DragAction.ASK )
 
         def annotation_drag_motion(widget, drag_context, x, y, timestamp):
+            w = Gtk.drag_get_source_widget(drag_context)
+            try:
+                if w.is_resizing():
+                    if self.annotation_fraction(widget) < .5:
+                        w._icon.set_cursor(widget.annotation.fragment.begin)
+                    else:
+                        w._icon.set_cursor(widget.annotation.fragment.end)
+            except AttributeError:
+                pass
+
             actions=drag_context.get_actions()
             # Dragging an annotation. Set the default action to ASK.
             if (config.data.drag_type['annotation'][0][0] in drag_context.list_targets()
@@ -2375,10 +2399,28 @@ class TimeLine(AdhocView):
             return True
         return False
 
+    def is_resize_annotation(self, context):
+        w = Gtk.drag_get_source_widget(context)
+        try:
+            if w.is_resizing():
+                # Annotation resize mode. Just ignore drop.
+                # Return widget for the annotation to resize, so that
+                # we can indicate it the appropriate time.
+                return w
+        except AttributeError:
+            # No annotation resize.
+            pass
+        return False
+
     def layout_drag_received(self, widget, context, x, y, selection, targetType, time):
         """Handle the drop from an annotation to the layout.
         """
         # We received a drop. Determine the location.
+        wid = self.is_resize_annotation(context)
+        if wid:
+            t = self.pixel2unit(self.adjustment.get_value() +  x, absolute=True)
+            wid.set_resize_time(t)
+            return True
 
         # Correct y value according to scrollbar position
         y += widget.get_parent().get_vscrollbar().get_adjustment().get_value()

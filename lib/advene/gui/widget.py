@@ -49,12 +49,17 @@ except (ImportError, ValueError):
 # Advene part
 import advene.core.config as config
 
-from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color
+from advene.gui.util import png_to_pixbuf, enable_drag_source, name2color, overlay_svg_as_pixbuf
 import advene.util.helper as helper
 from advene.model.annotation import Annotation
 import advene.gui.popup
 
 active_color=name2color('#fdfd4b')
+pixbuf_template = """<svg:svg xmlns:svg="http://www.w3.org/2000/svg" width="320pt" height="200pt" version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 320 200'><svg:text x='50' y='100' fill="white" font-size="48" stroke="white" font-family="sans-serif">%s</svg:text></svg:svg>"""
+resize_pixbuf = {
+    'begin': overlay_svg_as_pixbuf(svg_data=pixbuf_template % 'Set begin', width=80),
+    'end': overlay_svg_as_pixbuf(svg_data=pixbuf_template % 'Set end', width=80),
+}
 
 class GenericColorButtonWidget(Gtk.DrawingArea):
     """ Widget emulating a color button widget
@@ -215,6 +220,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.annotation=annotation
         self.active=False
         self._fraction_marker=None
+        self.resize_time = None
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
         self.connect('key-press-event', self.keypress, self.annotation)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
@@ -229,11 +235,26 @@ class AnnotationWidget(GenericColorButtonWidget):
         return self._fraction_marker
     fraction_marker = property(get_fraction_marker, set_fraction_marker)
 
+    def set_resize_time(self, t):
+        self.resize_time = t
+
+    def is_resizing(self):
+        # _click_fraction is set in views where it makes sense to
+        # resize the annotation (the timeline). If it is not set, then
+        # it will raise an AttributeError
+        try:
+            if self._click_fraction < .1:
+                return 'begin'
+            elif self._click_fraction > .9:
+                return 'end'
+        except AttributeError:
+            pass
+        return None
+
     def _drag_begin(self, widget, context):
         # set_icon_widget is broken ATM in recent gtk on win32.
-        if config.data.os == 'win32':
-            return GenericColorButtonWidget._drag_begin(self, widget, context)
-
+        #if config.data.os == 'win32':
+        #    return GenericColorButtonWidget._drag_begin(self, widget, context)
         try:
             widgets=self.container.get_selected_annotation_widgets()
             if not widget in widgets:
@@ -263,6 +284,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         l.get_style_context().add_class('advene_drag_icon')
         v.pack_start(l, False, True, 0)
 
+        resize = self.is_resizing()
         def set_cursor(wid, t=None, precision=None):
             if t is None:
                 t = self.annotation
@@ -282,9 +304,13 @@ class AnnotationWidget(GenericColorButtonWidget):
                         pixbuf = png_to_pixbuf(snap,
                                                width=config.data.preferences['drag-snapshot-width'])
                     begin.set_from_pixbuf(pixbuf)
-                    end.hide()
-                    padding.hide()
-                    l.set_text(helper.format_time(t))
+                    if resize:
+                        end.set_from_pixbuf(resize_pixbuf[resize])
+                        l.set_text(helper.format_time(t))
+                    else:
+                        end.hide()
+                        padding.hide()
+                        l.set_text(helper.format_time(t))
                 elif isinstance(t, Annotation):
                     # It can be an annotation
                     begin.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t),
