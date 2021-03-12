@@ -156,7 +156,7 @@ def image_from_position(controller, position=None, media=None, width=None, heigh
     i.set_from_pixbuf(pb)
     return i
 
-def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
+def overlay_svg_as_pixbuf(png_data="", svg_data="", width=None, height=None):
 
     """Overlay svg graphics over a png image.
 
@@ -181,8 +181,11 @@ def overlay_svg_as_pixbuf(png_data, svg_data, width=None, height=None):
             p = loader.get_pixbuf ()
             w = p.get_width()
             h = p.get_height()
-            pixbuf=png_to_pixbuf (png_data).scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
-            p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
+            if png_data:
+                pixbuf=png_to_pixbuf(png_data).scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR)
+                p.composite(pixbuf, 0, 0, w, h, 0, 0, 1.0, 1.0, GdkPixbuf.InterpType.BILINEAR, 255)
+            else:
+                pixbuf = p
         except GObject.GError:
             # The PNG data was invalid.
             logger.error("Invalid image data", exc_info=True)
