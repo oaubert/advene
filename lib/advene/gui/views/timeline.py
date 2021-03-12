@@ -1217,7 +1217,6 @@ class TimeLine(AdhocView):
 
     def annotation_drag_received(self, widget, context, x, y, selection, targetType, time):
         wid = self.is_resize_annotation(context)
-        logger.warning(f"annotation_drag_received {wid}")
         if wid:
             if wid is widget:
                 wid.set_resize_time(None)
