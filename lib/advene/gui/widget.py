@@ -221,9 +221,11 @@ class AnnotationWidget(GenericColorButtonWidget):
         self.active=False
         self._fraction_marker=None
         self.resize_time = None
+        self.resize_cursor = Gdk.Cursor.new_from_name(container.widget.get_display(), "ew-resize")
         GenericColorButtonWidget.__init__(self, element=annotation, container=container)
         self.connect('key-press-event', self.keypress, self.annotation)
         self.connect('enter-notify-event', lambda b, e: b.grab_focus() and True)
+        self.connect('motion-notify-event', self.motion_notify_cb)
         # The widget can generate drags
         enable_drag_source(self, annotation, container.controller)
         self.no_image_pixbuf=None
@@ -250,6 +252,39 @@ class AnnotationWidget(GenericColorButtonWidget):
         except AttributeError:
             pass
         return None
+
+    def annotation_fraction(self, position=None):
+        """Return the fraction of the given position (or the cursor) relative
+        to the annotation widget.
+
+        If width is less than 20px then consider it is in the middle (.5) anyway.
+
+        @return: a fraction (float)
+        """
+        w = self.get_allocation().width
+        if w < 20:
+            return .5
+        if position is None:
+            x, y = self.get_pointer()
+        else:
+            x = position[0]
+        return 1.0 * x / w
+
+    # Draw rectangle during mouse movement
+    def motion_notify_cb(self, widget, event):
+        if event.is_hint:
+            pointer = event.get_window().get_pointer()
+            x, y, state = pointer[1], pointer[2], pointer[3]
+        else:
+            x = event.x
+            y = event.y
+        fraction = self.annotation_fraction( (x, y) )
+        if fraction < .1 or fraction > .9:
+            # Show resize handle
+            self.get_toplevel().get_window().set_cursor(self.resize_cursor)
+        else:
+            self.get_toplevel().get_window().set_cursor(None)
+        return False
 
     def _drag_begin(self, widget, context):
         # set_icon_widget is broken ATM in recent gtk on win32.

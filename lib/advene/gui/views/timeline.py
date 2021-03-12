@@ -1180,16 +1180,6 @@ class TimeLine(AdhocView):
             self.controller.notify('EditSessionEnd', element=source)
         return True
 
-    def annotation_fraction(self, widget):
-        """Return the fraction of the cursor position relative to the annotation widget.
-
-        @return: a fraction (float)
-        """
-        x, y = widget.get_pointer()
-        w = widget.get_allocation().width
-        f = 1.0 * x / w
-        return f
-
     def create_relation(self, source, dest, rt):
         """Create the relation of type rt between source and dest.
         """
@@ -1229,7 +1219,9 @@ class TimeLine(AdhocView):
         wid = self.is_resize_annotation(context)
         logger.warning(f"annotation_drag_received {wid}")
         if wid:
-            if self.annotation_fraction(widget) < .5:
+            if wid is widget:
+                wid.set_resize_time(None)
+            elif widget.annotation_fraction() <= .5:
                 wid.set_resize_time(widget.annotation.fragment.begin)
             else:
                 wid.set_resize_time(widget.annotation.fragment.end)
@@ -1778,7 +1770,7 @@ class TimeLine(AdhocView):
         """Handle button presses on annotation widgets.
         """
         widget._single_click_guard=False
-        widget._click_fraction = self.annotation_fraction(widget)
+        widget._click_fraction = widget.annotation_fraction()
         if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
             self.annotation_cb(widget, annotation, event.x)
             return True
@@ -1939,7 +1931,7 @@ class TimeLine(AdhocView):
             self.controller.gui.adjust_annotation_bound(annotation, 'end')
         elif event.keyval == Gdk.KEY_p:
             # Play
-            f=self.annotation_fraction(widget)
+            f=widget.annotation_fraction()
             x, y = widget.get_pointer()
             if (x < 0 or y < 0
                 or x > widget.get_allocation().width
@@ -2084,7 +2076,7 @@ class TimeLine(AdhocView):
             w = Gtk.drag_get_source_widget(drag_context)
             try:
                 if w.is_resizing():
-                    if self.annotation_fraction(widget) < .5:
+                    if widget.annotation_fraction() <= .5:
                         w._icon.set_cursor(widget.annotation.fragment.begin)
                     else:
                         w._icon.set_cursor(widget.annotation.fragment.end)
@@ -2113,7 +2105,7 @@ class TimeLine(AdhocView):
             elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
                 incr=config.data.preferences[i]
 
-            fr=self.annotation_fraction(button)
+            fr=button.annotation_fraction()
             f=button.annotation.fragment
 
             self.controller.notify('EditSessionStart', element=button.annotation, immediate=True)
