@@ -32,7 +32,6 @@ import locale
 import os
 from pathlib import Path
 import pprint
-import queue
 import re
 import socket
 import sys
