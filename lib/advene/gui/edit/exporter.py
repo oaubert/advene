@@ -134,9 +134,9 @@ class AnnotationExporter(AdhocView):
             vbox.pack_start(line, False, True, 0)
             line.pack_start(Gtk.Label(self.title), True, True, 0)
 
-        # get_exporter returns a dict indexed by name with exporter class values
-        # We sort it alphabetically
-        exporter_items = sorted(get_exporter().items(), key=lambda t: t[0].lower())
+        exporter_items = list(sorted(( (e, e.get_name())
+                                       for e in self.controller.get_export_filters(self.source) ),
+                                     key=lambda t: t[1].lower()))
 
         line = Gtk.HBox()
         vbox.pack_start(line, False, True, 0)
@@ -159,7 +159,7 @@ class AnnotationExporter(AdhocView):
         self.fname_button.add(self.fname_label)
         self.fname_button.connect('clicked', filename_chooser)
 
-        default_exporter = exporter_items[0][1](self.controller, self.source)
+        default_exporter = exporter_items[0][0](self.controller, self.source)
         default_filename = default_exporter.get_filename(source=self.source)
         self.set_filename(default_filename)
 
@@ -173,7 +173,7 @@ class AnnotationExporter(AdhocView):
         vbox.pack_start(line, False, True, 0)
 
         line.pack_start(Gtk.Label(_("Filter") + " "), False, False, 0)
-        self.exporters = dialog.list_selector_widget([ (cl, name) for (name, cl) in exporter_items ],
+        self.exporters = dialog.list_selector_widget(exporter_items,
                                                      preselect=self.exporter and self.exporter.__class__,
                                                      callback=self.update_options)
         line.pack_start(self.exporters, False, True, 0)

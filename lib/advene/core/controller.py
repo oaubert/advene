@@ -2727,8 +2727,16 @@ class AdveneController:
         self.notify('ViewCreate', view=v, immediate=True)
         return v
 
-    def get_export_filters(self):
-        return get_exporter().values()
+    def get_export_filters(self, element=None):
+        """Return a list valid export filters (classes) for the given element.
+        """
+        valid_filter = lambda v: True
+        if isinstance(element, Package):
+            valid_filter = lambda v: v.is_valid_for('package')
+        elif isinstance(element, AnnotationType):
+            valid_filter = lambda v: v.is_valid_for('annotation-type')
+
+        return [ e for e in get_exporter().values() if valid_filter(e) ]
 
     def apply_export_filter(self, element, exportfilter, filename=None):
         """Apply the given export filename to the element and output the result to filename.
