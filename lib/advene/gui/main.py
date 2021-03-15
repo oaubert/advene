@@ -88,7 +88,7 @@ import advene.model.tal.context
 
 import advene.core.mediacontrol
 import advene.util.helper as helper
-from advene.util.tools import unescape_string
+from advene.util.tools import unescape_string, open_in_filebrowser
 import xml.etree.ElementTree as ET
 
 import advene.util.importer
@@ -4628,20 +4628,7 @@ Image cache information: %(imagecache)s
         return True
 
     def on_advene_log_folder_display(self, button=None, data=None):
-        d = config.data.advenefile('', 'settings')
-        if config.data.os == 'win32':
-            os.startfile(d)
-        elif config.data.os == 'darwin':
-            os.system('open "%s"' % d)
-        else:
-            # Linux is more problematic...
-            for p in ('xdg-open', 'gnome-open', 'kfmclient'):
-                prg = helper.find_in_path(p)
-                if prg is not None:
-                    if p == 'kfmclient':
-                        prg = prg + " openURL"
-                    os.system('%s "%s"' % (prg, d))
-                    break
+        open_in_filebrowser(config.data.advenefile('', 'settings'))
         return True
 
     def on_create_view_activate (self, button=None, data=None):

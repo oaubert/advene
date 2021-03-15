@@ -32,6 +32,8 @@ except ImportError:
     from md5 import md5
 import os
 import re
+import shutil
+import subprocess
 import sys
 import urllib.request
 from urllib.parse import urlparse, unquote
@@ -492,3 +494,20 @@ def media_is_valid(uri):
         return False
     except urllib.error.URLError:
         return False
+
+def open_in_filebrowser(path):
+    if sys.platform == 'win32':
+        os.startfile(path)
+    elif sys.platform == 'darwin':
+        subprocess.Popen([shutil.which('open'), path])
+    else:
+        # Linux is more diverse...
+        for p in ('xdg-open', 'gnome-open', 'kfmclient'):
+            prg = shutil.which(p)
+            if prg is not None:
+                args = [ prg ]
+                if p == 'kfmclient':
+                    args.append("openURL")
+                args.append(path)
+                subprocess.Popen(args)
+                break
