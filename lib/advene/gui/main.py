@@ -2352,63 +2352,13 @@ class AdveneGUI:
         return True
 
     def export_element(self, element):
-
         if isinstance(element, Package):
             title=_("Export package data")
         elif isinstance(element, AnnotationType):
             title=_("Export annotation type %s") % self.controller.get_title(element)
         else:
             title=_("Export element %s") % self.controller.get_title(element)
-        fs = Gtk.FileChooserDialog(title=title,
-                                   parent=self.gui.win,
-                                   action=Gtk.FileChooserAction.SAVE,
-                                   buttons=( Gtk.STOCK_CONVERT, Gtk.ResponseType.OK,
-                                             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
-        def update_extension(sel):
-            exportfilter = sel.get_current_element()(self.controller, element)
-            f = exportfilter.get_filename(basename=(os.path.basename(fs.get_filename() or "")
-                                                    or unquote(str(os.path.basename(self.controller.package.uri)))),
-                                          source=element)
-            fs.set_current_name(f)
-            return True
-        def valid_always(v):
-            return True
-        def valid_for_package(v):
-            return v.is_valid_for('package')
-        def valid_for_annotation_type(v):
-            return v.is_valid_for('annotation-type')
-        valid_filter=valid_always
-        if isinstance(element, Package):
-            valid_filter=valid_for_package
-        elif isinstance(element, AnnotationType):
-            valid_filter=valid_for_annotation_type
-        exporters = dialog.list_selector_widget( [ (e, e.get_name()) for e in self.controller.get_export_filters()
-                                                   if valid_filter(e) ],
-                                                 callback=update_extension )
-        hb=Gtk.HBox()
-        hb.pack_start(Gtk.Label(_("Export format")), False, False, 0)
-        hb.pack_start(exporters, True, True, 0)
-        fs.set_extra_widget(hb)
-
-        fs.show_all()
-        update_extension(exporters)
-        self.fs=fs
-        res=fs.run()
-
-        if res == Gtk.ResponseType.OK:
-            filename = fs.get_filename()
-            if os.path.exists(filename):
-                if not dialog.message_dialog(_("%s already exists. Do you want to overwrite it?") % filename,
-                                             icon=Gtk.MessageType.QUESTION):
-                    filename = None
-
-            if filename is not None:
-                out = self.controller.apply_export_filter(element,
-                                                          exporters.get_current_element(),
-                                                          filename)
-                if out:
-                    dialog.message_dialog(out)
-        fs.destroy()
+        self.open_adhoc_view('exporterview', title=title, source=element)
         return True
 
     def update_package_list (self):
