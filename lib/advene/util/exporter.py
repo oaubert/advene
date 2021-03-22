@@ -82,7 +82,7 @@ class GenericExporter:
     extension = ".txt"
     mimetype = "text/plain"
 
-    def __init__(self, controller=None, source=None):
+    def __init__(self, controller=None, source=None, callback=None):
         """Instanciate the exporter.
 
         source is the source of elements to export (usually a package,
@@ -98,11 +98,16 @@ class GenericExporter:
         TALES expression that should be evaluated to output the actual
         elements to export.
 
+        callback is a method that will be called to inform of the
+        export progression.
+
         @param controller: controller
         @type controller: advene.core.controller
+
         """
         self.controller = controller
         self.set_source(source)
+        self.callback = callback
 
         # Optional output message that can be set by the exporter to
         # provide feedback to the user
@@ -156,7 +161,10 @@ class GenericExporter:
                 basename = self.controller.get_title(source)
             else:
                 basename = "exported_data"
-        return "{}.{}".format(basename, self.extension)
+        if self.extension:
+            return "{}.{}".format(basename, self.extension)
+        else:
+            return basename
 
     def set_options(self, options):
         """Set importer options (attributes) according to the given options.

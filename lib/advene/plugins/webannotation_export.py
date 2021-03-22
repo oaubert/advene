@@ -42,8 +42,8 @@ class WebAnnotationExporter(FlatJsonExporter):
     extension = 'jsonld'
     mimetype = "application/json"
 
-    def __init__(self, controller=None, source=None):
-        super().__init__(controller, source)
+    def __init__(self, controller=None, source=None, callback=None):
+        super().__init__(controller, source, callback)
         self.split = False
         self.optionparser.add_option("-s", "--split",
                                      action="store_true", dest="split", default=self.split,

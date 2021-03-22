@@ -121,7 +121,7 @@ class AdArdflibExporter(GenericExporter):
     name = _("AdA rdflib exporter")
     extension = 'rdf'
 
-    def __init__(self, controller=None, source=None):
+    def __init__(self, controller=None, source=None, callback=None):
         super().__init__(controller=controller, source=source)
         self.format = "json-ld"
         self.optionparser.add_option("-f", "--format",

@@ -31,7 +31,6 @@ import advene.core.config as config
 from advene.gui.edit.properties import OptionParserGUI
 from advene.gui.util import dialog
 from advene.gui.views import AdhocView
-from advene.util.exporter import get_exporter
 from advene.util.tools import open_in_filebrowser
 
 name = "AnnotationExporter view plugin"
@@ -55,12 +54,14 @@ class AnnotationExporter(AdhocView):
         self.contextual_actions = ()
         self.options = {
             }
+        # Flag used to cancel export
+        self.should_continue = True
 
         self.exporter = None
         if self.source is None:
             self.source = controller.package
         if exporterclass is not None:
-            self.exporter = exporterclass(controller=self.controller, source=self.source)
+            self.exporter = exporterclass(controller=self.controller, source=self.source, callback=self.progress_callback)
         self.filename = filename
         self.widget = self.build_widget()
 
@@ -73,7 +74,7 @@ class AnnotationExporter(AdhocView):
                 fname = fname.replace('file://', '')
             if ec is None:
                 return True
-            e = ec(controller=self.controller, source=self.source)
+            e = ec(controller=self.controller, source=self.source, callback=self.progress_callback)
             self.exporter = e
         else:
             e = self.exporter
@@ -93,7 +94,7 @@ class AnnotationExporter(AdhocView):
             message = _("Error when exporting data: %s") % "\n".join(str(a) for a in e.args)
             logger.exception(message)
             icon = Gtk.MessageType.ERROR
-        if dialog.message_dialog(message, icon=icon):
+        if dialog.message_dialog(message, icon=icon) and icon ==  Gtk.MessageType.QUESTION:
             # Try to open the file
             open_in_filebrowser(fname)
             pass
@@ -125,6 +126,23 @@ class AnnotationExporter(AdhocView):
     def set_filename(self, name):
         self.fname_label.set_label(os.path.abspath(name))
         return True
+
+    def progress_callback(self, value=None, label=None):
+        if value is None:
+            self.progressbar.pulse()
+        else:
+            self.progressbar.set_fraction(value)
+        if label is not None:
+            self.progressbar.set_text(label)
+        # We could do a "while Gtk.events_pending()" but we want to
+        # avoid process lock because of too many pending events
+        # processing.
+        for i in range(8):
+            if Gtk.events_pending():
+                Gtk.main_iteration()
+            else:
+                break
+        return self.should_continue
 
     def build_widget(self):
         vbox = Gtk.VBox()
@@ -159,7 +177,7 @@ class AnnotationExporter(AdhocView):
         self.fname_button.add(self.fname_label)
         self.fname_button.connect('clicked', filename_chooser)
 
-        default_exporter = exporter_items[0][0](self.controller, self.source)
+        default_exporter = exporter_items[0][0](self.controller, self.source, callback=self.progress_callback)
         default_filename = default_exporter.get_filename(source=self.source)
         self.set_filename(default_filename)
 
@@ -190,6 +208,9 @@ class AnnotationExporter(AdhocView):
         sw.add_with_viewport(self.options_frame)
         exp.add(sw)
         vbox.pack_start(exp, True, True, 0)
+
+        self.progressbar = Gtk.ProgressBar()
+        vbox.pack_start(self.progressbar, False, True, 0)
 
         bb = Gtk.HButtonBox()
 

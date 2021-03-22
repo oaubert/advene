@@ -126,8 +126,8 @@ class AdARDFExporter(WebAnnotationExporter):
     name = _("AdA RDF exporter")
     extension = 'ada.jsonld'
 
-    def __init__(self, controller=None, source=None):
-        super().__init__(controller=controller, source=source)
+    def __init__(self, controller=None, source=None, callback=None):
+        super().__init__(controller=controller, source=source, callback=callback)
         self.not_part_of_ontology = set()
 
     def annotation_uri(self, a, media_uri):
