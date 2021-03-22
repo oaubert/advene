@@ -30,6 +30,7 @@ import json
 import os
 
 import advene.core.config as config
+import advene.util.helper as helper
 from advene.util.importer import GenericImporter
 
 def register(controller=None):
@@ -132,8 +133,8 @@ class WebAnnotationImporter(GenericImporter):
                     logger.debug("Invalid mediafragment value %s", val)
                     return None
                 begin, end = val[2:].split(',')
-                begin = int(float(begin) * 1000)
-                end = int(float(end) * 1000)
+                begin = helper.parse_time(begin)
+                end = helper.parse_time(end)
             return media, begin, end
 
         progress = 0.01
