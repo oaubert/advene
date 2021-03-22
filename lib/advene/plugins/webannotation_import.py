@@ -53,24 +53,53 @@ class WebAnnotationImporter(GenericImporter):
 
     def fix_item(self, i, collection=None):
         """Enrich item content with structure-specific information.
+
+        Handle typing information.
         """
-        if collection is not None and i.get('advene:type') is None:
-            i['advene:type'] = (collection.get('@id')
-                                or collection.get('id')
-                                or collection.get('@label')
-                                or collection.get('label')
-                                or str(collection))
+        _type = i.get('type') or i.get('@type')
+        if isinstance(_type, str):
+            # String value. Make it a list.
+            i['type'] = [ _type ]
+        else:
+            # Make sure 'type' is defined (it could have been @type)
+            i['type'] = _type
+
+        # Trying to get specific type information
+        if i.get('advene:type') is None:
+            if len(i['type']) > 1:
+                # Type may be multi-valued (as in Advene WebAnnotation export)
+                # It must be a list, possibly holding additional annotation type information.
+                atype = [ at for at in i['type'] if at != 'Annotation' ]
+                if atype:
+                    # There is some non-generic information.
+                    # Use the first one as type id.
+                    atype = atype[0]
+                    if atype.startswith('local:'):
+                        atype = atype[6:]
+                    i['advene:type'] = atype
+                else:
+                    # No type information. Use the collection id if possible.
+                    if collection is not None:
+                        i['advene:type'] = (collection.get('@id')
+                                            or collection.get('id')
+                                            or collection.get('@label')
+                                            or collection.get('label')
+                                            or str(collection))
+                    else:
+                        i['advene:type'] = 'annotation'
         return i
 
     def get_items(self, data):
+        """Return a list of item lists.
+        """
         if isinstance(data, list):
             # List of something (collection hopefully).  Let's flatten
             # the generated lists
             return [ self.get_items(d) for d in data ]
         elif (data.get('type') or data.get('@type')) == 'AnnotationCollection':
             # Top-level AnnotationCollection. Consider only the first page.
-            return [ self.fix_item(i, data)
-                     for i in data.get('first', {}).get('items', []) ]
+            return [ [ self.fix_item(i, data)
+                       for i in data.get('first', {}).get('items', []) ] ]
             #label = data.get('label', 'No label')
         elif (data.get('type') or data.get('@type')) == 'ldp:Container':
             # ldp:Container, for holding multiple AnnotationCollections
@@ -141,7 +170,7 @@ class WebAnnotationImporter(GenericImporter):
         step = 1.0 / len(items)
         self.progress(progress, "Starting conversion")
         for i in items:
-            if (i.get('type') or i.get('@type')) != 'Annotation':
+            if not 'Annotation' in i.get('type'):
                 logger.debug("Not an annotation")
                 continue
             # Check that it is a media annotation
@@ -153,11 +182,15 @@ class WebAnnotationImporter(GenericImporter):
                    'begin': fragment[1],
                    'end': fragment[2] }
             if i.get('advene:type'):
-                # A type is defined. Use it. Else we will fallback on
+                # An type is defined. Use it. Else we will fallback on
                 # default type.
                 el['type'] = i.get('advene:type')
+
             if i.get('creator'):
-                el['author'] = i.get('creator').get('@id')
+                creator = i.get('creator')
+                if not isinstance(creator, str):
+                    creator = creator.get('@id') or creator.get('id') or creator.get('nickname')
+                el['author'] = creator
             body = i.get('body')
             # body can be either an object or a list of objects
             if body is not None:
