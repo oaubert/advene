@@ -1,4 +1,4 @@
-<package dc:creator="oaubert" dc:date="2004-06-15" xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
+<package xmlns="http://experience.univ-lyon1.fr/advene/ns" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink" dc:creator="oaubert" dc:date="2021-03-22T13:10">
   <meta><is_template xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">true</is_template><default_adhoc xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/><default_utbv xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/><default_stbv xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/><description xmlns="http://purl.org/dc/elements/1.1/">This Advene standard package define views to export annotations to various formats.</description><media_uri xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/>
     <tag_colors xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></tag_colors>
     <duration xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/>
@@ -821,6 +821,7 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
      ]
   }
 }
-</content></view>
+</content></view><view viewable-class="package" id="audacity" dc:date="2021-03-17T17:50:59" dc:creator="oaubert"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></extension><title xmlns="http://purl.org/dc/elements/1.1/">audacity</title></meta><content mime-type="text/plain" encoding="utf-8">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
+&lt;span tal:replace=&quot;python:a.fragment.begin / 1000&quot; &gt;Begin&lt;/span&gt;	 &lt;span tal:replace=&quot;python:a.fragment.end / 1000&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;&lt;/span&gt;</content></view>
   </views>
 </package>
