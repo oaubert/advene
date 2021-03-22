@@ -2351,14 +2351,17 @@ class AdveneGUI:
                            self.controller.package.imagecache.get(position))
         return True
 
-    def export_element(self, element):
+    def export_element(self, element, filter_id=None):
         if isinstance(element, Package):
             title=_("Export package data")
         elif isinstance(element, AnnotationType):
             title=_("Export annotation type %s") % self.controller.get_title(element)
         else:
             title=_("Export element %s") % self.controller.get_title(element)
-        self.open_adhoc_view('exporterview', title=title, source=element)
+        exporterclass = None
+        if filter_id is not None:
+            exporterclass = self.controller.get_export_filters(ident=filter_id)
+        self.open_adhoc_view('exporterview', title=title, source=element, exporterclass=exporterclass)
         return True
 
     def update_package_list (self):
