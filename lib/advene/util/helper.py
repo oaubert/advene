@@ -169,7 +169,7 @@ class InvalidTimestamp(Exception):
     pass
 
 small_time_regexp=re.compile(r'(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
-time_regexp=re.compile(r'(?P<h>\d+):(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,:f]?)(?P<ms>\d+)?$')
+time_regexp=re.compile(r'((?P<h>\d+):)?(?P<m>\d+):(?P<s>\d+)((?P<sep>[.,:f])(?P<ms>\d+))?$')
 float_regexp = re.compile(r'(?P<s>\d*)\.(?P<ms>\d*)')
 def parse_time(s):
     """Convert a time string as long.
@@ -199,23 +199,27 @@ def parse_time(s):
       ms: milliseconds
       NN: frame number
     """
+    # Remove surrounding whitespace, including zero-width space.
+    # See https://bugs.python.org/issue13391
+    if isinstance(s, str):
+        s = s.strip().strip(u'\u200B\ufeff')
     try:
-        val=int(s)
+        val = int(s)
     except ValueError:
         # It was not a plain integer. Try to determine its format.
-        t=None
+        t = None
         m = float_regexp.match(s)
         if m:
             t = m.groupdict()
             t['sep'] = ''
         else:
-            m=time_regexp.match(s)
+            m = time_regexp.match(s)
             if m:
-                t=m.groupdict()
+                t = m.groupdict()
             else:
-                m=small_time_regexp.match(s)
+                m = small_time_regexp.match(s)
                 if m:
-                    t=m.groupdict()
+                    t = m.groupdict()
                     t['h'] = 0
 
         if t is not None:
