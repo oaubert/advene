@@ -80,8 +80,8 @@ class WebAnnotationImporter(GenericImporter):
             return list(itertools.chain(self.get_items(col) for col in data.get('ldp:contains')))
         elif data.get('items'):
             # Direct item list
-            return [ self.fix_item(i, 'imported')
-                     for i in data.get('items') ]
+            return [ [ self.fix_item(i, 'imported')
+                       for i in data.get('items') ] ]
         else:
             return []
 
