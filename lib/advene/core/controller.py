@@ -31,6 +31,7 @@ notifications and actions triggering.
 import logging
 logger = logging.getLogger(__name__)
 
+import atexit
 from gi.repository import GObject
 import html
 import itertools
@@ -315,6 +316,8 @@ class AdveneController:
             defaults={'message': 'annotation/content/data'},
             category='gui',
         ))
+        # Register on_exit method
+        atexit.register(self.on_exit)
 
     def get_cached_duration(self):
         try:
