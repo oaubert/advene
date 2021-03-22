@@ -16,12 +16,15 @@
 # along with Advene; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
+name = "Website export plugin"
+
 import logging
 logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
 import os
+from pathlib import Path
 import time
 import re
 import urllib.request, urllib.parse, urllib.error
@@ -30,70 +33,63 @@ import shutil
 
 import advene.core.config as config
 import advene.util.helper as helper
+from advene.util.exporter import GenericExporter, register_exporter
 
-fragment_re=re.compile('(.*)#(.+)')
-package_expression_re=re.compile(r'packages/(\w+)/(.*)')
-href_re=re.compile(r'''(xlink:href|href|src|about|resource)=['"](.+?)['"> ]''')
-snapshot_re=re.compile(r'/packages/[^/]+/imagecache/(\d+)')
-tales_re=re.compile(r'(\w+)/(.+)')
-player_re=re.compile(r'/media/play(/|\?position=)(\d+)(/(\d+))?')
-overlay_re=re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
+fragment_re           = re.compile('(.*)#(.+)')
+package_expression_re = re.compile(r'packages/(\w+)/(.*)')
+href_re               = re.compile(r'''(xlink:href|href|src|about|resource)=['"](.+?)['"> ]''')
+snapshot_re           = re.compile(r'/packages/[^/]+/imagecache/(\d+)')
+tales_re              = re.compile(r'(\w+)/(.+)')
+player_re             = re.compile(r'/media/play(/|\?position=)(\d+)(/(\d+))?')
+overlay_re            = re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
 
-class WebsiteExporter:
+@register_exporter
+class WebsiteExporter(GenericExporter):
     """Export a set of static views to a directory.
 
-    The intent of this export is to be able to quickly publish a
-    comment in the form of a set of static views.
-
-    @param destination: the destination directory
-    @type destination: path
-    @param views: the list of views to export
-    @param max_depth: maximum recursion depth
-    @param progress_callback: if defined, the method will be called with a float in 0..1 and a message indicating progress
+    This filter does a static scraping of a set of static views, in
+    order to publish them independently from Advene.
     """
-    def __init__(self, controller, destination='/tmp/n', views=None, max_depth=3, progress_callback=None, video_url=None):
-        self.controller=controller
+    name = _("Website exporter")
+    extension = ""
+    mimetype = "inode/directory"
 
-        # Directory creation/checks
-        self.destination=destination
-        self.imgdir=os.path.join(self.destination, 'imagecache')
+    @classmethod
+    def is_valid_for(cls, expr):
+        """Is the template valid for different types of sources.
 
-        if os.path.exists(self.destination) and not os.path.isdir(self.destination):
-            self.log(_("%s exists but is not a directory. Cancelling website export") % self.destination)
-            return
-        elif not os.path.exists(self.destination):
-            helper.recursive_mkdir(self.destination)
+        expr is either "package" or "annotation-type" or "annotation-container".
+        """
+        return expr == 'package'
 
-        if not os.path.isdir(self.destination):
-            self.log(_("%s does not exist") % self.destination)
-            return
+    def __init__(self, controller=None, source=None, callback=None):
+        super().__init__(controller, source, callback)
 
-        if views is None:
-            views=[ v
-                    for v in self.controller.package.views
-                    if (not v.id.startswith('_') # Do not include admin views
-                        and v.matchFilter['class'] == 'package'
-                        and helper.get_view_type(v) == 'static')
-                    ]
-        defaultview = self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
-        v = self.controller.package.views.get_by_id(defaultview)
-        if v is not None and v not in views:
-            # The specified default view is not present in views
-            # (probably because it starts with _). Add it.
-            views.append(v)
+        # Default options
+        self.video_url = (self.controller.package and self.controller.package.getMetaData(config.data.namespace, "media_uri")) or ""
+        self.depth = 3
+        self.views = ""
 
-        self.views=views
-        self.max_depth=max_depth
-        if progress_callback is not None:
-            # Override dummy progress_callback
-            self.progress_callback=progress_callback
-        self.video_url=video_url
-        self.video_player=self.find_video_player(video_url)
+        self.optionparser.add_option("-u", "--video-url",
+                                     type="string",
+                                     action="store",
+                                     dest="video_url",
+                                     default=self.video_url,
+                                     help=_("URL for the video, if it is available on a sharing website.\n It can also be a mp4 or ogg file, relative to the export directory."))
 
-        self.url_translation={}
+        self.optionparser.add_option("-d", "--depth",
+                                     action="store",
+                                     type="int",
+                                     dest="depth",
+                                     default=self.depth,
+                                     help=_("Maximum recursion depth"))
 
-    def log(self, *p):
-        self.controller.log(*p)
+        self.optionparser.add_option("-v", "--views",
+                                     type="string",
+                                     action="store",
+                                     dest="views",
+                                     default=self.views,
+                                     help=_("Comma-separated list of views to export - leave blank for all views"))
 
     def find_video_player(self, video_url):
         p=None
@@ -105,18 +101,11 @@ class WebsiteExporter:
                 if cl == HTML5VideoPlayer and not self.video_url:
                     # Use current player movie
                     self.video_url = self.controller.get_default_media()
-                p=cl(self.destination, self.video_url)
+                p=cl(self.output, self.video_url)
                 break
 
 
         return p
-
-    def progress_callback(self, value, msg):
-        """Do-nothing progress callback.
-
-        This method can be overriden by the caller from the constructor.
-        """
-        return True
 
     def unconverted(self, url, reason):
         return 'unconverted.html?url=%s&reason=%s' % (
@@ -127,40 +116,40 @@ class WebsiteExporter:
         """Return the contents of the given view.
         """
         # Handle fragments
-        m=fragment_re.search(url)
+        m = fragment_re.search(url)
         if m:
-            url=m.group(1)
+            url = m.group(1)
             if not url:
                 # Empty URL: we are addressing ourselves.
                 return None
 
-        m=package_expression_re.search(url)
+        m = package_expression_re.search(url)
         if m:
             # Absolute url
-            address=m.group(2)
+            address = m.group(2)
         elif url in (v.id for v in self.controller.package.views):
             # Relative url for a view
-            address='view/'+url
+            address = 'view/'+url
         else:
             # No match. Do not try to retrieve
             return None
 
         # Generate the view
-        ctx=self.controller.build_context()
+        ctx = self.controller.build_context()
         try:
-            content=ctx.evaluateValue('here/%s' % address)
+            content = ctx.evaluateValue('here/%s' % address)
         except Exception:
             logger.error("Exception when evaluating %s", address, exc_info=True)
-            content=None
+            content = None
 
         if not isinstance(content, str):
             # Not a string. Could be an Advene element
             try:
-                c=content.view(context=self.controller.build_context(here=content))
-                content=c
+                c = content.view(context=self.controller.build_context(here=content))
+                content = c
             except AttributeError:
                 # Apparently not. Fallback on explicit string conversion.
-                content=str(content)
+                content = str(content)
         return content
 
     def translate_links(self, content, baseurl=None, max_depth_exceeded=False):
@@ -170,10 +159,10 @@ class WebsiteExporter:
 
         It returns a list of URLs that should be processed in the next stage (depth+1).
         """
-        res=set()
-        used_snapshots=set()
-        used_overlays=set()
-        used_resources=set()
+        res = set()
+        used_snapshots = set()
+        used_overlays = set()
+        used_resources = set()
 
         # Convert all links
         for (attname, url) in href_re.findall(content):
@@ -184,68 +173,68 @@ class WebsiteExporter:
             original_url=url
 
             if url.startswith('javascript:'):
-                self.url_translation[original_url]=original_url
+                self.url_translation[original_url] = original_url
                 continue
 
-            m=snapshot_re.search(url)
+            m = snapshot_re.search(url)
             # Image translation. Add a .png extension.
             if m:
-                self.url_translation[original_url]="imagecache/%s.png" % m.group(1)
+                self.url_translation[original_url] = "imagecache/%s.png" % m.group(1)
                 used_snapshots.add(m.group(1))
                 continue
 
-            m=overlay_re.search(url)
+            m = overlay_re.search(url)
             if m:
-                ident=m.group(2)
-                tales=m.group(3) or ''
+                ident = m.group(2)
+                tales = m.group(3) or ''
                 # FIXME: not robust wrt. multiple packages/videos
-                a=self.controller.package.get_element_by_id(ident)
+                a = self.controller.package.get_element_by_id(ident)
                 if not a:
                     self.url_translation[original_url]=self.unconverted(url, 'non-existent annotation')
                     self.log("Cannot find annotation %s for overlaying" % ident)
                     continue
-                name=ident+tales.replace('/', '_')
-                self.url_translation[original_url]='imagecache/overlay_%s.png' % name
+                name = ident+tales.replace('/', '_')
+                self.url_translation[original_url] = 'imagecache/overlay_%s.png' % name
                 used_overlays.add( (ident, tales) )
                 continue
 
-            l=url.replace(self.controller.get_urlbase(), '')
+            l = url.replace(self.controller.get_urlbase(), '')
 
             if l.startswith('http:') or l.startswith('https:'):
                 # It is an external url
-                self.url_translation[url]=url
+                self.url_translation[url] = url
                 continue
 
-            fragment=None
-            m=fragment_re.search(url)
+            fragment = None
+            m = fragment_re.search(url)
             if m:
-                url=m.group(1)
-                fragment=m.group(2)
+                url = m.group(1)
+                fragment = m.group(2)
                 if not url:
                     # Empty URL: we are addressing ourselves.
                     continue
                 if url in self.url_translation:
-                    self.url_translation[original_url]="%s#%s" % (self.url_translation[url],
+                    self.url_translation[original_url] = "%s#%s" % (self.url_translation[url],
                                                                   fragment)
                     # URL already processed
                     continue
 
-            m=package_expression_re.search(url)
+            m = package_expression_re.search(url)
             if m:
                 # Absolute url
-                tales=m.group(2)
+                tales = m.group(2)
             elif url in (v.id for v in self.controller.package.views):
                 # Relative url.
-                tales='view/'+url
+                tales = 'view/'+url
             else:
-                tales=None
+                tales = None
 
             if tales:
-                m=tales_re.match(tales)
+                m = tales_re.match(tales)
                 if m:
                     if m.group(1) == 'resources':
                         # We have a resource.
-                        self.url_translation[url]=tales
+                        self.url_translation[url] = tales
                         used_resources.add(m.group(2))
                         continue
                     elif m.group(1) in ('view', 'annotations', 'relations',
@@ -253,14 +242,14 @@ class WebsiteExporter:
                                         'queries'):
                         # We skip the first element, which is either view/
                         # (for toplevel views), or a bundle (annotations, views...)
-                        output=m.group(2).replace('/', '_')
+                        output = m.group(2).replace('/', '_')
 
                         # Check if we can add a suffix. This
                         # will facilitate handling by webservers.
-                        path=m.group(2).split('/')
+                        path = m.group(2).split('/')
                         if path and (len(path) == 1 or path[-2] == 'view'):
                             # Got a view. Check its mimetype
-                            v=self.controller.package.get_element_by_id(path[-1])
+                            v = self.controller.package.get_element_by_id(path[-1])
                             if v and hasattr(v, 'content'):
                                 if v.content.mimetype == 'text/plain':
                                     # Workaround: the mimetypes
@@ -268,9 +257,9 @@ class WebsiteExporter:
                                     # extension for text/plain. Ensure
                                     # that the more appropriate .txt
                                     # is used.
-                                    ext='.txt'
+                                    ext = '.txt'
                                 else:
-                                    ext=mimetypes.guess_extension(v.content.mimetype)
+                                    ext = mimetypes.guess_extension(v.content.mimetype)
                                 if ext is not None:
                                     output = output + ext
                         elif len(path) > 1 and path[-2] in ('annotations', 'relations',
@@ -280,7 +269,7 @@ class WebsiteExporter:
                             # Reference to an Advene element, without
                             # a specified view. Assume a default view
                             # is applied and that it will output html.
-                            output = output+".html"
+                            output = output + ".html"
 
                         if m.group(1) == 'views':
                             # Addressing a view content. Prepend a
@@ -292,26 +281,26 @@ class WebsiteExporter:
                         res.add(original_url)
                     else:
                         # Can be a query over a package, or a relative pathname
-                        output=tales.replace('/', '_')
+                        output = tales.replace('/', '_')
                         res.add(original_url)
                 else:
-                    output=tales.replace('/', '_')
-                self.url_translation[url]=output
+                    output = tales.replace('/', '_')
+                self.url_translation[url] = output
                 if fragment:
-                    self.url_translation[original_url]="%s#%s" % (output, fragment)
+                    self.url_translation[original_url] = "%s#%s" % (output, fragment)
             elif self.video_url and player_re.search(url):
-                m=player_re.search(url)
+                m = player_re.search(url)
                 if not 'stbv' in url:
-                    self.url_translation[original_url]=self.video_player.player_url(m.group(2), m.group(4))
+                    self.url_translation[original_url] = self.video_player.player_url(m.group(2), m.group(4))
                 else:
-                    self.url_translation[original_url]=self.unconverted(url, 'need advene')
+                    self.url_translation[original_url] = self.unconverted(url, 'need advene')
             else:
                 # It is another element.
-                self.url_translation[url]=self.unconverted(url, 'unhandled url')
+                self.url_translation[url] = self.unconverted(url, 'unhandled url')
         if max_depth_exceeded:
             # Max depth exceeded: all new links should be marked as unconverted
             for url in res:
-                self.url_translation[url]=self.unconverted(url, 'max depth exceeded')
+                self.url_translation[url] = self.unconverted(url, 'max depth exceeded')
             res=set()
         return res, used_snapshots, used_overlays, used_resources
 
@@ -325,13 +314,13 @@ class WebsiteExporter:
                 continue
             if link.startswith('#'):
                 continue
-            m=fragment_re.search(link)
+            m = fragment_re.search(link)
             if m:
-                fragment=m.group(2)
-                tr=self.url_translation.get(m.group(1))
+                fragment = m.group(2)
+                tr = self.url_translation.get(m.group(1))
             else:
-                fragment=None
-                tr=self.url_translation.get(link)
+                fragment = None
+                tr = self.url_translation.get(link)
             if tr is None:
                 logger.error("website export bug: %s was not translated", link)
                 continue
@@ -341,56 +330,54 @@ class WebsiteExporter:
                 if attr is not None:
                     extra.append(attr)
                 if l is not None:
-                    tr=l
+                    tr = l
                 if 'unconverted' in tr:
                     extra.append('onClick="return false;"')
                 if fragment is not None:
-                    tr=tr+'#'+fragment
+                    tr = tr + '#'+fragment
 
                 if extra:
                     exp = '''(%s=['"])%s(['"> ])''' % (attname, re.escape(link))
-                    content=re.sub(exp, " ".join(extra) + r''' \1''' + tr + r'''\2''', content)
+                    content = re.sub(exp, " ".join(extra) + r''' \1''' + tr + r'''\2''', content)
                 else:
                     exp = '''(%s=['"])%s(['"> ])''' % (attname, re.escape(link))
-                    content=re.sub(exp, r'''\1''' + tr + r'''\2''', content)
+                    content = re.sub(exp, r'''\1''' + tr + r'''\2''', content)
 
-        content=self.video_player.transform_document(content)
+        content = self.video_player.transform_document(content)
         return content
 
     def write_data(self, url, content, used_snapshots, used_overlays, used_resources):
         """Write the converted content as well as associated data.
         """
         # Write the content.
-        output=self.url_translation[url]
-        f=open(os.path.join(self.destination, output), 'w', encoding='utf-8')
-        f.write(content)
-        f.close()
+        output = self.url_translation[url]
+        with open(self.output / output, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        if not self.imgdir.is_dir():
+            self.imgdir.mkdir(parents=True)
 
         # Copy snapshots
         for t in used_snapshots:
             # FIXME: not robust wrt. multiple packages/videos
-            if not os.path.isdir(self.imgdir):
-                helper.recursive_mkdir(self.imgdir)
-            with open(os.path.join(self.imgdir, '%s.png' % t), 'wb') as f:
+            with open(self.imgdir / f'{t}.png', 'wb') as f:
                 f.write(bytes(self.controller.package.imagecache[t]))
 
         # Copy overlays
         for (ident, tales) in used_overlays:
             # FIXME: not robust wrt. multiple packages/videos
-            a=self.controller.package.get_element_by_id(ident)
+            a = self.controller.package.get_element_by_id(ident)
             if not a:
                 logger.error("Cannot find annotation %s for overlaying", ident)
                 continue
-            name=ident+tales.replace('/', '_')
-            if not os.path.isdir(self.imgdir):
-                helper.recursive_mkdir(self.imgdir)
+            name = ident + tales.replace('/', '_')
+            if tales:
+                # There is a TALES expression
+                ctx = self.controller.build_context(here=a)
+                data = ctx.evaluateValue('here' + tales)
+            else:
+                data = a.content.data
             with open(os.path.join(self.imgdir, 'overlay_%s.png' % name), 'wb') as f:
-                if tales:
-                    # There is a TALES expression
-                    ctx=self.controller.build_context(here=a)
-                    data=ctx.evaluateValue('here' + tales)
-                else:
-                    data=a.content.data
                 try:
                     f.write(self.controller.gui.overlay(self.controller.package.imagecache[a.fragment.begin], data))
                 except TypeError:
@@ -398,124 +385,185 @@ class WebsiteExporter:
 
         # Copy resources
         for path in used_resources:
-            dest=os.path.join(self.destination, 'resources', path)
+            dest = self.output / 'resources' / path
 
-            d=os.path.dirname(dest)
-            if not os.path.isdir(d):
-                helper.recursive_mkdir(d)
+            d = dest.parent
+            if not d.is_dir():
+                d.mkdir(parents=True)
 
-            r=self.controller.package.resources
+            r = self.controller.package.resources
             for element in path.split('/'):
-                r=r[element]
+                r = r[element]
+
+            data = r.data
+            if isinstance(data, str):
+                data = data.encode('utf-8')
             with open(dest, 'wb') as output:
-                data = r.data
-                if isinstance(data, str):
-                    data = data.encode('utf-8')
                 output.write(data)
 
-    def website_export(self):
-        main_step=1.0/self.max_depth
+    def check_requirements(self):
+        self.output = Path(self.output)
+        self.imgdir = self.output / 'imagecache'
 
-        progress=0
-        if not self.progress_callback(progress, _("Starting export")):
+        if self.callback is None:
+            self.callback = lambda progress, message: True
+
+        if self.output.exists() and not self.output.is_dir():
+            self.log(_("%s exists but is not a directory. Cancelling website export") % self.output)
+            return
+        elif not self.output.exists():
+            self.output.mkdir(parents=True)
+
+        # Last check, to be sure
+        if not self.output.is_dir():
+            self.log(_("%s does not exist") % self.output)
             return
 
-        view_url={}
-        ctx=self.controller.build_context()
+        if self.views:
+            # Specified view ids, should be a list of string, convert them to a list of views
+            viewlist = [ (v.strip(), self.controller.package.get_element_by_id(v)) for v in self.views.split(",") ]
+            missing_views = [ n[0] for n in viewlist if n[1] is None ]
+            if missing_views:
+                logger.error(_("The following views do not exist: %s"), ", ".join(missing_views))
+            views = [ n[1] for n in viewlist if n[1] is not None ]
+        else:
+            # Empty, use all views
+            views = [ v
+                      for v in self.controller.package.views
+                      if (not v.id.startswith('_') # Do not include admin views
+                          and v.matchFilter['class'] == 'package'
+                          and helper.get_view_type(v) == 'static')
+                     ]
+        defaultview = self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
+        v = self.controller.package.views.get_by_id(defaultview)
+        if v is not None and v not in views:
+            # The specified default view is not present in views
+            # (probably because it starts with _). Add it.
+            views.append(v)
+
+        self.views = views
+
+        self.video_player = self.find_video_player(self.video_url)
+        self.url_translation = {}
+
+    def export(self, filename=None):
+        # The filename parameter is the output dir
+        try:
+            self.output = Path(filename)
+        except TypeError:
+            logger.error(_("This export filter must be called with an output directory name"))
+            return
+
+        if self.output.exists() and not self.output.is_dir():
+            logger.error(f"{filename} exists and is not a directory.")
+            return
+
+        self.check_requirements()
+
+        main_step = 1.0/self.depth
+        progress = 0
+        if not self.callback(progress, _("Starting export")):
+            return
+
+        view_url = {}
+        ctx = self.controller.build_context()
+
         # Pre-seed url translations for base views
         for v in self.views:
-            link="/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
+            link = "/".join( (ctx.globals['options']['package_url'], 'view', v.id) )
             if hasattr(v, 'content'):
                 if v.content.mimetype == 'text/plain':
-                    ext='.txt'
+                    ext = '.txt'
                 else:
-                    ext=mimetypes.guess_extension(v.content.mimetype)
+                    ext = mimetypes.guess_extension(v.content.mimetype)
                 if ext is not None:
-                    self.url_translation[link]="%s%s" % (v.id, ext)
+                    self.url_translation[link] = "%s%s" % (v.id, ext)
                 else:
-                    self.url_translation[link]=v.id
+                    self.url_translation[link] = v.id
             else:
-                self.url_translation[link]=v.id
-            view_url[v]=link
+                self.url_translation[link] = v.id
+            view_url[v] = link
 
-        progress=.01
-        depth=1
+        progress = .01
+        depth = 1
 
-        links_to_be_processed=list(view_url.values())
+        links_to_be_processed = list(view_url.values())
 
-        while depth <= self.max_depth:
-            max_depth_exceeded = (depth == self.max_depth)
-            step=main_step / (len(links_to_be_processed) or 1)
-            if not self.progress_callback(progress, _("Depth %d") % depth):
+        while depth <= self.depth:
+            max_depth_exceeded = (depth == self.depth)
+            step = main_step / (len(links_to_be_processed) or 1)
+            if not self.callback(progress, _("Depth %d") % depth):
                 return
-            links=set()
+            links = set()
             for url in links_to_be_processed:
-                if not self.progress_callback(progress, _("Depth %(depth)d: processing %(url)s") % locals()):
+                if not self.callback(progress, _("Depth %(depth)d: processing %(url)s") % locals()):
                     return
                 progress += step
-                content=self.get_contents(url)
+                content = self.get_contents(url)
 
                 (new_links,
                  used_snapshots,
                  used_overlays,
-                 used_resources)=self.translate_links(content,
-                                                      url,
-                                                      max_depth_exceeded)
+                 used_resources) = self.translate_links(content,
+                                                        url,
+                                                        max_depth_exceeded)
                 links.update(new_links)
 
                 # Write contents
-                self.write_data(url, self.fix_links(content),
+                self.write_data(url,
+                                self.fix_links(content),
                                 used_snapshots,
                                 used_overlays,
                                 used_resources)
 
-            links_to_be_processed=links
+            links_to_be_processed = links
             depth += 1
 
-        if not self.progress_callback(0.95, _("Finalizing")):
+        if not self.callback(0.95, _("Finalizing")):
             return
 
         # Copy static video player resources
-        for (path, dest) in self.video_player.needed_resources():
-            dest=os.path.join(self.destination, dest)
-            if os.path.isdir(path):
+        for (original, dest) in self.video_player.needed_resources():
+            dest = self.output / dest
+            original = Path(original)
+            if original.is_dir():
                 # Copy tree
-                if os.path.exists(dest):
+                if dest.exists():
                     # First remove old version
-                    if os.path.isdir(dest):
+                    if dest.is_dir():
                         shutil.rmtree(dest, True)
                     else:
-                        os.unlink(dest)
-                shutil.copytree(path, dest)
+                        dest.unlink()
+                shutil.copytree(original, dest)
             else:
                 # Copy file
-                d=os.path.dirname(dest)
-                if not os.path.isdir(d):
-                    helper.recursive_mkdir(d)
-                shutil.copy(path, dest)
+                d = dest.parent
+                if not d.is_dir():
+                    d.mkdir(parents=True)
+                shutil.copy(original, dest)
 
         # Generate video helper files if necessary
         self.video_player.finalize()
 
         # Generate a default index.html
-        name="index.html"
+        name = "index.html"
         if name in list(self.url_translation.values()):
-            name="_index.html"
+            name = "_index.html"
 
-        default_href=''
-        default=''
-        defaultview=self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
-        v=self.controller.package.views.get_by_id(defaultview)
+        default_href = ''
+        default = ''
+        defaultview = self.controller.package.getMetaData(config.data.namespace, 'default_utbv')
+        v = self.controller.package.views.get_by_id(defaultview)
         if defaultview and v:
             url = view_url.get(v)
             if url is not None:
-                default_href=self.url_translation[url]
-                default=_("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': default_href, 'title': self.controller.get_title(v) }
+                default_href = self.url_translation[url]
+                default = _("""<p><strong>You should probably begin at <a href="%(href)s">%(title)s</a>.</strong></p>""") % { 'href': default_href, 'title': self.controller.get_title(v) }
             else:
                 # No view url defined for v???
                 logger.error("No view url for default view")
 
-        with open(os.path.join(self.destination, name), 'w', encoding='utf-8') as f:
+        with open(os.path.join(self.output, name), 'w', encoding='utf-8') as f:
             f.write("""<html><head>%(title)s</head>
 <body>
 <h1>%(title)s views</h1>
@@ -531,29 +579,25 @@ class WebsiteExporter:
         frame="frame.html"
         if frame in list(self.url_translation.values()):
             frame="_frame.html"
-        f=open(os.path.join(self.destination, frame), 'w', encoding='utf-8')
-        f.write("""<html>
-<head><title>%(title)s</title></head>
-<frameset cols="70%%,30%%">
-  <frame name="main" src="%(index)s" />
-  <frame name="video_player" src="" />
-</frameset>
-</html>
-""" % {
-    'title': self.controller.get_title(self.controller.package),
-    'index': default_href or name,
-})
-        f.close()
+        with open(self.output / frame, 'w', encoding='utf-8') as f:
+            f.write(f"""<html>
+            <head><title>{self.controller.get_title(self.controller.package)}</title></head>
+            <frameset cols="70%%,30%%">
+            <frame name="main" src="{default_href or name}" />
+            <frame name="video_player" src="" />
+            </frameset>
+            </html>
+        """)
 
-        f=open(os.path.join(self.destination, "unconverted.html"), 'w', encoding='utf-8')
-        f.write("""<html><head>%(title)s - not converted</head>
+        with open(self.output / "unconverted.html", 'w', encoding='utf-8') as f:
+            title = self.controller.get_title(self.controller.package)
+            f.write(f"""<html><head>{title} - not converted</head>
 <body>
-<h1>%(title)s - not converted resource</h1>
+<h1>{title} - not converted resource</h1>
 <p>Advene was unable to export this resource.</p>
-</body></html>""" % { 'title': self.controller.get_title(self.controller.package) })
-        f.close()
+</body></html>""")
 
-        self.progress_callback(1.0, _("Export complete"))
+        self.callback(1.0, _("Export complete"))
 
 class VideoPlayer:
     """Generic video player support.
@@ -562,7 +606,7 @@ class VideoPlayer:
     @ivar video_id: the video url
     """
     def __init__(self, destination, video_url):
-        self.destination=destination
+        self.output=destination
         self.video_url=video_url
 
     @staticmethod
