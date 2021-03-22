@@ -261,7 +261,26 @@ class TextImporter(GenericImporter):
                     }
                     stored_begin = begin
                     index += 1
+        # End of file. If we are in begin/auto mode, the last line
+        # contains a timecode that we should import.
+        if self.timestampmode != 'both' and stored_begin is not None:
+            if self.first_word_is_type:
+                if ' ' in stored_data:
+                    type_, content = stored_data.split(" ", 1)
+                else:
+                    type_, content = stored_data, ""
+            else:
+                type_, content = "text_import", stored_data
+            # end is either the media duration (if we have it), or we
+            # add an arbitrary duration
+            end = self.controller.cached_duration or (stored_begin + 2000)
+            yield {
+                'begin': stored_begin,
+                'end': end,
+                'content': content,
+                'type': type_.strip(),
 
+            }
     def set_regexp(self, r):
         self.re = re.compile(r)
 
