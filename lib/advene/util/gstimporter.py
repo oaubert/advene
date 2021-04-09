@@ -189,7 +189,7 @@ class GstImporter(GenericImporter):
     def async_process_file(self, filename, end_callback):
         self.end_callback = end_callback
 
-        sink = 'appsink name=sink emit-signals=true sync=false'
+        sink = 'appsink name=sink emit-signals=true sync=false max-buffers=10 drop=true'
 
         pipeline_elements = self.setup_importer(filename)
 
