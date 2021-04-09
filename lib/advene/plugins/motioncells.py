@@ -43,9 +43,7 @@ class MotionCellImporter(GstImporter):
         super(MotionCellImporter, self).__init__(*p, **kw)
 
         ## Internal data structures
-        self.buffer = [ ]
         self.sensitivity = 1.0
-        self.is_finalized = False
 
         self.optionparser.add_option("-s", "--sensitivity",
                                      action="store", type="float", dest="sensitivity", default=self.sensitivity,

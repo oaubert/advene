@@ -42,7 +42,6 @@ class SceneChangeImporter(GstImporter):
         ## Internal data structures
         self.buffer = [ 0 ]
         self.duration = None
-        self.is_finalized = False
 
     def do_finalize(self):
         self.convert({ 'begin': int(begin / Gst.MSECOND),
