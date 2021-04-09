@@ -41,7 +41,7 @@ def subprocess_setup():
     # non-Python subprocesses expect.
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-# Decorator. But using it would imply python >= 2.6.
+# Registering decorator
 def ttsengine(name):
     def inside_register(f):
         ENGINES[name] = f
@@ -85,6 +85,7 @@ def register(controller=None):
         category='sound',
     ))
 
+@ttsengine('generic')
 class TTSEngine:
     """Generic TTSEngine.
     """
@@ -111,8 +112,8 @@ class TTSEngine:
                 except advene.model.tal.context.AdveneTalesException:
                     rulename=_("Unknown rule")
                 logger.error(_("Rule %(rulename)s: Error in the evaluation of the parameter %(parametername)s:") % {'rulename': rulename,
-                                                                                                                      'parametername': name})
-                logger.error(str(e.message)[:160])
+                                                                                                                    'parametername': name})
+                logger.error(str(e)[:160])
                 result=default_value
         else:
             result=default_value
@@ -133,8 +134,8 @@ class TTSEngine:
         message=self.parse_parameter(context, parameters, 'message', _("No message..."))
         self.pronounce(message)
         return True
-ENGINES['generic'] = TTSEngine
 
+@ttsengine('festival')
 class FestivalTTSEngine(TTSEngine):
     """Festival TTSEngine.
 
@@ -187,8 +188,8 @@ class FestivalTTSEngine(TTSEngine):
         except OSError as e:
             logger.error("TTS Error: " + str(e.message))
         return True
-ENGINES['festival'] = FestivalTTSEngine
 
+@ttsengine('macosx')
 class MacOSXTTSEngine(TTSEngine):
     """MacOSX TTSEngine.
     """
@@ -201,7 +202,6 @@ class MacOSXTTSEngine(TTSEngine):
     def pronounce (self, sentence):
         subprocess.call( [ '/usr/bin/say', sentence.encode(config.data.preferences['tts-encoding'], 'ignore') ] )
         return True
-ENGINES['macosx'] = MacOSXTTSEngine
 
 """
 Win32: install pytts + pywin32 (from sf.net) + mfc71.dll + spchapi.exe (from www.microsoft.com/reader/developer/downloads/tts.mspx
@@ -221,6 +221,7 @@ http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/114216
 http://www.daniweb.com/code/snippet326.html
 http://www.mindtrove.info/articles/pytts.html
 """
+@ttsengine('espeak')
 class EspeakTTSEngine(TTSEngine):
     """Espeak TTSEngine.
     """
@@ -275,8 +276,8 @@ class EspeakTTSEngine(TTSEngine):
         except OSError as e:
             logger.error("TTS Error: %s", str(e.message))
         return True
-ENGINES['espeak'] = EspeakTTSEngine
 
+@ttsengine('sapi')
 class SAPITTSEngine(TTSEngine):
     """SAPI (win32) TTSEngine.
     """
@@ -305,8 +306,8 @@ class SAPITTSEngine(TTSEngine):
             self.sapi=win32com.client.Dispatch("sapi.SPVoice")
         self.sapi.Speak( sentence.encode(config.data.preferences['tts-encoding'], 'ignore'), self.SPF_ASYNC | self.SPF_PURGEBEFORESPEAK )
         return True
-ENGINES['sapi'] = SAPITTSEngine
 
+@ttsengine('custom')
 class CustomTTSEngine(TTSEngine):
     """Custom TTSEngine.
 
@@ -359,8 +360,8 @@ class CustomTTSEngine(TTSEngine):
         except OSError as e:
             logger.error("TTS Error: %s", str(e.message))
         return True
-ENGINES['custom'] = CustomTTSEngine
 
+@ttsengine('customarg')
 class CustomArgTTSEngine(TTSEngine):
     """CustomArg TTSEngine.
 
@@ -406,4 +407,3 @@ class CustomArgTTSEngine(TTSEngine):
             except UnicodeDecodeError:
                 logger.error("TTS: Error decoding error message with standard encoding %s", m.encode('ascii', 'replace'))
         return True
-ENGINES['customarg'] = CustomArgTTSEngine
