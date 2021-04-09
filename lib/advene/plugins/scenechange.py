@@ -59,10 +59,6 @@ class SceneChangeImporter(GstImporter):
                     s = event.get_structure()
                     self.duration = s.get_value('segment').stop
                 elif event.type == Gst.EventType.STREAM_GROUP_DONE:
-                    # Guard against multiple calls
-                    if self.is_finalized:
-                        return None
-                    self.is_finalized = True
                     # Push last timecode
                     if self.duration is not None:
                         self.buffer.append(self.duration)
