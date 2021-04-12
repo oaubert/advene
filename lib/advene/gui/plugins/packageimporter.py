@@ -77,7 +77,7 @@ class TreeViewImporter:
         """Toggle all elements from the current selection.
         """
         def toggle_row(model, path, it, data=None):
-            model.set_value(iter, self.COLUMN_APPLY, not model.get_value(it, self.COLUMN_APPLY))
+            model.set_value(it, self.COLUMN_APPLY, not model.get_value(it, self.COLUMN_APPLY))
         self.widget.get_selection().selected_foreach(toggle_row)
         return True
 
