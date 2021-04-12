@@ -160,7 +160,7 @@ setup (name = "advene",
 
        packages = get_packages_list(),
 
-       scripts = [ 'bin/%s' % SCRIPTNAME ],
+       scripts = [ 'bin/%s' % SCRIPTNAME, 'bin/advene_import', 'bin/advene_export' ],
 
        data_files = generate_data_files(),
 
