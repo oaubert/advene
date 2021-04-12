@@ -312,6 +312,10 @@ class WebsiteExporter(GenericExporter):
     def fix_links(self, content):
         """Transform contents in order to fix links.
         """
+        # Avoid messing with JSON data
+        content = content.strip()
+        if content.startswith('{') or content.startswith('[') or content.startswith('"'):
+            return content
         # Convert all links
         for (attname, link) in href_re.findall(content):
             if link.startswith('imagecache/'):
