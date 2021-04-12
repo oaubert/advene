@@ -30,22 +30,11 @@ from gettext import gettext as _
 
 import io
 import json
-from pathlib import Path
 import optparse
 import os
 import sys
 
-try:
-    import advene.core.config as config
-except (ModuleNotFoundError,  ImportError):
-    # Try to find if we are in a development tree.
-    app_dir = Path(__file__).resolve().parent.parent.parent.parent
-    if (app_dir / "setup.py").exists():
-        # Chances are that we are using a development tree
-        sys.path.insert(0, str(app_dir / "lib"))
-    # Try to import again. It will fail if we could not fix paths.
-    import advene.core.config as config
-    config.data.fix_paths(app_dir)
+import advene.core.config as config
 
 from advene.model.package import Package
 from advene.model.content import KeywordList
