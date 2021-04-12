@@ -5,7 +5,6 @@
 ../lib/advene/gui/plugins/shotvalidation.py
 ../lib/advene/gui/plugins/eventaccumulator.py
 ../lib/advene/gui/plugins/htmlcontenhandler.py
-../lib/advene/gui/plugins/tracetimeline.py
 ../lib/advene/gui/plugins/logmessages.py
 ../lib/advene/gui/plugins/packageimporter.py
 ../lib/advene/gui/plugins/actions.py
@@ -38,6 +37,7 @@
 ../lib/advene/gui/views/logwindow.py
 ../lib/advene/gui/views/interactivequery.py
 ../lib/advene/gui/popup.py
+../lib/advene/gui/app.py
 ../lib/advene/gui/util/initialconfig.py
 ../lib/advene/gui/util/__init__.py
 ../lib/advene/gui/util/dialog.py
@@ -45,6 +45,7 @@
 ../lib/advene/gui/edit/properties.py
 ../lib/advene/gui/edit/frameselector.py
 ../lib/advene/gui/edit/create.py
+../lib/advene/gui/edit/exporter.py
 ../lib/advene/gui/edit/imports.py
 ../lib/advene/gui/edit/shapewidget.py
 ../lib/advene/gui/edit/importer.py
@@ -85,6 +86,7 @@
 ../lib/advene/plugins/scenechange.py
 ../lib/advene/plugins/base_importers.py
 ../lib/advene/plugins/dcp.py
+../lib/advene/plugins/dummyimporter.py
 ../lib/advene/plugins/annotationgraph.py
 ../lib/advene/plugins/shotdetectapp.py
 ../lib/advene/plugins/mpeg7.py
