@@ -903,9 +903,11 @@ class Config:
         for ext, t in mimetypes.read_mime_types(fname).items():
             mimetypes.add_type(t, ext)
 
-    def fix_paths(self, maindir):
+    def fix_paths(self, maindir=None):
         """Adjust paths according to the given main directory.
         """
+        if maindir is None:
+            return
         maindir = Path(maindir)
         # We override any modification that could have been made in
         # .advenerc. Rationale: if the .advenerc was really correct, it
