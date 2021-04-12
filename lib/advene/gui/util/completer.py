@@ -430,6 +430,8 @@ class Indexer:
             logger.error("Should not happen for %s", element)
             s = set()
             atid = None
+            # Do not try to index non-defined views (like Resources)
+            return True
         s.update(self.get_words(element.content.data))
         if atid:
             self.index[atid]=s
