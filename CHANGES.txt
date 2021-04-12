@@ -19,9 +19,11 @@ advene (3.12) unstable; urgency=medium
 
   * New exporter: Audacity label format
 
+  * The website exporter now uses the generic Export API
+
   * Fix issues in scene change video processing filter.
 
- -- Olivier Aubert <contact@olivieraubert.net>  Mon, 12 Apr 2021 12:42:50 +0200
+ -- Olivier Aubert <contact@olivieraubert.net>  Mon, 12 Apr 2021 15:29:03 +0200
 
 advene (3.11) unstable; urgency=medium
 
