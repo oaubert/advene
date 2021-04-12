@@ -1969,7 +1969,7 @@ class Packages(Common):
                     a.content.data = data
                     objet.annotations.append(a)
                     self.controller.notify("AnnotationCreate", annotation=a)
-                except Exception as e:
+                except Exception:
                     t, v, tr = sys.exc_info()
                     import code
                     return self.send_error(500, _("""<p>Error while creating annotation of type %(type)s :<pre>
