@@ -199,14 +199,17 @@ class PackageImporter(AdhocView):
             return True
 
         b = Gtk.Button(_("All"))
+        b.set_tooltip_text(_("Check all items"))
         b.connect('clicked', select_all)
         self.buttonbox.add (b)
 
         b = Gtk.Button(_('None'))
+        b.set_tooltip_text(_("Uncheck all items"))
         b.connect('clicked', unselect_all)
         self.buttonbox.add (b)
 
         b = Gtk.Button(_('Selection'))
+        b.set_tooltip_text(_("Toggle checked state on selected lines"))
         b.connect('clicked', toggle_selection)
         self.buttonbox.add (b)
 
