@@ -239,7 +239,7 @@ class WebsiteExporter(GenericExporter):
                         continue
                     elif m.group(1) in ('view', 'annotations', 'relations',
                                         'views', 'schemas', 'annotationTypes', 'relationTypes',
-                                        'queries'):
+                                        'queries', 'export'):
                         # We skip the first element, which is either view/
                         # (for toplevel views), or a bundle (annotations, views...)
                         output = m.group(2).replace('/', '_')
@@ -247,7 +247,12 @@ class WebsiteExporter(GenericExporter):
                         # Check if we can add a suffix. This
                         # will facilitate handling by webservers.
                         path = m.group(2).split('/')
-                        if path and (len(path) == 1 or path[-2] == 'view'):
+                        if path and len(path) == 1 and m.group(1) == 'export':
+                            # Export filter. Find out its extension.
+                            filter_class = self.controller.get_export_filters(ident=path[0])
+                            if filter_class is not None and filter_class.extension:
+                                output = output + "." + filter_class.extension
+                        elif path and (len(path) == 1 or path[-2] == 'view'):
                             # Got a view. Check its mimetype
                             v = self.controller.package.get_element_by_id(path[-1])
                             if v and hasattr(v, 'content'):
