@@ -98,6 +98,8 @@ class AnnotationExporter(AdhocView):
             # Try to open the file
             open_in_filebrowser(fname)
             pass
+        # Close view
+        self.close()
         return True
 
     def update_options(self, combo, forced=None):
