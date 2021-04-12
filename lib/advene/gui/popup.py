@@ -181,36 +181,8 @@ class Menu:
 
     def offset_element (self, widget, el):
         offset = self.popup_get_offset()
-        if offset is None:
-            return True
-        if isinstance(el, Annotation):
-            self.controller.notify('EditSessionStart', element=el, immediate=True)
-            el.fragment.begin += offset
-            el.fragment.end += offset
-            self.controller.notify('AnnotationEditEnd', annotation=el)
-            self.controller.notify('EditSessionEnd', element=el)
-        elif isinstance(el, AnnotationType):
-            batch_id=object()
-            for a in el.annotations:
-                self.controller.notify('EditSessionStart', element=a, immediate=True)
-                a.fragment.begin += offset
-                a.fragment.end += offset
-                self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
-                self.controller.notify('EditSessionEnd', element=a)
-        elif isinstance(el, Package):
-            for a in el.annotations:
-                a.fragment.begin += offset
-                a.fragment.end += offset
-            self.controller.notify('PackageActivate', package=el)
-        elif isinstance(el, Schema):
-            batch_id=object()
-            for at in el.annotationTypes:
-                for a in at.annotations:
-                    self.controller.notify('EditSessionStart', element=a, immediate=True)
-                    a.fragment.begin += offset
-                    a.fragment.end += offset
-                    self.controller.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
-                    self.controller.notify('EditSessionEnd', element=a)
+        if offset is not None:
+            self.controller.offset_element(el, offset)
         return True
 
     def search_replace_content(self, widget, el):

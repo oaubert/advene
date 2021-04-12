@@ -1551,6 +1551,46 @@ class AdveneController:
 
         return an
 
+    def offset_element(self, el, offset, batch_id=None):
+        """Offset (by time) the specified element.
+
+        el may be an Advene item (Annotation, AnnotationType, Schema, Package) or a selection (list) of elements.
+        """
+        logger.debug("offsetting %s %s", el, type(el))
+        if isinstance(el, Annotation):
+            self.notify('EditSessionStart', element=el, immediate=True)
+            el.fragment.begin += offset
+            el.fragment.end += offset
+            self.notify('AnnotationEditEnd', annotation=el)
+            self.notify('EditSessionEnd', element=el)
+        elif isinstance(el, AnnotationType):
+            batch_id =  batch_id or object()
+            for a in el.annotations:
+                self.notify('EditSessionStart', element=a, immediate=True)
+                a.fragment.begin += offset
+                a.fragment.end += offset
+                self.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
+                self.notify('EditSessionEnd', element=a)
+        elif isinstance(el, Package):
+            for a in el.annotations:
+                a.fragment.begin += offset
+                a.fragment.end += offset
+            self.notify('PackageActivate', package=el)
+        elif isinstance(el, Schema):
+            batch_id =  batch_id or object()
+            for at in el.annotationTypes:
+                for a in at.annotations:
+                    self.notify('EditSessionStart', element=a, immediate=True)
+                    a.fragment.begin += offset
+                    a.fragment.end += offset
+                    self.notify('AnnotationEditEnd', annotation=a, batch=batch_id)
+                    self.notify('EditSessionEnd', element=a)
+        elif isinstance(el, list):
+            # List of elements
+            batch_id = batch_id or object()
+            for e in el:
+                self.offset_element(e, offset, batch_id)
+
     def quick_completion_fill_annotation(self, annotation, index):
         """Quickly edit an annotation by using a completion at the given index.
 
