@@ -995,7 +995,7 @@ class Admin(Common):
         l=[ n
             for n in config.data.path['data'].glob('*.*')
             if n.suffix.lower().endswith('.xml') or n.suffix.lower().endswith('.azp') ]
-        l.sort(key=lambda a: a.lower())
+        l.sort(key=lambda a: str(a).lower())
         for uri in l:
             alias = re.sub('[^a-zA-Z0-9_]', '_', uri.stem)
             res.append ("""
