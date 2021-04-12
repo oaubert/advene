@@ -3326,6 +3326,7 @@ class TimeLine(AdhocView):
                     (_('Display selection in a table'), self.selection_as_table),
                     (_('Center and zoom on selection'), center_and_zoom),
                     (_('Edit selected annotations'), self.selection_edit),
+                    (_('Offset selected annotations'), self.selection_offset),
                     (_('Merge annotations'), self.selection_merge),
                     (_('Display statistics'), display_stats),
                     (_('Extract video'), extract_video),
@@ -3904,6 +3905,16 @@ class TimeLine(AdhocView):
         for w in selection:
             self.controller.delete_element(w.annotation, batch=batch_id)
         return True
+
+    def selection_offset(self, widget, selection=None):
+        if selection is None:
+            selection = self.get_selected_annotation_widgets()
+        selection = [ w.annotation for w in selection ]
+        offset = dialog.entry_dialog(title='Enter an offset',
+                                     text=_("Give the offset to apply on\non selected annotations.\nIt is in ms and can be\neither positive or negative."),
+                                     default="0")
+        if offset is not None:
+            self.controller.offset_element(selection, int(offset))
 
     def selection_as_table(self, widget, selection):
         self.controller.gui.open_adhoc_view('table', elements=[ w.annotation for w in selection ], destination='east')
