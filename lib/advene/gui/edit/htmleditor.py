@@ -378,6 +378,7 @@ class HTMLEditor(textview_class, HTMLParser):
         dattr=dict(attr)
         src=dattr.get('src')
         data=None
+        alt = ""
         if src:
             data, msg=self.url_load(src)
             if data is None:
