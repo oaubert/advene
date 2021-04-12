@@ -1,3 +1,28 @@
+advene (3.12) unstable; urgency=medium
+
+  * Note-taking: new shortcut Escape (Play or Pause + seek -2s)
+
+  * The gstrecorder pseudo video-player is functional again. It allows you
+    to record a video, while taking live notes and annotations. After the
+    recording is stopped, the video is available along the corresponding
+    annotations.
+
+  * Annotations in timeline can be resized by dragging their border to
+    either a time position in the timeline background, or to another
+    annotation to align it with the begin or end position.
+
+  * In timeline, it is possible to offset a selection of annotations.
+
+  * Fix a text importer bug that ignored the last line of the input file
+
+  * advene_import/advene_export scripts have been moved to bin/
+
+  * New exporter: Audacity label format
+
+  * Fix issues in scene change video processing filter.
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Mon, 12 Apr 2021 12:42:50 +0200
+
 advene (3.11) unstable; urgency=medium
 
   * New scripts advene_import / advene_export to facilitate test and
