@@ -122,8 +122,12 @@ class Common:
         cherrypy.response.headers['Cache-Control']='max-age=0'
 
     def start_html (self, title="", headers=None, head_section=None, body_attributes="",
-                    mode=None, mimetype=None, duplicate_title=False, cache=False):
+                    mode=None, mimetype=None, duplicate_title=False, cache=False, data=None):
         """Starts writing a HTML response (header + common body start).
+
+        data is used in the case of admin views, to be able to detect
+        if we should inject standard header code. The data value
+        itself is not included.
 
         @param title: Title of the HTML document (default : "")
         @type title: string
@@ -140,32 +144,51 @@ class Common:
         @type duplicate_title: boolean
         @param cache: make the document cacheable. Default: False
         @type cache: boolean
+
+        @param data: data that is meant to be sent afterwards
+        @type data: str
         @return: nothing
+
         """
+        body = []
         if mode is None:
             mode = config.data.webserver['displaymode']
         cherrypy.response.status=200
+
+        if (mimetype == 'text/html'
+            and mode != 'navigation'
+            and isinstance(data, str)
+            and data.startswith('<div ')
+            and 'advene_admin' in data[:50]
+            ):
+            # This must be an Advene admin page. Inject
+            # standard template code.
+            body = [ """<html><head><title>Advene Admin</title>
+            <link rel="stylesheet" type="text/css" href="/data/advene.css" ></link>
+            </head>
+            <body>
+""" ]
+
         if mode == 'navigation' or mimetype is None or mimetype == 'text/html':
             mimetype='text/html; charset=utf-8'
         # Enforce utf-8 encoding on all text resources
         if mimetype.startswith('text/') and 'charset' not in mimetype:
             mimetype += '; charset=utf-8'
-        cherrypy.response.headers['Content-type']=mimetype
+        cherrypy.response.headers['Content-type'] = mimetype
         if headers is not None:
             for h in headers:
                 cherrypy.request.headers[h[0]]=h[1]
         if not cache:
             self.no_cache ()
 
-        res=[]
         if mode == "navigation" and mimetype.startswith('text/'):
-            res.append("""<html><head><title>%s</title><link rel="stylesheet" type="text/css" href="/data/advene.css" />""" % title)
+            body = [ """<html><head><title>%s</title><link rel="stylesheet" type="text/css" href="/data/advene.css" />""" % title ]
             if head_section is not None:
-                res.append(head_section)
+                body.append(head_section)
 
-            res.append("</head><body %s>" % body_attributes)
+            body.append("</head><body %s>" % body_attributes)
 
-            res.append(_("""
+            body.append(_("""
             <p>
             <a href="/admin">Server administration</a> |
             <a href="/media">Media control</a> |
@@ -177,9 +200,9 @@ class Common:
                      'path': cherrypy.request.path_info } )
 
             if duplicate_title:
-                res.append("<h1>%s</h1>\n" % title)
+                body.append("<h1>%s</h1>\n" % title)
 
-        return "".join(res) or b''
+        return "".join(body) or b''
 
     def send_no_content(self):
         """Sends a No Content (204) response.
@@ -266,7 +289,7 @@ class Common:
             <h1>Current STBV: %(currentstbv)s</h1>
 
             <h1>Player status</h1>
-            <table border="1">
+            <table>
             <tr>
             <td>Current media</td><td>%(uri)s</td>
             <td>Current position</td><td>%(position)s</td>
@@ -830,7 +853,7 @@ class Access(Common):
         """
         return _("""
         <h1>Authorized hosts</h1>
-        <table border="1">
+        <table>
         <tr><th>Host</th><th>IP Addr</th><th>Action</th></tr>
         %s
         </table>
@@ -1103,7 +1126,7 @@ class Packages(Common):
 
         res.append (_("""
         <h1>Loaded package(s)</h1>
-        <table border="1" width="50%">
+        <table class="package-list">
         <tr>
         <th>Alias</th>
         <th>Action</th>
@@ -1248,9 +1271,9 @@ class Packages(Common):
             # FIXME: should be default view
             context.setLocal('view', objet)
             try:
-                v=objet.view(context=context)
+                v = objet.view(context=context)
                 #import pdb;pdb.set_trace()
-                res.append(self.start_html(mimetype=v.contenttype, mode=displaymode))
+                res.append(self.start_html(mimetype=v.contenttype, mode=displaymode, data=v))
                 res.append(v)
             except simpletal.simpleTAL.TemplateParseException as e:
                 res.append( self.start_html(_("Error")) )
@@ -1286,7 +1309,7 @@ class Packages(Common):
                     pass
             try:
                 logger.debug("DPE object display %s", type(objet))
-                res.append( self.start_html(mimetype=mimetype, mode=displaymode) )
+                res.append( self.start_html(mimetype=mimetype, mode=displaymode, data=objet) )
                 #import pdb; pdb.set_trace()
                 if isinstance(objet, str):
                     res.append(objet.encode('utf-8'))
