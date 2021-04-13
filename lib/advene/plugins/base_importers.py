@@ -25,6 +25,7 @@ name="Base importer collection"
 from gettext import gettext as _
 
 import gzip
+import json
 import os
 import re
 import sys
@@ -47,6 +48,7 @@ def register(controller=None):
     controller.register_importer(CmmlImporter)
     controller.register_importer(IRIImporter)
     controller.register_importer(IRIDataImporter)
+    controller.register_importer(FlatJSONImporter)
     return True
 
 class TextImporter(GenericImporter):
@@ -1080,5 +1082,40 @@ class IRIDataImporter(GenericImporter):
         self.defaulttype.mimetype='application/x-advene-values'
 
         self.convert(self.iterator(sound))
+        self.progress(1.0)
+        return self.package
+
+class FlatJSONImporter(GenericImporter):
+    """FlatJSON importer.
+    """
+    name = _("FlatJSON importer")
+
+    @staticmethod
+    def can_handle(fname):
+        if fname.lower().endswith('.json'):
+            return 100
+        else:
+            return 0
+
+    def iterator(self, annotations):
+        for a in annotations:
+            # The keys of the FlatJSON export are the same as those
+            # accepted by the Import API.
+            yield a
+
+    def process_file(self, filename):
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+        except ValueError:
+            logger.error("Cannot parse source data")
+            return self.package
+        p, at = self.init_package()
+        p.setMetaData(config.data.namespace_prefix['dc'],
+                      'description',
+                      _("Converted from %s") % filename)
+        if data['annotations']:
+            self.package.setMedia(data['annotations'][0]['media'])
+            self.convert(self.iterator(data['annotations']))
         self.progress(1.0)
         return self.package
