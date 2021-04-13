@@ -70,7 +70,6 @@ logger = logging.getLogger(__name__)
 import json
 import os
 import optparse
-from pathlib import Path
 import shutil
 import signal
 import subprocess
@@ -297,7 +296,7 @@ class GenericImporter:
     def update_statistics(self, elementtype):
         self.statistics[elementtype] = self.statistics.get(elementtype, 0) + 1
 
-    def ensure_new_type(self, prefix="at_converted", title="Converted data", schemaid=None, mimetype=None, description=None):
+    def ensure_new_type(self, prefix="at_converted", title="Converted data", schemaid=None, mimetype=None, description=None, color=None):
         """Create a new type.
         """
         if prefix == "":
@@ -320,11 +319,11 @@ class GenericImporter:
         s = self.create_schema(id_=schemaid, title=schemaid)
         if not isinstance(s, Schema):
             raise Exception("Error during conversion: %s is not a schema" % schemaid)
-        self.defaulttype = self.create_annotation_type(s, atid, title=title, mimetype=mimetype, description=description)
+        self.defaulttype = self.create_annotation_type(s, atid, title=title, mimetype=mimetype, description=description, color=color)
         return self.defaulttype
 
     def create_annotation_type (self, schema, id_, author=None, date=None, title=None,
-                                representation=None, description=None, mimetype=None):
+                                representation=None, description=None, mimetype=None, color=None):
         at=helper.get_id(self.package.annotationTypes, id_)
         if at is not None:
             return at
@@ -338,8 +337,13 @@ class GenericImporter:
         if representation:
             at.setMetaData(config.data.namespace, "representation", representation)
         try:
-            color=next(self.package._color_palette)
-            at.setMetaData(config.data.namespace, "color", color)
+            # Use the specified color, or pick from the palette
+            tcolor = color or next(self.package._color_palette)
+            logger.warning("Set color %s", tcolor)
+            # Convert from basic string to TALES for # encoded colors
+            if tcolor.startswith('#'):
+                tcolor = f"string:{color}"
+            at.setMetaData(config.data.namespace, "color", tcolor)
         except AttributeError:
             # The package does not have a _color_palette
             pass
@@ -484,7 +488,8 @@ class GenericImporter:
             if not isinstance(content, str):
                 content = json.dumps(content)
             ident = d.get('id', None)
-            author = d.get('author', self.author)
+            # Support both author and creator keys
+            author = d.get('author', d.get('creator', self.author))
             title = d.get('title', content[:20])
             timestamp = d.get('timestamp', self.timestamp)
 
@@ -497,9 +502,18 @@ class GenericImporter:
                 # create it if necessary.
                 type_id = type_
                 type_ = self.package.get_element_by_id(type_id)
+
+                # mimetype was the key in initial versions of the
+                # import API. But I used content_type in FlatJSON
+                # export. Let's support both.
+                mimetype = d.get('mimetype', d.get('content_type', None))
                 if type_ is None:
                     # Not existing, create it.
-                    type_ = self.ensure_new_type(prefix=type_id, title=type_id, mimetype=d.get('mimetype', None))
+                    type_ = self.ensure_new_type(prefix=type_id,
+                                                 title=d.get('type_title', type_id),
+                                                 mimetype=mimetype,
+                                                 color=d.get('type_color', None),
+                                                 )
             if not isinstance(type_, AnnotationType):
                 raise Exception("Error during import: the specified type id %s is not an annotation type" % type_)
 
