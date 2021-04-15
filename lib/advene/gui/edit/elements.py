@@ -917,7 +917,7 @@ class EditSchemaPopup (EditElementPopup):
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"),
+                         tooltip=_("Textual description of the element"),
                          focus=True,
                          sizegroup=sg)
         self.register_form(f)
@@ -1006,7 +1006,7 @@ class EditAnnotationTypePopup (EditElementPopup):
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"),
+                         tooltip=_("Textual description of the element"),
                          focus=True,
                          sizegroup=sg)
 
@@ -1138,7 +1138,7 @@ class EditRelationTypePopup (EditElementPopup):
                          element=self.element, name='description',
                          namespaceid='dc', controller=self.controller,
                          editable=editable,
-                         tooltip=_("Textual description of the package"),
+                         tooltip=_("Textual description of the element"),
                          focus=True,
                          sizegroup=sg)
 
