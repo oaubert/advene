@@ -15,6 +15,12 @@ advene (3.12) unstable; urgency=medium
 
   * Fix a text importer bug that ignored the last line of the input file
 
+  * New FlatJSON importer - able to import back the data exported through
+    the FlatJSON export filter. Note that this format does not convey all
+    Advene information - it is meant as a technical export format
+    (esp. for Web-based visualisations), not as an alternative saving
+    format.
+
   * advene_import/advene_export scripts have been moved to bin/
 
   * New exporter: Audacity label format
