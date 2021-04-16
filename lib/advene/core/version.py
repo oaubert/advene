@@ -20,5 +20,5 @@
 """
 
 version='3.12'
-date='20210412'
+date='20210416'
 major,minor=[ int(s) for s in version.split('.') ]

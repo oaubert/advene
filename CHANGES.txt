@@ -29,7 +29,7 @@ advene (3.12) unstable; urgency=medium
 
   * Fix issues in scene change video processing filter.
 
- -- Olivier Aubert <contact@olivieraubert.net>  Mon, 12 Apr 2021 15:29:03 +0200
+ -- Olivier Aubert <contact@olivieraubert.net>  Fri, 16 Apr 2021 17:59:09 +0200
 
 advene (3.11) unstable; urgency=medium
 
