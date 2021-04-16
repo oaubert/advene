@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-12 15:32+0200\n"
+"POT-Creation-Date: 2021-04-16 17:59+0200\n"
 "PO-Revision-Date: 2006-04-07 11:42+0200\n"
 "Last-Translator: Olivier Aubert <olivier.aubert@liris.cnrs.fr>\n"
 "Language-Team: advene@liris.cnrs.fr\n"
@@ -298,8 +298,8 @@ msgid "Create"
 msgstr "Arbvido"
 
 #: ../lib/advene/gui/main.py:292 ../lib/advene/gui/main.py:3314
-#: ../lib/advene/gui/views/timeline.py:3726
-#: ../lib/advene/gui/views/timeline.py:3738 ../lib/advene/gui/app.py:143
+#: ../lib/advene/gui/views/timeline.py:3728
+#: ../lib/advene/gui/views/timeline.py:3740 ../lib/advene/gui/app.py:143
 #: ../lib/advene/util/helper.py:282
 msgid "Schema"
 msgstr ""
@@ -1171,7 +1171,7 @@ msgstr ""
 msgid "Choose an annotation type."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3266 ../lib/advene/gui/views/timeline.py:3185
+#: ../lib/advene/gui/main.py:3266 ../lib/advene/gui/views/timeline.py:3187
 #: ../lib/advene/gui/edit/transcribe.py:1006
 msgid "Create a new annotation type"
 msgstr ""
@@ -1494,8 +1494,8 @@ msgstr ""
 msgid "Successfully extracted the video stream address (%s) from the url.\n"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4292 ../lib/advene/gui/views/timeline.py:3679
-#: ../lib/advene/gui/views/timeline.py:3857
+#: ../lib/advene/gui/main.py:4292 ../lib/advene/gui/views/timeline.py:3681
+#: ../lib/advene/gui/views/timeline.py:3859
 #: ../lib/advene/gui/views/tagbag.py:63
 #: ../lib/advene/gui/edit/properties.py:186
 #: ../lib/advene/gui/edit/transcribe.py:155
@@ -2489,7 +2489,7 @@ msgid " Max. : "
 msgstr ""
 
 #: ../lib/advene/gui/plugins/eventaccumulator.py:187
-#: ../lib/advene/gui/edit/exporter.py:217
+#: ../lib/advene/gui/edit/exporter.py:219
 #, fuzzy
 msgid "Export"
 msgstr "Importi dosieron"
@@ -3949,7 +3949,7 @@ msgid "Limit display to current area"
 msgstr "Vidi komentajxojn sur templinio"
 
 #: ../lib/advene/gui/views/timeline.py:156
-#: ../lib/advene/gui/views/timeline.py:3464
+#: ../lib/advene/gui/views/timeline.py:3466
 #, fuzzy
 msgid "Display whole movie"
 msgstr "Krei komentajxojn de DVD cxapitroj"
@@ -4200,229 +4200,224 @@ msgstr "Krei komentajxojn de DVD cxapitroj"
 msgid "Goto next annotation"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3117
-#, python-format
-msgid "From schema %s"
-msgstr ""
-
-#: ../lib/advene/gui/views/timeline.py:3140
+#: ../lib/advene/gui/views/timeline.py:3142
 #, fuzzy
 msgid "Restrict playing to this annotation-type"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3182
+#: ../lib/advene/gui/views/timeline.py:3184
 msgid "+"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3240
+#: ../lib/advene/gui/views/timeline.py:3242
 #, fuzzy
 msgid "Open an annotation display view"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3247
+#: ../lib/advene/gui/views/timeline.py:3249
 msgid "Open a slave montage view (coordinated zoom level)"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3282
+#: ../lib/advene/gui/views/timeline.py:3284
 msgid ""
 "<b>Statistics about current selection</b>\n"
 "\n"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3310
+#: ../lib/advene/gui/views/timeline.py:3312
 #, fuzzy
 msgid "No selected annotation"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3314
+#: ../lib/advene/gui/views/timeline.py:3316
 #, fuzzy, python-format
 msgid "%d selected annotation(s)"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3321
+#: ../lib/advene/gui/views/timeline.py:3323
 #, fuzzy
 msgid "Unselect all annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3322
+#: ../lib/advene/gui/views/timeline.py:3324
 #, fuzzy
 msgid "Create a static view"
 msgstr "Arbvido"
 
-#: ../lib/advene/gui/views/timeline.py:3323
+#: ../lib/advene/gui/views/timeline.py:3325
 msgid "Highlight selection in other views"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3324
-#: ../lib/advene/gui/views/timeline.py:3956
+#: ../lib/advene/gui/views/timeline.py:3326
+#: ../lib/advene/gui/views/timeline.py:3958
 #, fuzzy
 msgid "Tag selection"
 msgstr "Vido"
 
-#: ../lib/advene/gui/views/timeline.py:3325
+#: ../lib/advene/gui/views/timeline.py:3327
 #, fuzzy
 msgid "Delete selected annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3326
+#: ../lib/advene/gui/views/timeline.py:3328
 #, fuzzy
 msgid "Display selection in a table"
 msgstr "Vidi komentajxojn sur templinio"
 
-#: ../lib/advene/gui/views/timeline.py:3327
+#: ../lib/advene/gui/views/timeline.py:3329
 msgid "Center and zoom on selection"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3328
+#: ../lib/advene/gui/views/timeline.py:3330
 #, fuzzy
 msgid "Edit selected annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3329
+#: ../lib/advene/gui/views/timeline.py:3331
 #, fuzzy
 msgid "Offset selected annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3330
+#: ../lib/advene/gui/views/timeline.py:3332
 #, fuzzy
 msgid "Merge annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3331
+#: ../lib/advene/gui/views/timeline.py:3333
 #, fuzzy
 msgid "Display statistics"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3332
+#: ../lib/advene/gui/views/timeline.py:3334
 #, fuzzy
 msgid "Extract video"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3339
+#: ../lib/advene/gui/views/timeline.py:3341
 #, fuzzy
 msgid "Select all annotations of the same type in this time range"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3342
+#: ../lib/advene/gui/views/timeline.py:3344
 #, fuzzy
 msgid "Select all annotations in this time range"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3457
+#: ../lib/advene/gui/views/timeline.py:3459
 #, fuzzy
 msgid "Goto previous page"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3469
+#: ../lib/advene/gui/views/timeline.py:3471
 #, fuzzy
 msgid "Goto next page"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3519
+#: ../lib/advene/gui/views/timeline.py:3521
 #: ../lib/advene/gui/edit/montage.py:545
 msgid "Inspector"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3525
+#: ../lib/advene/gui/views/timeline.py:3527
 msgid "Inspector locked. Click here or in the timeline background to unlock."
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3552
+#: ../lib/advene/gui/views/timeline.py:3554
 #, fuzzy
 msgid ""
 "Delete the selected annotations or drop an annotation here to delete it."
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3575
+#: ../lib/advene/gui/views/timeline.py:3577
 msgid ""
 "Drag an annotation type here to remove it from display.\n"
 "Click to edit all displayed types"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3587
+#: ../lib/advene/gui/views/timeline.py:3589
 #, fuzzy
 msgid "Selection actions"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/gui/views/timeline.py:3598
+#: ../lib/advene/gui/views/timeline.py:3600
 msgid "Display relations"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3604
+#: ../lib/advene/gui/views/timeline.py:3606
 #, fuzzy
 msgid "Display all relations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3641
+#: ../lib/advene/gui/views/timeline.py:3643
 #: ../lib/advene/gui/edit/montage.py:452
 msgid "Zoom out"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3646
+#: ../lib/advene/gui/views/timeline.py:3648
 #: ../lib/advene/gui/edit/montage.py:457
 msgid "Zoom in"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3680
+#: ../lib/advene/gui/views/timeline.py:3682
 msgid "Center on current player position."
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3696
+#: ../lib/advene/gui/views/timeline.py:3698
 msgid "Automatically activate loop when clicking on an annotation"
-msgstr ""
-
-#: ../lib/advene/gui/views/timeline.py:3725
-#: ../lib/advene/gui/views/timeline.py:3737
-msgid "Displayed"
 msgstr ""
 
 #: ../lib/advene/gui/views/timeline.py:3727
 #: ../lib/advene/gui/views/timeline.py:3739
+msgid "Displayed"
+msgstr ""
+
+#: ../lib/advene/gui/views/timeline.py:3729
+#: ../lib/advene/gui/views/timeline.py:3741
 msgid "Ann. count"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3793
+#: ../lib/advene/gui/views/timeline.py:3795
 msgid "< All <"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3797
+#: ../lib/advene/gui/views/timeline.py:3799
 msgid "> All >"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3821
+#: ../lib/advene/gui/views/timeline.py:3823
 #, fuzzy
 msgid "Displayed annotation types"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3858
+#: ../lib/advene/gui/views/timeline.py:3860
 #, fuzzy
 msgid "Relation type"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/gui/views/timeline.py:3858
+#: ../lib/advene/gui/views/timeline.py:3860
 #, fuzzy
 msgid "Display relation types"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/views/timeline.py:3859
+#: ../lib/advene/gui/views/timeline.py:3861
 #, fuzzy
 msgid "Relation content"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/gui/views/timeline.py:3859
+#: ../lib/advene/gui/views/timeline.py:3861
 #, fuzzy
 msgid "Display relation content"
 msgstr "Vidi komentajxojn sur templinio"
 
-#: ../lib/advene/gui/views/timeline.py:3860 ../lib/advene/gui/popup.py:505
+#: ../lib/advene/gui/views/timeline.py:3862 ../lib/advene/gui/popup.py:505
 msgid "Highlight"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3860
+#: ../lib/advene/gui/views/timeline.py:3862
 msgid "Highlight active annotations"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3914
+#: ../lib/advene/gui/views/timeline.py:3916
 msgid ""
 "Give the offset to apply on\n"
 "on selected annotations.\n"
@@ -4430,11 +4425,11 @@ msgid ""
 "either positive or negative."
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3957
+#: ../lib/advene/gui/views/timeline.py:3959
 msgid "Enter the tag for the selection"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3963
+#: ../lib/advene/gui/views/timeline.py:3965
 #: ../lib/advene/gui/views/tagbag.py:165
 msgid "The tag contains invalid characters"
 msgstr ""
@@ -6011,23 +6006,23 @@ msgstr ""
 msgid "Error when exporting data: %s"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/gui/edit/exporter.py:162
+#: ../lib/advene/gui/edit/exporter.py:164
 #, fuzzy
 msgid "Export to"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/gui/edit/exporter.py:165
+#: ../lib/advene/gui/edit/exporter.py:167
 #, fuzzy
 msgid "Select destination"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/gui/edit/exporter.py:193
+#: ../lib/advene/gui/edit/exporter.py:195
 #: ../lib/advene/gui/edit/importer.py:307
 #, fuzzy
 msgid "Filter"
 msgstr "Dosiero"
 
-#: ../lib/advene/gui/edit/exporter.py:204
+#: ../lib/advene/gui/edit/exporter.py:206
 #: ../lib/advene/gui/edit/importer.py:316
 #, fuzzy
 msgid "Options"
@@ -6554,9 +6549,6 @@ msgid "Description"
 msgstr ""
 
 #: ../lib/advene/gui/edit/elements.py:810
-#: ../lib/advene/gui/edit/elements.py:920
-#: ../lib/advene/gui/edit/elements.py:1009
-#: ../lib/advene/gui/edit/elements.py:1141
 msgid "Textual description of the package"
 msgstr ""
 
@@ -6621,6 +6613,13 @@ msgstr ""
 #, fuzzy
 msgid "Name of the schema"
 msgstr "Arbvido"
+
+#: ../lib/advene/gui/edit/elements.py:920
+#: ../lib/advene/gui/edit/elements.py:1009
+#: ../lib/advene/gui/edit/elements.py:1141
+#, fuzzy
+msgid "Textual description of the element"
+msgstr "Importi transkribon"
 
 #: ../lib/advene/gui/edit/elements.py:930
 #: ../lib/advene/gui/edit/elements.py:1020
@@ -7122,7 +7121,7 @@ msgstr ""
 msgid "Automatically insert marks"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:168
+#: ../lib/advene/core/webcherry.py:193
 #, python-format
 msgid ""
 "\n"
@@ -7136,11 +7135,11 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:228
+#: ../lib/advene/core/webcherry.py:253
 msgid "Unspecified Error"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:229
+#: ../lib/advene/core/webcherry.py:254
 #, python-format
 msgid ""
 "\n"
@@ -7150,18 +7149,18 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:262
+#: ../lib/advene/core/webcherry.py:287
 msgid "<h1>No available mediaplayer</h1>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:265
+#: ../lib/advene/core/webcherry.py:290
 #, python-format
 msgid ""
 "\n"
 "            <h1>Current STBV: %(currentstbv)s</h1>\n"
 "\n"
 "            <h1>Player status</h1>\n"
-"            <table border=\"1\">\n"
+"            <table>\n"
 "            <tr>\n"
 "            <td>Current media</td><td>%(uri)s</td>\n"
 "            <td>Current position</td><td>%(position)s</td>\n"
@@ -7172,12 +7171,12 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:278
+#: ../lib/advene/core/webcherry.py:303
 #, fuzzy
 msgid "No media file"
 msgstr "Elekti ilobretan stilon"
 
-#: ../lib/advene/core/webcherry.py:285
+#: ../lib/advene/core/webcherry.py:310
 msgid ""
 "\n"
 "            <form action=\"/media/play\" method=\"GET\">\n"
@@ -7190,7 +7189,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:292
+#: ../lib/advene/core/webcherry.py:317
 msgid ""
 "<hr />\n"
 "            <form action=\"/media/load\" method=\"GET\">\n"
@@ -7200,135 +7199,135 @@ msgid ""
 "            </form>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:298
+#: ../lib/advene/core/webcherry.py:323
 msgid ""
 "<h3><a href=\"/media/snapshot\">Access to current packages snapshots</h3>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:307
+#: ../lib/advene/core/webcherry.py:332
 #, python-format
 msgid "Unknown STBV identifier: %s"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:382
+#: ../lib/advene/core/webcherry.py:407
 msgid "Media information"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:395
+#: ../lib/advene/core/webcherry.py:420
 msgid "File added"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:396
+#: ../lib/advene/core/webcherry.py:421
 #, python-format
 msgid "<p><strong>%s has been loaded.</strong></p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:407 ../lib/advene/core/webcherry.py:465
+#: ../lib/advene/core/webcherry.py:432 ../lib/advene/core/webcherry.py:490
 msgid "Access to packages snapshots"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:417 ../lib/advene/core/webcherry.py:475
+#: ../lib/advene/core/webcherry.py:442 ../lib/advene/core/webcherry.py:500
 msgid "Unknown package alias"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:423
+#: ../lib/advene/core/webcherry.py:448
 #, python-format
 msgid "Available snapshots for %s"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:429
+#: ../lib/advene/core/webcherry.py:454
 #, python-format
 msgid ""
 "<p><a href=\"/media/snapshot/%s?mode=inline\">Display with inline images</"
 "a></p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:436
+#: ../lib/advene/core/webcherry.py:461
 msgid "Done"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:438
+#: ../lib/advene/core/webcherry.py:463
 msgid "Pending"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:480
+#: ../lib/advene/core/webcherry.py:505
 #, fuzzy, python-format
 msgid "Unknown annotation id: %s"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/core/webcherry.py:596 ../lib/advene/core/webcherry.py:714
+#: ../lib/advene/core/webcherry.py:621 ../lib/advene/core/webcherry.py:739
 #, python-format
 msgid "Cannot activate stbvid %(stbvid)s: %(error)s"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:661
+#: ../lib/advene/core/webcherry.py:686
 msgid "<p>No GUI is available."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:663
+#: ../lib/advene/core/webcherry.py:688
 #, fuzzy, python-format
 msgid "<p>Opened adhoc views: %s</p>"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/core/webcherry.py:664
+#: ../lib/advene/core/webcherry.py:689
 msgid "<p>Available adhoc views:</p><ul>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:685
+#: ../lib/advene/core/webcherry.py:710
 #, python-format
 msgid "<p>Current stbv: %s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:686
+#: ../lib/advene/core/webcherry.py:711
 #, python-format
 msgid "<p>You can activate the following STBV:</p><ul>%s</ul>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:688
+#: ../lib/advene/core/webcherry.py:713
 msgid "Activate and play"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:694
+#: ../lib/advene/core/webcherry.py:719
 msgid "Application information"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:764
+#: ../lib/advene/core/webcherry.py:789
 msgid "Missing element id parameter"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:768
+#: ../lib/advene/core/webcherry.py:793
 #, python-format
 msgid "No existing element with id %s"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:777
+#: ../lib/advene/core/webcherry.py:802
 #, python-format
 msgid "<p>The GUI view %s does not exist.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:784
+#: ../lib/advene/core/webcherry.py:809
 msgid "Invalid request"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:789
+#: ../lib/advene/core/webcherry.py:814
 msgid "Invalid configuration variable name"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:801
+#: ../lib/advene/core/webcherry.py:826
 msgid "Invalid value"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:805
+#: ../lib/advene/core/webcherry.py:830
 #, python-format
 msgid "Unsupported method %s"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:831
+#: ../lib/advene/core/webcherry.py:856
 #, python-format
 msgid ""
 "\n"
 "        <h1>Authorized hosts</h1>\n"
-"        <table border=\"1\">\n"
+"        <table>\n"
 "        <tr><th>Host</th><th>IP Addr</th><th>Action</th></tr>\n"
 "        %s\n"
 "        </table>\n"
@@ -7340,47 +7339,47 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:845
+#: ../lib/advene/core/webcherry.py:870
 msgid "Access control"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:850
+#: ../lib/advene/core/webcherry.py:875
 msgid "Access control - add a hostname"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:858 ../lib/advene/core/webcherry.py:872
+#: ../lib/advene/core/webcherry.py:883 ../lib/advene/core/webcherry.py:897
 #, python-format
 msgid "<strong>Error: %s is an invalid hostname.</strong>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:861
+#: ../lib/advene/core/webcherry.py:886
 #, python-format
 msgid "<p>Added %s to authorized hosts list.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:867
+#: ../lib/advene/core/webcherry.py:892
 msgid "Access control - delete a hostname"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:875
+#: ../lib/advene/core/webcherry.py:900
 msgid "<strong>Cannot remove the localhost access.</strong>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:880
+#: ../lib/advene/core/webcherry.py:905
 #, python-format
 msgid "<p>Removed %s from authorized hosts list.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:882
+#: ../lib/advene/core/webcherry.py:907
 #, python-format
 msgid "<p>%s is not in authorized hosts list.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:931
+#: ../lib/advene/core/webcherry.py:956
 msgid "Server Administration"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:939
+#: ../lib/advene/core/webcherry.py:964
 #, python-format
 msgid ""
 "\n"
@@ -7405,76 +7404,76 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:969
+#: ../lib/advene/core/webcherry.py:994
 msgid "Available files"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:994
+#: ../lib/advene/core/webcherry.py:1019
 msgid "You should specify an alias"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:999
+#: ../lib/advene/core/webcherry.py:1024
 msgid "You should specify an uri"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1005
+#: ../lib/advene/core/webcherry.py:1030
 #, python-format
 msgid "Package %s loaded"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1006 ../lib/advene/core/webcherry.py:1042
+#: ../lib/advene/core/webcherry.py:1031 ../lib/advene/core/webcherry.py:1067
 #, python-format
 msgid ""
 "<p>Go to the <a href=\"/packages/%(alias)s\">%(alias)s</a> package, or to "
 "the <a href=\"/packages\">package list</a>."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1009
+#: ../lib/advene/core/webcherry.py:1034
 #, python-format
 msgid "<p>Cannot load package %(alias)s : %(error)s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1020
+#: ../lib/advene/core/webcherry.py:1045
 #, python-format
 msgid "Package %s deleted"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1021
+#: ../lib/advene/core/webcherry.py:1046
 msgid "<p>Go to the <a href=\"/packages\">package list</a>."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1024
+#: ../lib/advene/core/webcherry.py:1049
 #, python-format
 msgid "<p>Cannot delete package %(alias)s : %(error)s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1041
+#: ../lib/advene/core/webcherry.py:1066
 #, python-format
 msgid "Package %s saved"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1045
+#: ../lib/advene/core/webcherry.py:1070
 #, python-format
 msgid "<p>Cannot save package %(alias)s : %(error)s</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1055
+#: ../lib/advene/core/webcherry.py:1080
 msgid "Server reset"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1061
+#: ../lib/advene/core/webcherry.py:1086
 msgid "Available TALES methods"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1102
+#: ../lib/advene/core/webcherry.py:1127
 msgid "Loaded package(s)"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1104
+#: ../lib/advene/core/webcherry.py:1129
 msgid ""
 "\n"
 "        <h1>Loaded package(s)</h1>\n"
-"        <table border=\"1\" width=\"50%\">\n"
+"        <table class=\"package-list\">\n"
 "        <tr>\n"
 "        <th>Alias</th>\n"
 "        <th>Action</th>\n"
@@ -7484,7 +7483,7 @@ msgid ""
 "        "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1116
+#: ../lib/advene/core/webcherry.py:1141
 #, python-format
 msgid ""
 "<tr>\n"
@@ -7498,34 +7497,34 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1189 ../lib/advene/core/webcherry.py:1256
-#: ../lib/advene/core/webcherry.py:1265 ../lib/advene/core/webcherry.py:1273
-#: ../lib/advene/core/webcherry.py:1437 ../lib/advene/core/webcherry.py:1445
-#: ../lib/advene/core/webcherry.py:1453 ../lib/advene/core/webcherry.py:2013
-#: ../lib/advene/core/webcherry.py:2020
+#: ../lib/advene/core/webcherry.py:1214 ../lib/advene/core/webcherry.py:1281
+#: ../lib/advene/core/webcherry.py:1290 ../lib/advene/core/webcherry.py:1298
+#: ../lib/advene/core/webcherry.py:1462 ../lib/advene/core/webcherry.py:1470
+#: ../lib/advene/core/webcherry.py:1478 ../lib/advene/core/webcherry.py:2038
+#: ../lib/advene/core/webcherry.py:2045
 #: ../lib/advene/plugins/ada_rdf_export.py:274
 msgid "Error"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1190
+#: ../lib/advene/core/webcherry.py:1215
 #, python-format
 msgid "The TALES expression %s is not valid."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1233
+#: ../lib/advene/core/webcherry.py:1258
 msgid "Content mode not available on non-content data"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1257 ../lib/advene/core/webcherry.py:1266
-#: ../lib/advene/core/webcherry.py:1274 ../lib/advene/core/webcherry.py:1299
-#: ../lib/advene/core/webcherry.py:1303 ../lib/advene/core/webcherry.py:1438
-#: ../lib/advene/core/webcherry.py:1446 ../lib/advene/core/webcherry.py:1454
-#: ../lib/advene/core/webcherry.py:1513 ../lib/advene/core/webcherry.py:1590
-#: ../lib/advene/core/webcherry.py:1710 ../lib/advene/core/webcherry.py:1760
+#: ../lib/advene/core/webcherry.py:1282 ../lib/advene/core/webcherry.py:1291
+#: ../lib/advene/core/webcherry.py:1299 ../lib/advene/core/webcherry.py:1324
+#: ../lib/advene/core/webcherry.py:1328 ../lib/advene/core/webcherry.py:1463
+#: ../lib/advene/core/webcherry.py:1471 ../lib/advene/core/webcherry.py:1479
+#: ../lib/advene/core/webcherry.py:1538 ../lib/advene/core/webcherry.py:1615
+#: ../lib/advene/core/webcherry.py:1735 ../lib/advene/core/webcherry.py:1785
 msgid "<h1>Error</h1>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1258 ../lib/advene/core/webcherry.py:1304
+#: ../lib/advene/core/webcherry.py:1283 ../lib/advene/core/webcherry.py:1329
 #, python-format
 msgid ""
 "<p>There was an error in the template code.</p>\n"
@@ -7533,7 +7532,7 @@ msgid ""
 "                <p>Error message: <em>%(message)s</em></p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1267
+#: ../lib/advene/core/webcherry.py:1292
 #, python-format
 msgid ""
 "<p>An invalid character is in the Context:</p>\n"
@@ -7541,21 +7540,21 @@ msgid ""
 "pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1275
+#: ../lib/advene/core/webcherry.py:1300
 #, python-format
 msgid ""
 "<p>There was an error in the TALES expression.</p>\n"
 "                <pre>%s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1300
+#: ../lib/advene/core/webcherry.py:1325
 #, python-format
 msgid ""
 "<p>There was an error.</p>\n"
 "                <pre>%s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1324
+#: ../lib/advene/core/webcherry.py:1349
 #, python-format
 msgid ""
 "\n"
@@ -7569,7 +7568,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1342
+#: ../lib/advene/core/webcherry.py:1367
 msgid ""
 "\n"
 "            </select> View: <select name=\"view\" onchange=\"submit()\">\n"
@@ -7577,7 +7576,7 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1360
+#: ../lib/advene/core/webcherry.py:1385
 #, python-format
 msgid ""
 "<hr>\n"
@@ -7586,12 +7585,12 @@ msgid ""
 "            "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1396
+#: ../lib/advene/core/webcherry.py:1421
 #, python-format
 msgid "<p>Package <strong>%s</strong> not loaded</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1439
+#: ../lib/advene/core/webcherry.py:1464
 #, python-format
 msgid ""
 "<p>There was an error in the template code.</p>\n"
@@ -7599,14 +7598,14 @@ msgid ""
 "            <p>Error message: <em>%(message)s</em></p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1447
+#: ../lib/advene/core/webcherry.py:1472
 #, python-format
 msgid ""
 "<p>There was an error in the expression.</p>\n"
 "            <pre>%s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1455
+#: ../lib/advene/core/webcherry.py:1480
 #, python-format
 msgid ""
 "<p>Cannot resolve TALES expression %(expr)s on package %(package)s<p><pre>\n"
@@ -7615,41 +7614,41 @@ msgid ""
 "            %(traceback)s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1514 ../lib/advene/core/webcherry.py:1711
+#: ../lib/advene/core/webcherry.py:1539 ../lib/advene/core/webcherry.py:1736
 msgid "<p>Cannot set the value : invalid path</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1576 ../lib/advene/core/webcherry.py:1829
+#: ../lib/advene/core/webcherry.py:1601 ../lib/advene/core/webcherry.py:1854
 #, python-format
 msgid ""
 "<h1>Error</h1><p>When creating resource %(path)s, the resource folder "
 "%(folder)s could not be created.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1585 ../lib/advene/core/webcherry.py:1837
+#: ../lib/advene/core/webcherry.py:1610 ../lib/advene/core/webcherry.py:1862
 msgid "Resource successfuly created/updated"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1594
+#: ../lib/advene/core/webcherry.py:1619
 msgid "Value successfuly updated"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1596
+#: ../lib/advene/core/webcherry.py:1621
 #, python-format
 msgid ""
 "Unable to update the attribute %(attribute)s for element %(element)s: "
 "%(error)s."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1707
+#: ../lib/advene/core/webcherry.py:1732
 msgid "<p>Invalid request</p>."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1771 ../lib/advene/core/webcherry.py:1788
+#: ../lib/advene/core/webcherry.py:1796 ../lib/advene/core/webcherry.py:1813
 msgid "Value updated"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1772
+#: ../lib/advene/core/webcherry.py:1797
 #, python-format
 msgid ""
 "\n"
@@ -7661,7 +7660,7 @@ msgid ""
 "                "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1789
+#: ../lib/advene/core/webcherry.py:1814
 #, python-format
 msgid ""
 "\n"
@@ -7673,31 +7672,31 @@ msgid ""
 "                    "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1800
+#: ../lib/advene/core/webcherry.py:1825
 #, python-format
 msgid ""
 "Malformed request: cannot update the value of %(attribute)s in %(tales)s."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1841
+#: ../lib/advene/core/webcherry.py:1866
 msgid "Cannot create an element in something else than a package."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1858
+#: ../lib/advene/core/webcherry.py:1883
 #, python-format
 msgid "The identifier %s already exists."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1870
+#: ../lib/advene/core/webcherry.py:1895
 #, python-format
 msgid "<p>Error while creating view %(id)s</p><pre>%(error)s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1876
+#: ../lib/advene/core/webcherry.py:1901
 msgid "View created"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1877
+#: ../lib/advene/core/webcherry.py:1902
 #, python-format
 msgid ""
 "\n"
@@ -7707,51 +7706,51 @@ msgid ""
 "                 "
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1893
+#: ../lib/advene/core/webcherry.py:1918
 #, python-format
 msgid "Missing %s parameter"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1896
+#: ../lib/advene/core/webcherry.py:1921
 #, python-format
 msgid "Relation type %s does not exist"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1903 ../lib/advene/core/webcherry.py:1906
+#: ../lib/advene/core/webcherry.py:1928 ../lib/advene/core/webcherry.py:1931
 #, fuzzy, python-format
 msgid "Annotation %s does not exist"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/core/webcherry.py:1909
+#: ../lib/advene/core/webcherry.py:1934
 #, python-format
 msgid ""
 "<p>Cannot create relation between %(member1)s and %(member2)s: invalid type</"
 "p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1921
+#: ../lib/advene/core/webcherry.py:1946
 #, python-format
 msgid ""
 "<p>Error while creating relation between %(member1)s and %(member2)s :</"
 "p><pre>%(error)s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1924
+#: ../lib/advene/core/webcherry.py:1949
 #, fuzzy
 msgid "Relation created"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/core/webcherry.py:1925
+#: ../lib/advene/core/webcherry.py:1950
 #, fuzzy, python-format
 msgid "<h1>Relation <em>%s</em> created</h1>"
 msgstr "Defauxlta regularo"
 
-#: ../lib/advene/core/webcherry.py:1935
+#: ../lib/advene/core/webcherry.py:1960
 #, python-format
 msgid "Annotation type %s does not exist"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1952
+#: ../lib/advene/core/webcherry.py:1977
 #, python-format
 msgid ""
 "<p>Error while creating annotation of type %(type)s :<pre>\n"
@@ -7760,93 +7759,93 @@ msgid ""
 "                    %(traceback)s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1964
+#: ../lib/advene/core/webcherry.py:1989
 #, fuzzy, python-format
 msgid "Annotation %s created"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/core/webcherry.py:1966
+#: ../lib/advene/core/webcherry.py:1991
 #, python-format
 msgid "Error: Cannot create an object of type %s."
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1969
+#: ../lib/advene/core/webcherry.py:1994
 #, python-format
 msgid ""
 "Error: Cannot perform the action <em>%(action)s</em> on <code>%(object)s</"
 "code></p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1982
+#: ../lib/advene/core/webcherry.py:2007
 msgid "Available actions"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:1991
+#: ../lib/advene/core/webcherry.py:2016
 #, python-format
 msgid "<li>%(name)s: %(value)s"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2014
+#: ../lib/advene/core/webcherry.py:2039
 #, python-format
 msgid "<p>Unknown action</p><pre>Action: %s</pre>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2021
+#: ../lib/advene/core/webcherry.py:2046
 msgid "Missing parameter(s) :<ul>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2057
+#: ../lib/advene/core/webcherry.py:2082
 msgid "Advene web resources"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2063
+#: ../lib/advene/core/webcherry.py:2088
 msgid "Advene webserver"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2064
+#: ../lib/advene/core/webcherry.py:2089
 #, python-format
 msgid ""
 "<p>Welcome on the <a href=\"http://advene.org/\">Advene</a> webserver run by "
 "%(userid)s on %(serveraddress)s.</p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2071
+#: ../lib/advene/core/webcherry.py:2096
 msgid ""
 " <p>No package is loaded. You can access the <a href=\"/admin\">server "
 "administration page</a>.<p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2081
+#: ../lib/advene/core/webcherry.py:2106
 #, python-format
 msgid ""
 "the <a href=\"/packages/%(alias)s/view/%(view)s\">loaded package's default "
 "view</a>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2083
+#: ../lib/advene/core/webcherry.py:2108
 #, python-format
 msgid "the <a href=\"/packages/%s\">loaded package's data</a>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2085
+#: ../lib/advene/core/webcherry.py:2110
 msgid "the <a href=\"/packages\">loaded packages' data</a>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2086
+#: ../lib/advene/core/webcherry.py:2111
 #, python-format
 msgid ""
 " <p>You can either access %s or the <a href=\"/admin\">server administration "
 "page</a>.<p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2088
+#: ../lib/advene/core/webcherry.py:2113
 #, python-format
 msgid ""
 "<hr><p align=\"right\"><em>Document generated by <a href=\"http://advene.org/"
 "\">Advene</a> v. %s.</em></p>"
 msgstr ""
 
-#: ../lib/advene/core/webcherry.py:2173 ../lib/advene/core/webcherry.py:2182
+#: ../lib/advene/core/webcherry.py:2198 ../lib/advene/core/webcherry.py:2207
 #, python-format
 msgid "Cannot start HTTP server: %s"
 msgstr ""
@@ -8321,7 +8320,8 @@ msgstr "Importi dosieron"
 
 #: ../lib/advene/plugins/vian_import.py:62
 #: ../lib/advene/plugins/webannotation_import.py:128
-#: ../lib/advene/plugins/owl_import.py:79 ../lib/advene/util/importer.py:412
+#: ../lib/advene/plugins/base_importers.py:1116
+#: ../lib/advene/plugins/owl_import.py:79 ../lib/advene/util/importer.py:416
 #, python-format
 msgid "Converted from %s"
 msgstr ""
@@ -8469,18 +8469,18 @@ msgid "Parsing section information"
 msgstr ""
 
 #: ../lib/advene/plugins/transcriber.py:257
-#: ../lib/advene/plugins/base_importers.py:807
+#: ../lib/advene/plugins/base_importers.py:809
 msgid "Creating package"
 msgstr ""
 
 #: ../lib/advene/plugins/transcriber.py:263
-#: ../lib/advene/plugins/base_importers.py:814
+#: ../lib/advene/plugins/base_importers.py:816
 #, fuzzy
 msgid "Creating annotation types"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
 #: ../lib/advene/plugins/transcriber.py:268
-#: ../lib/advene/plugins/base_importers.py:820
+#: ../lib/advene/plugins/base_importers.py:822
 msgid "Parsing header information"
 msgstr ""
 
@@ -8563,134 +8563,139 @@ msgstr "Importi dosieron"
 msgid "Scene change"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:102
+#: ../lib/advene/plugins/base_importers.py:104
 msgid "Text importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:116
-#: ../lib/advene/plugins/base_importers.py:495
+#: ../lib/advene/plugins/base_importers.py:118
+#: ../lib/advene/plugins/base_importers.py:497
 msgid "Specify the encoding of the input file (latin1, utf8...)"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:119
+#: ../lib/advene/plugins/base_importers.py:121
 msgid "Should the timestamps be encoded relative to the first timestamp?"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:122
+#: ../lib/advene/plugins/base_importers.py:124
 msgid "Unit to consider for integers"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:125
+#: ../lib/advene/plugins/base_importers.py:127
 msgid ""
 "What timestamps are present in a line (only begin, both begin and end, or "
 "automatic recognition)"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:128
+#: ../lib/advene/plugins/base_importers.py:130
 msgid "Consider the first data word as a type id"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:305
+#: ../lib/advene/plugins/base_importers.py:307
 msgid "lsdvd importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:332
+#: ../lib/advene/plugins/base_importers.py:334
 msgid "Processing data"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:350
-#: ../lib/advene/plugins/base_importers.py:408
+#: ../lib/advene/plugins/base_importers.py:352
+#: ../lib/advene/plugins/base_importers.py:410
 #, fuzzy
 msgid "DVD Chapter"
 msgstr "Importi DVD cxapitrojn"
 
-#: ../lib/advene/plugins/base_importers.py:354
+#: ../lib/advene/plugins/base_importers.py:356
 msgid "Launching lsdvd..."
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:364
+#: ../lib/advene/plugins/base_importers.py:366
 msgid "chaplin importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:420
+#: ../lib/advene/plugins/base_importers.py:422
 msgid "Xi importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:488
+#: ../lib/advene/plugins/base_importers.py:490
 msgid "Subtitle (SRT) importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:546
+#: ../lib/advene/plugins/base_importers.py:548
 #, python-format
 msgid "Subtitles from %s"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:551
+#: ../lib/advene/plugins/base_importers.py:553
 msgid ""
 "Cannot decode subtitle file. Try to specify an encoding (latin1 perhaps?)."
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:560
+#: ../lib/advene/plugins/base_importers.py:562
 msgid "PRAAT importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:647
+#: ../lib/advene/plugins/base_importers.py:649
 msgid "CMML importer"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:710
+#: ../lib/advene/plugins/base_importers.py:712
 msgid "Parsing clip information"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:810
+#: ../lib/advene/plugins/base_importers.py:812
 msgid "Creating CMML schema"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:834
+#: ../lib/advene/plugins/base_importers.py:836
 msgid "Parsing stream information"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:865
+#: ../lib/advene/plugins/base_importers.py:867
 #, fuzzy
 msgid "IRI importer"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/plugins/base_importers.py:874
+#: ../lib/advene/plugins/base_importers.py:876
 msgid "Generate one type per view"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:893
+#: ../lib/advene/plugins/base_importers.py:895
 #, python-format
 msgid "Parsing ensemble %s"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:904
+#: ../lib/advene/plugins/base_importers.py:906
 #, python-format
 msgid "Parsing decoupage %s"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:939
+#: ../lib/advene/plugins/base_importers.py:941
 msgid "Parsing views"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:986
-#: ../lib/advene/plugins/base_importers.py:1074
+#: ../lib/advene/plugins/base_importers.py:988
+#: ../lib/advene/plugins/base_importers.py:1076
 msgid "Initializing package"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:1023
+#: ../lib/advene/plugins/base_importers.py:1025
 #, fuzzy
 msgid "IRIData importer"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/plugins/base_importers.py:1037
+#: ../lib/advene/plugins/base_importers.py:1039
 msgid "Parsing sound values"
 msgstr ""
 
-#: ../lib/advene/plugins/base_importers.py:1049
+#: ../lib/advene/plugins/base_importers.py:1051
 #, fuzzy
 msgid "Creating annotations"
 msgstr "Krei komentajxojn de DVD cxapitroj"
+
+#: ../lib/advene/plugins/base_importers.py:1091
+#, fuzzy
+msgid "FlatJSON importer"
+msgstr "Importi dosieron"
 
 #: ../lib/advene/plugins/dcp.py:66
 #, fuzzy
@@ -9610,51 +9615,51 @@ msgstr ""
 msgid "Comma-separated list of views to export - leave blank for all views"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:412
+#: ../lib/advene/util/website_export.py:421
 #, python-format
 msgid "%s exists but is not a directory. Cancelling website export"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:419
+#: ../lib/advene/util/website_export.py:428
 #, fuzzy, python-format
 msgid "%s does not exist"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/util/website_export.py:427
+#: ../lib/advene/util/website_export.py:436
 #, fuzzy, python-format
 msgid "The following views do not exist: %s"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/util/website_export.py:454
+#: ../lib/advene/util/website_export.py:463
 msgid "This export filter must be called with an output directory name"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:465
+#: ../lib/advene/util/website_export.py:474
 msgid "Starting export"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:495
+#: ../lib/advene/util/website_export.py:504
 #, python-format
 msgid "Depth %d"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:499
+#: ../lib/advene/util/website_export.py:508
 #, python-format
 msgid "Depth %(depth)d: processing %(url)s"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:522
+#: ../lib/advene/util/website_export.py:531
 msgid "Finalizing"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:561
+#: ../lib/advene/util/website_export.py:570
 #, python-format
 msgid ""
 "<p><strong>You should probably begin at <a href=\"%(href)s\">%(title)s</a>.</"
 "strong></p>"
 msgstr ""
 
-#: ../lib/advene/util/website_export.py:600
+#: ../lib/advene/util/website_export.py:609
 #, fuzzy
 msgid "Export complete"
 msgstr "Importi dosieron"
@@ -9687,57 +9692,57 @@ msgstr ""
 msgid "Flat JSON exporter"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/util/importer.py:145
+#: ../lib/advene/util/importer.py:144
 msgid "Generic importer"
 msgstr ""
 
-#: ../lib/advene/util/importer.py:199
+#: ../lib/advene/util/importer.py:198
 msgid "Usage: %prog [options] source-file destination-file"
 msgstr ""
 
-#: ../lib/advene/util/importer.py:203
+#: ../lib/advene/util/importer.py:202
 msgid "Specify the offset in ms"
 msgstr ""
 
-#: ../lib/advene/util/importer.py:276
+#: ../lib/advene/util/importer.py:275
 msgid ""
 "Import filter error. The asynchronous API should be used, please report a "
 "bug."
 msgstr ""
 
-#: ../lib/advene/util/importer.py:278
+#: ../lib/advene/util/importer.py:277
 msgid ""
 "Import filter error. No conversion method is defined,  please report a bug."
 msgstr ""
 
-#: ../lib/advene/util/importer.py:544
+#: ../lib/advene/util/importer.py:558
 #, fuzzy
 msgid "ExternalApp importer"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/util/importer.py:558
+#: ../lib/advene/util/importer.py:572
 #, python-format
 msgid ""
 "The <b>%s</b> application does not seem to be installed. Please check that "
 "it is present and that its path is correctly specified in preferences."
 msgstr ""
 
-#: ../lib/advene/util/importer.py:560
+#: ../lib/advene/util/importer.py:574
 #, fuzzy, python-format
 msgid "The file %s does not seem to exist."
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/util/importer.py:582
+#: ../lib/advene/util/importer.py:596
 #, fuzzy, python-format
 msgid "Could not run %(appname)s: %(msg)s"
 msgstr "Krei komentajxojn de DVD cxapitroj"
 
-#: ../lib/advene/util/importer.py:584 ../lib/advene/util/merger.py:686
+#: ../lib/advene/util/importer.py:598 ../lib/advene/util/merger.py:686
 #, fuzzy, python-format
 msgid "Processing %s"
 msgstr "Importi dosieron"
 
-#: ../lib/advene/util/importer.py:588
+#: ../lib/advene/util/importer.py:602
 msgid "Cleaning up..."
 msgstr ""
 
@@ -10010,10 +10015,6 @@ msgstr "Komentaraj attributoj"
 #, fuzzy
 #~ msgid "Display the transcription for an annotation type"
 #~ msgstr "Krei komentajxojn de DVD cxapitroj"
-
-#, fuzzy
-#~ msgid "Transcription of the whole package"
-#~ msgstr "Importi transkribon"
 
 #, fuzzy
 #~ msgid "No valid importer"
