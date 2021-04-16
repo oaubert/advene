@@ -3114,7 +3114,9 @@ class TimeLine(AdhocView):
 
             b = AnnotationTypeWidget(annotationtype=t, container=self)
             self.annotationtype_widgets[t] = b
-            b.set_tooltip_text(_("From schema %s") % self.controller.get_title(t.schema))
+            b.set_tooltip_text("[%s] %s" % (self.controller.get_title(t.schema),
+                                            t.getMetaData(config.data.namespace_prefix['dc'], "description")
+                                            ))
             y_position = self.layer_position.get(t)
             if y_position is None:
                 logger.error("Type %s not in layer_position (%s)", t.id, list(self.layer_position.keys()))
