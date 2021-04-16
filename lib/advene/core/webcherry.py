@@ -121,7 +121,7 @@ class Common:
         cherrypy.response.headers['Pragma']='no-cache'
         cherrypy.response.headers['Cache-Control']='max-age=0'
 
-    def start_html (self, title="", headers=None, head_section=None, body_attributes="",
+    def start_html (self, title="", headers=None, head_section="", body_attributes="",
                     mode=None, mimetype=None, duplicate_title=False, cache=False, data=None):
         """Starts writing a HTML response (header + common body start).
 
@@ -159,14 +159,16 @@ class Common:
             and mode != 'navigation'
             and isinstance(data, str)
             and data.startswith('<div ')
-            and 'advene_admin' in data[:50]
+            and ('advene_admin' in data[:50]
+                 or 'include_header' in data[:50])
             ):
             # This must be an Advene admin page. Inject
             # standard template code.
-            body = [ """<html><head><title>Advene Admin</title>
+            body = [ f"""<html><head><title>Advene - { title }</title>
             <link rel="stylesheet" type="text/css" href="/data/advene.css" ></link>
+            { head_section }
             </head>
-            <body>
+            <body { body_attributes }>
 """ ]
 
         if mode == 'navigation' or mimetype is None or mimetype == 'text/html':
@@ -183,7 +185,7 @@ class Common:
 
         if mode == "navigation" and mimetype.startswith('text/'):
             body = [ """<html><head><title>%s</title><link rel="stylesheet" type="text/css" href="/data/advene.css" />""" % title ]
-            if head_section is not None:
+            if head_section:
                 body.append(head_section)
 
             body.append("</head><body %s>" % body_attributes)
