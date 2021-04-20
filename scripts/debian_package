@@ -29,7 +29,7 @@ gbp import-orig --upstream-version ${VER} ${TMPDIR}.tgz || exit 1
 gbp dch -a --commit --new-version ${VER}-1 || exit 1
 
 # To test package build
-gbp buildpackage
+gbp buildpackage --git-export-dir=/tmp/advene_build --git-no-pristine-tar
 
 # Once it is ok
 gbp tag --ignore-new
