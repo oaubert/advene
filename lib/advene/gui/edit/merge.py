@@ -18,6 +18,9 @@
 #
 """GUI to merge packages.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GObject
@@ -29,6 +32,9 @@ from gettext import gettext as _
 import advene.core.config as config
 
 import advene.gui.popup
+from advene.model.schema import Schema, AnnotationType, RelationType
+from advene.model.view import View
+from advene.model.query import Query
 import advene.util.helper as helper
 from advene.util.merger import Differ
 
@@ -298,10 +304,40 @@ class Merger:
                 l[self.mergerview.COLUMN_APPLY] = True
             return True
 
-        def unselect_all(b):
+        def unselect_all(b=None):
             model=self.mergerview.store
             for l in model:
                 l[self.mergerview.COLUMN_APPLY] = False
+            return True
+
+        def is_all_selected():
+            # Every element is selected if there is not unselected element
+            return not [ l
+                         for l in self.mergerview.store
+                         if l[self.mergerview.COLUMN_APPLY] is False ]
+
+        def select_structure(b):
+            """Select schemas and types
+            """
+            # If everything is selected, then first unselect all
+            if is_all_selected():
+                unselect_all()
+            for l in self.mergerview.store:
+                if isinstance(l[self.mergerview.COLUMN_ELEMENT][1],
+                              (Schema, AnnotationType, RelationType)):
+                    l[self.mergerview.COLUMN_APPLY] = True
+            return True
+
+        def select_views(b):
+            """Select views and queries
+            """
+            # If everything is selected, then first unselect all
+            if is_all_selected():
+                unselect_all()
+            for l in self.mergerview.store:
+                if isinstance(l[self.mergerview.COLUMN_ELEMENT][1],
+                              (View, Query)):
+                    l[self.mergerview.COLUMN_APPLY] = True
             return True
 
         def toggle_selection(b):
@@ -309,16 +345,29 @@ class Merger:
             return True
 
         b = Gtk.Button(_("All"))
+        b.set_tooltip_text(_("Select all elements"))
         b.connect('clicked', select_all)
         self.buttonbox.add (b)
 
         b = Gtk.Button(_('None'))
+        b.set_tooltip_text(_("Unselect all elements"))
         b.connect('clicked', unselect_all)
         self.buttonbox.add (b)
 
         b = Gtk.Button(_('Selection'))
+        b.set_tooltip_text(_("Toggle the state of selected elements - you can select a range by holding Ctrl or Shift"))
         b.connect('clicked', toggle_selection)
         self.buttonbox.add (b)
+
+        b = Gtk.Button(_("Structure"))
+        b.set_tooltip_text(_("Select structure elements (schemas, types)"))
+        b.connect('clicked', select_structure)
+        self.buttonbox.add(b)
+
+        b = Gtk.Button(_("Views"))
+        b.set_tooltip_text(_("Select views"))
+        b.connect('clicked', select_views)
+        self.buttonbox.add(b)
 
         b = Gtk.Button(stock=Gtk.STOCK_OK)
         b.connect('clicked', validate)
