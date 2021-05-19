@@ -21,8 +21,6 @@
   <repository type='tarball' name='ftp.gnupg.org' href="https://gnupg.org/ftp/" />
   <repository type="tarball" name="chromaprint"
               href="https://github.com/acoustid/chromaprint/releases/download/"/>
-  <repository type="tarball" name="libgme"
-              href="https://bitbucket.org/mpyne/game-music-emu/downloads/"/>
   <repository type="tarball" name="soundtouch"
               href="http://www.surina.net/soundtouch/"/>
   <repository type="tarball" name="xiph"
@@ -76,6 +74,7 @@
   <repository type="tarball" name="autoconf-archive"
               href="https://ftpmirror.gnu.org/autoconf-archive/"/>
 
+  <include href="https://gitlab.gnome.org/GNOME/gnome-modulesets/-/raw/master/gnome-core-deps.modules" />
   <metamodule id="meta-bootstrap">
     <dependencies>
       <dep package="automake"/>
@@ -104,6 +103,7 @@
       <dep package="python-gobject"/>
       <dep package="python-pyobjc"/>
       <dep package="python-pip"/>
+      <dep package="CherryPy"/>
     </dependencies>
   </metamodule>
 
@@ -681,18 +681,11 @@
             hash="sha256:6d58c986d22b038c8c0df30d639f23a3e6d172a05c3583e766f4c0b785c0986a"/>
   </distutils>
 
-  <distutils id="python-feedparser" python3="1">
-    <branch repo="pypi.org" module="f/feedparser/feedparser-${version}.tar.bz2"
-            checkoutdir="python-feedparser-${version}"
-            version="5.2.1"/>
-    <dependencies>
-      <dep package="python-setuptools"/>
-    </dependencies>
-  </distutils>
-
-  <distutils id="python-mutagen" python3="1">
-    <branch repo="pypi.org" checkoutdir="python-mutagen-${version}" module="m/mutagen/mutagen-${version}.tar.gz"
-            version="1.41.1" hash="sha256:2ea9c900a05fa7f5f4c5bd9fc1475d7d576532e13b2f79b694452b997ff67200"/>
+  <distutils id="CherryPy" python3="1">
+    <branch repo="pypi.org" checkoutdir="cherrypy-${version}" module="/packages/f5/f0/72f632c9503f1ffd765561e0e18eba19de746bddebe615deb699c210be60/CherryPy-18.6.0.tar.gz"
+            version="18.6.0"
+            hash="sha256:56608edd831ad00991ae585625e0206ed61cf1a0850e4b2cc48489fb2308c499"
+            />
     <dependencies>
       <dep package="python-setuptools"/>
     </dependencies>
@@ -702,16 +695,6 @@
     <branch repo="pypi.org" checkoutdir="python-pip-${version}" module="p/pip/pip-${version}.tar.gz"
             version="20.0.2"
             hash="sha256:7db0c8ea4c7ea51c8049640e8e6e7fde949de672bfa4949920675563a5a6967f"/>
-    <dependencies>
-      <dep package="python-setuptools"/>
-    </dependencies>
-  </distutils>
-
-  <distutils id="python-musicbrainzngs" python3="1">
-    <branch repo="github-tar"
-            checkoutdir="python-musicbrainzngs-${version}"
-            module="alastair/python-musicbrainzngs/archive/v${version}.tar.gz"
-            version="0.6"/>
     <dependencies>
       <dep package="python-setuptools"/>
     </dependencies>
@@ -884,8 +867,6 @@
       <dep package="faad2"/>
       <dep package="libbs2b"/>
       <dep package="chromaprint"/>
-      <dep package="soundtouch"/>
-      <dep package="libgme"/>
     </dependencies>
   </autotools>
 
@@ -895,13 +876,6 @@
             module="v${version}/chromaprint-${version}.tar.gz"
             version="1.4.3"
             hash="sha256:ea18608b76fb88e0203b7d3e1833fb125ce9bb61efe22c6e169a50c52c457f82">
-    </branch>
-  </cmake>
-
-  <cmake id="libgme" use-ninja="no" cmakeargs="-DCMAKE_INSTALL_NAME_DIR='${prefix}/lib'">
-    <branch repo="libgme" checkoutdir="libgme-${version}" module="game-music-emu-${version}.tar.xz"
-            version="0.6.2"
-            hash="sha256:5046cb471d422dbe948b5f5dd4e5552aaef52a0899c4b2688e5a68a556af7342">
     </branch>
   </cmake>
 
@@ -1123,6 +1097,18 @@
         hash="sha256:ae7a42df026550b85daca8389b6a60ba6313b0567f374392e54918588a411e94"/>
     <dependencies>
       <dep package="gmp" />
+    </dependencies>
+  </autotools>
+
+  <autotools id="gtksourceview-3"
+             autogenargs="--enable-introspection --disable-vala">
+    <branch repo="gitlab.gnome.org/GNOME"
+            checkoutdir="gtksourceview-3" module="gtksourceview" revision="gnome-3-24"/>
+    <dependencies>
+      <dep package="gobject-introspection"/>
+      <dep package="libxml2"/>
+      <dep package="gtk3"/>
+      <dep package="m4"/>
     </dependencies>
   </autotools>
 
