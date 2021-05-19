@@ -182,7 +182,8 @@ def make_sdk_name(sdk_version):
 
 def get_sdkdir(sdk_name, xcodepath, xcodeversion):
     platformpath = None
-    if xcodeversion >= 4.3:
+    # OA Fix: change from 4.3 to 14.3 so that the build system finds the Commandline SDK
+    if xcodeversion >= 14.3:
         platformpath = os.path.join("Platforms", "MacOSX.platform", "Developer")
     if xcodepath and platformpath:
         sdkdir = os.path.join(xcodepath, platformpath, "SDKs", sdk_name)
