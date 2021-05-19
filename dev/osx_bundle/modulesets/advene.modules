@@ -73,6 +73,8 @@
               href="http://www.nasm.us/pub/nasm/releasebuilds/"/>
   <repository type="tarball" name="autoconf-archive"
               href="https://ftpmirror.gnu.org/autoconf-archive/"/>
+  <repository type="tarball" name="videolan" href="https://downloads.videolan.org/pub/videolan/x265/"/>
+  <repository type="tarball" name="ffmpeg.org" href="https://ffmpeg.org/releases/"/>
 
   <include href="https://gitlab.gnome.org/GNOME/gnome-modulesets/-/raw/master/gnome-core-deps.modules" />
   <metamodule id="meta-bootstrap">
@@ -343,6 +345,34 @@
       <dep package="python"/>
     </dependencies>
   </autotools>
+
+  <autotools id="ffmpeg" autogenargs="--enable-shared --disable-static --enable-swscale" autogen-sh="configure" supports-non-srcdir-builds="no" autogen-template="%(srcdir)s/%(autogen-sh)s --prefix=%(prefix)s %(autogenargs)s">
+    <branch repo="ffmpeg.org" module="ffmpeg-4.2.1.tar.xz" version="4.2.1" hash="sha256:cec7c87e9b60d174509e263ac4011b522385fd0775292e1670ecc1180c9bb6d4"/>
+    <dependencies>
+      <dep package="nasm"/>
+      <dep package="fontconfig"/>
+    </dependencies>
+  </autotools>
+
+  <cmake id="opencv" cmakeargs="-DOPENCV_GENERATE_PKGCONFIG=ON -DCMAKE_INSTALL_NAME_DIR=$JHBUILD_PREFIX/lib">
+    <branch checkoutdir="opencv-4.1.2" module="opencv/opencv/archive/4.1.2.tar.gz" version="4.1.2" repo="github-tar"/>
+    <after>
+      <dep package="ffmpeg"/>
+    </after>
+  </cmake>
+
+  <cmake id="x265" cmakeargs="-DCMAKE_INSTALL_NAME_DIR=$JHBUILD_PREFIX/lib">
+    <branch checkoutdir="x265_3.2.1"
+      module="x265_3.2.1.tar.gz" version="3.2.1"
+      hash="sha256:fb9badcf92364fd3567f8b5aa0e5e952aeea7a39a2b864387cec31e3b58cbbcc"
+      repo="videolan">
+      <!-- no cmake files in the root folder -->
+      <patch file="https://gitlab.gnome.org/samm-git/gtk-osx/raw/gimp/patches/x265-cmake.patch" strip="0"/>
+    </branch>
+    <dependencies>
+      <dep package="nasm"/>
+    </dependencies>
+  </cmake>
 
   <autotools id="orc" autogen-sh="configure">
     <branch repo="gstreamer" module="orc/orc-${version}.tar.xz" version="0.4.28"
@@ -795,21 +825,19 @@
     --disable-aiff
     --disable-asfmux
     --disable-audiofxbad
-    --disable-audiomixer
     --disable-audiovisualizers
     --disable-autoconvert
     --disable-bayer
     --disable-camerabin2
     --disable-coloreffects
     --disable-compositor
-    --disable-dataurisrc
-    --disable-debugutils
+    --enable-debugutils
     --disable-dvbsuboverlay
     --disable-dvdspu
     --disable-festival
-    --disable-fieldanalysis
+    --enable-fieldanalysis
     --disable-freeverb
-    --disable-frei0r
+    --enable-frei0r
     --disable-gaudieffects
     --disable-gdp
     --disable-geometrictransform
@@ -819,44 +847,42 @@
     --disable-ivfparse
     --disable-ivtc
     --disable-jp2kdecimator
-    --disable-jpegformat
+    --enable-jpegformat
     --disable-librfb
-    --disable-liveadder
     --disable-midi
-    --disable-mpegdemux
-    --disable-mpegpsmux
-    --disable-mpegtsdemux
-    --disable-mpegtsmux
-    --disable-mxf
+    --enable-mpegdemux
+    --enable-mpegpsmux
+    --enable-mpegtsdemux
+    --enable-mpegtsmux
+    --enable-mxf
     --disable-pcapparse
-    --disable-pnm
-    --disable-rawparse
-    --disable-removesilence
-    --disable-sdp
-    --disable-segmentclip
+    --enable-pnm
+    --enable-rawparse
+    --enable-removesilence
+    --enable-sdp
+    --enable-segmentclip
     --disable-siren
     --disable-smooth
-    --disable-speed
+    --enable-speed
     --disable-stereo
     --disable-subenc
-    --disable-videofilters
-    --disable-videoparsers
-    --disable-videosignal
+    --enable-videofilters
+    --enable-videoparsers
+    --enable-videosignal
     --disable-vmnc
     --disable-y4m
     --disable-yadif
-    --disable-bz2
+    --enable-bz2
     --disable-dash
     --disable-decklink
     --disable-gl
     --disable-hls
-    --disable-rsvg
+    --enable-rsvg
     --disable-shm
     --disable-smoothstreaming
-    --disable-apple_media
-    --disable-gtk3
+    --enable-apple_media
     --disable-dtls
-    --enable-cocoa=no --enable-x11=no --enable-opengl=no --disable-gtk-doc"
+    --disable-gtk-doc"
              makeargs="ERROR_CFLAGS=">
     <branch repo="gstreamer" version="1.14.4"
             module="gst-plugins-bad/gst-plugins-bad-${version}.tar.xz"
@@ -865,8 +891,11 @@
       <dep package="gstreamer"/>
       <dep package="gst-plugins-base"/>
       <dep package="faad2"/>
+      <dep package="x265"/>
       <dep package="libbs2b"/>
       <dep package="chromaprint"/>
+      <dep package="librsvg"/>
+      <dep package="soundtouch"/>
     </dependencies>
   </autotools>
 
