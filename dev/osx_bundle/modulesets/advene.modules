@@ -87,7 +87,7 @@
     </dependencies>
   </metamodule>
 
-  <metamodule id="quodlibet">
+  <metamodule id="advene">
     <dependencies>
       <dep package="adwaita-icon-theme"/>
       <dep package="dmgbuild"/>
@@ -101,10 +101,7 @@
       <dep package="gtk3"/>
       <dep package="python-cairo"/>
       <dep package="python-certifi"/>
-      <dep package="python-feedparser"/>
       <dep package="python-gobject"/>
-      <dep package="python-musicbrainzngs"/>
-      <dep package="python-mutagen"/>
       <dep package="python-pyobjc"/>
       <dep package="python-pip"/>
     </dependencies>

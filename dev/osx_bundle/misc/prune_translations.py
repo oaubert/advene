@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""A script to remove all translations for languages where Quod Libet doesn't
+"""A script to remove all translations for languages where Advene doesn't
 provide a translation. The passed path should point to $PREFIX/share/locale in
 the finished bundle"""
 
@@ -18,7 +18,7 @@ def main(argv):
     for dir_ in os.listdir(target):
         dir_ = os.path.join(target, dir_)
         msgs = os.path.join(dir_, "LC_MESSAGES")
-        if not os.path.exists(os.path.join(msgs, "quodlibet.mo")):
+        if not os.path.exists(os.path.join(msgs, "advene.mo")):
             shutil.rmtree(dir_)
 
 

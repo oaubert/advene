@@ -7,14 +7,14 @@ import plistlib
 if __name__ == "__main__":
     assert sys.version_info[0] == 3
 
-    # "quodlibet" "3.4.0"
+    # "advene" "3.4.0"
     app_id, app_version = sys.argv[1:]
     app_id_lower = app_id.lower()
 
     plist = dict(
         CFBundleExecutable=app_id_lower,
         CFBundleIconFile="%s.icns" % app_id_lower,
-        CFBundleIdentifier="io.github.quodlibet.%s" % app_id,
+        CFBundleIdentifier="org.advene.%s" % app_id,
         CFBundleInfoDictionaryVersion="6.0",
         CFBundlePackageType="APPL",
         CFBundleShortVersionString=app_version,
@@ -25,19 +25,8 @@ if __name__ == "__main__":
         CFBundleSignature="????",
     )
 
-    if app_id_lower == "exfalso":
-        plist.update(dict(
-            CFBundleName="Ex Falso",
-            CFBundleDocumentTypes=[
-                dict(
-                    CFBundleTypeOSTypes=["fold"],
-                    CFBundleTypeRole="Viewer",
-                ),
-            ],
-        ))
-    elif app_id_lower == "quodlibet":
-        plist.update(dict(
-            CFBundleName="Quod Libet",
+    plist.update(dict(
+            CFBundleName="Advene",
             CFBundleDocumentTypes=[
                 dict(
                     CFBundleTypeExtensions=[
@@ -52,12 +41,10 @@ if __name__ == "__main__":
                         "wmv", "wv", "xm",
                     ],
                     CFBundleTypeRole="Viewer",
-                    CFBundleTypeIconFile="quodlibet.icns",
+                    CFBundleTypeIconFile="advene.icns",
                 ),
             ],
         ))
-    else:
-        assert 0, app_id_lower
 
     print(plistlib.dumps(plist).decode("utf-8"))
 

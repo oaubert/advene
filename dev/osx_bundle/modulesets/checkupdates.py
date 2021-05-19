@@ -22,7 +22,7 @@ import requests
 
 def get_moduleset_versions():
     versions = {}
-    tree = etree.parse('quodlibet.modules')
+    tree = etree.parse('advene.modules')
     root = tree.getroot()
     for x in root.iter():
         branch = x.find("branch")

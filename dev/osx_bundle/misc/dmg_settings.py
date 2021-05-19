@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import biplist
 import os.path
 
-# dmgbuild -s settings.py -D app=QuodLibet.app "Quod Libet" QuodLibet.dmg
+# dmgbuild -s settings.py -D app=Advene.app "Advene" Advene.dmg
 
 application = defines['app']
 appname = os.path.basename(application)

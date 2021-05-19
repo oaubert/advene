@@ -61,64 +61,53 @@ function main {
     CLONE="$QL_OSXBUNDLE_BUNDLE_DEST"/_temp_clone
     git clone ../.. "$CLONE"
     (cd "$CLONE"; git checkout "$GIT_TAG")
-    jhbuild run "$PYTHON" "$CLONE"/setup.py install \
+    (
+     # This is is a bit hackish. More proper investigation would be needed to determine why setup.py install does not find its own install dir
+     export PYTHONPATH="$APP_PREFIX/lib/$PYTHONID/site-packages:$PYTHONPATH"
+     cd "$CLONE"
+     jhbuild run "$PYTHON" "$CLONE"/setup.py install \
         --prefix="$APP_PREFIX" \
         --record="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt
+    )
     rm -Rf "$CLONE"
 
     jhbuild run "$PYTHON" ./misc/prune_translations.py \
         "$APP_PREFIX"/share/locale
 
     # create launchers
-    (cd "$APP"/Contents/MacOS/ && ln -s _launcher quodlibet)
-    (cd "$APP"/Contents/MacOS/ && ln -s _launcher exfalso)
-    (cd "$APP"/Contents/MacOS/ && ln -s _launcher operon)
+    (cd "$APP"/Contents/MacOS/ && ln -s _launcher advene)
     (cd "$APP"/Contents/MacOS/ && ln -s _launcher run)
     (cd "$APP"/Contents/MacOS/ && ln -s _launcher gst-plugin-scanner)
 
     # remove empty directories
     find "$APP_PREFIX" -type d -empty -delete
 
-    EXFALSO="$QL_OSXBUNDLE_BUNDLE_DEST/ExFalso.app"
-    EXFALSO_PREFIX="$EXFALSO"/Contents/Resources
-    QUODLIBET="$QL_OSXBUNDLE_BUNDLE_DEST/QuodLibet.app"
-    QUODLIBET_PREFIX="$QUODLIBET"/Contents/Resources
+    ADVENE="$QL_OSXBUNDLE_BUNDLE_DEST/Advene.app"
+    ADVENE_PREFIX="$ADVENE"/Contents/Resources
 
-    cp -R "$APP" "$EXFALSO"
-    mv "$APP" "$QUODLIBET"
+    mv "$APP" "$ADVENE"
 
-    echo 'BUILD_TYPE = u"osx-exfalso"' >> \
-        "$EXFALSO_PREFIX"/lib/"$PYTHONID"/site-packages/quodlibet/build.py
-    echo 'BUILD_TYPE = u"osx-quodlibet"' >> \
-        "$QUODLIBET_PREFIX"/lib/"$PYTHONID"/site-packages/quodlibet/build.py
+    #echo 'BUILD_TYPE = u"osx-advene"' >> \
+    #    "$ADVENE_PREFIX"/lib/"$PYTHONID"/site-packages/advene/build.py
 
     # force compile again to get relative paths in pyc files and for the
     # modified files
-    jhbuild run "$PYTHON" -m compileall -b -d "" -f "$EXFALSO_PREFIX"/lib/"$PYTHONID"
-    jhbuild run "$PYTHON" -m compileall -b -d "" -f "$QUODLIBET_PREFIX"/lib/"$PYTHONID"
+    jhbuild run "$PYTHON" -m compileall -b -d "" -f "$ADVENE_PREFIX"/lib/"$PYTHONID"
 
-    VERSION=$("$QUODLIBET"/Contents/MacOS/run -c \
-        "import sys, quodlibet.const;sys.stdout.write(quodlibet.const.VERSION)")
-    jhbuild run "$PYTHON" ./misc/create_info.py "QuodLibet" "$VERSION" > \
-        "$QUODLIBET"/Contents/Info.plist
-    jhbuild run "$PYTHON" ./misc/create_info.py "ExFalso" "$VERSION" > \
-        "$EXFALSO"/Contents/Info.plist
+    VERSION=$("$ADVENE"/Contents/MacOS/run -c \
+        "import sys, advene.core.version;sys.stdout.write(advene.core.version.version)")
+    jhbuild run "$PYTHON" ./misc/create_info.py "Advene" "$VERSION" > \
+        "$ADVENE"/Contents/Info.plist
 
     jhbuild run "$PYTHON" ./misc/list_content.py "$HOME/jhbuild_prefix" \
-        "$QUODLIBET" > "$QUODLIBET/Contents/Resources/content.txt"
-    jhbuild run "$PYTHON" ./misc/list_content.py "$HOME/jhbuild_prefix" \
-        "$EXFALSO" > "$EXFALSO/Contents/Resources/content.txt"
+        "$ADVENE" > "$ADVENE/Contents/Resources/content.txt"
 
     DMG_SETTINGS="misc/dmg_settings.py"
-    jhbuild run dmgbuild -s "$DMG_SETTINGS" -D app="$QUODLIBET" \
-        "Quod Libet $VERSION" "$QL_OSXBUNDLE_BUNDLE_DEST/QuodLibet-$VERSION.dmg"
-    jhbuild run dmgbuild -s "$DMG_SETTINGS" -D app="$EXFALSO" \
-        "Ex Falso $VERSION" "$QL_OSXBUNDLE_BUNDLE_DEST/ExFalso-$VERSION.dmg"
+    jhbuild run dmgbuild -s "$DMG_SETTINGS" -D app="$ADVENE" \
+        "Advene $VERSION" "$QL_OSXBUNDLE_BUNDLE_DEST/ADVENE-$VERSION.dmg"
 
     (cd "$QL_OSXBUNDLE_BUNDLE_DEST" && \
-        shasum -a256 "QuodLibet-$VERSION.dmg" > "QuodLibet-$VERSION.dmg.sha256")
-    (cd "$QL_OSXBUNDLE_BUNDLE_DEST" && \
-        shasum -a256 "ExFalso-$VERSION.dmg" > "ExFalso-$VERSION.dmg.sha256")
+        shasum -a256 "Advene-$VERSION.dmg" > "Advene-$VERSION.dmg.sha256")
 }
 
 main "$@";

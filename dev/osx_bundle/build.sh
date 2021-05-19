@@ -11,4 +11,4 @@ unzip -o ninja.zip -d "$BIN"
 rm ninja.zip
 
 jhbuild build meta-bootstrap
-jhbuild build quodlibet
+jhbuild build advene

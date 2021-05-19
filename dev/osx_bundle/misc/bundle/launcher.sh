@@ -20,7 +20,7 @@ export GTK_EXE_PREFIX="$bundle_res"
 export GTK_PATH="$bundle_res"
 export GTK_IM_MODULE_FILE="$bundle_etc/gtk-3.0/gtk.immodules"
 
-# comment following line and you won't see the quodlibet icon in the about dialog
+# comment following line and you won't see the advene icon in the about dialog
 export GDK_PIXBUF_MODULE_FILE="$bundle_lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
 
 # gobject-introspection
@@ -45,9 +45,6 @@ export GIO_MODULE_DIR="$bundle_lib/gio/modules"
 # (the env var gets respected because we patch it.. not available upstream)
 export GTLS_SYSTEM_CA_FILE=$(\
     echo "$bundle_lib/python"*"/site-packages/certifi/cacert.pem")
-
-# temporary disable tooltips
-export QUODLIBET_NO_HINTS=yes
 
 # select target based on our basename
 APP=$(basename "$0")

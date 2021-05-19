@@ -9,7 +9,7 @@
     <key>CFBundleIconFile</key>
     <string>@APP_ID@.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>org.quodlibet.@APP_ID@</string>
+    <string>org.advene.@APP_ID@</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
