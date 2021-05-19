@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 
-import sys
-from distutils.core import setup
-from distutils import log
-from setuptools import find_packages
+import logging
+logger = logging.getLogger(__name__)
+
 import os
+from setuptools import setup, find_packages
+import sys
 
 # We define the main script name here (file in bin), since we have to change it for MacOS X
 SCRIPTNAME='advene'
@@ -14,7 +15,7 @@ def check_changelog(maindir, version):
     with open(os.path.join( maindir, "CHANGES.txt" ), 'r') as f:
         l=f.readline()
     if not l.startswith('advene (' + version + ')'):
-        log.error("The CHANGES.txt does not seem to match version %s\n%s\nUpdate either the CHANGES.txt or the lib/advene/core/version.py file", version, l)
+        logger.error("The CHANGES.txt does not seem to match version %s\n%s\nUpdate either the CHANGES.txt or the lib/advene/core/version.py file", version, l)
         sys.exit(1)
     return True
 
@@ -108,7 +109,7 @@ def generate_data_files():
     if os.path.isdir("locale"):
         r.extend(generate_data_dir("locale", prefix=prefix))
     else:
-        log.warn("""**WARNING** You should generate the locales with "cd po; make mo".""")
+        logger.warning("""**WARNING** Cannot find locale directory.""")
     if sys.platform.startswith('linux'):
         # Install specific data files
         r.append( ( 'share/applications', [ 'share/advene.desktop' ] ) )
