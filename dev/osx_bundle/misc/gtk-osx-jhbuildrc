@@ -104,8 +104,9 @@ def osx_ver():
 
 # Determine the XCode Version:
 def xcode_ver():
-   ver = _popen("xcodebuild -version")
-   exp = re.compile(r'Xcode (\d+\.\d+)')
+   #ver = _popen("xcodebuild -version")
+   ver = _popen("pkgutil --pkg-info=com.apple.pkg.CLTools_Executables | grep version")
+   exp = re.compile(r'version:\s+(\d+\.\d+)')
    vernum = exp.match(ver)
    if vernum:
        return float(vernum.group(1))
