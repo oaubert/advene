@@ -106,6 +106,9 @@ def generate_data_files():
         postfix=os.path.sep+"advene"
     r=generate_data_dir("share", postfix=postfix)
     r.extend(generate_data_dir("doc", prefix=prefix, postfix=postfix))
+    if not os.path.isdir("locale"):
+        logger.warning("""**WARNING** Generating the locales with "cd po; make mo".""")
+        os.system("pwd; cd po; make mo")
     if os.path.isdir("locale"):
         r.extend(generate_data_dir("locale", prefix=prefix))
     else:
