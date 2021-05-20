@@ -106,7 +106,15 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
 
         self.default_size = (40, 10)
         # Initialize the size
-        self.set_size_request(*self.needed_size())
+        w, h = self.needed_size()
+        # Obviously wrong size. Make it large enough so that it gets noticed.
+        # Python raises an error if > 2147483647
+        if w > 200000:
+            w = 1024
+        try:
+            self.set_size_request(w, h)
+        except:
+            logger.warning(f"Error in set_size_request {self.element.id}")
 
     def _drag_begin(self, widget, context):
         # see https://developer.gnome.org/gtk3/stable/ch26s02.html
@@ -141,8 +149,15 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
             height = w.get_height()
         if width <= 0:
             logger.warning("Error: width %d <= 0 for %s", width, self.element.id)
-            width=5
-        self.set_size_request(width, height)
+            width = 5
+        # Obviously wrong size. Make it large enough so that it gets noticed.
+        # Python raises an error if > 2147483647
+        if width > 200000:
+            width = 1024
+        try:
+            self.set_size_request(width, height)
+        except:
+            logger.warning(f"Error in set_size_request {self.element.id}")
         #self.get_window().lower()
         return True
 
