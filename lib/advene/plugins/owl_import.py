@@ -70,6 +70,15 @@ class AdAOWLImporter(GenericImporter):
             return 90
         return 0
 
+    def __init__(self, *p, **kw):
+        super().__init__(*p, **kw)
+
+        # Used language
+        self.lang = "en"
+        self.optionparser.add_option("-l", "--lang",
+                                     action="store", type="str", dest="lang", default=self.lang,
+                                     help=_("Language to consider."))
+
     def process_file(self, filename, dest=None):
         graph = rdflib.Graph()
         graph.parse(filename)
@@ -110,25 +119,39 @@ class AdAOWLImporter(GenericImporter):
             First try ao:prefixedLabel, then label@en
             Using preferably @en labels
             """
+            prefix = ""
+            prefixedlabel = ""
             labels = list(graph.objects(subject, AO.prefixedLabel))
             if labels:
-                return labels[0]
-            labels = graph.preferredLabel(subject, lang='en')
+                # Get prefix from prefixedLabel (so that we use the self.lang setting for the title itself)
+                # It would be preferable to have an explicit prefix rather than extract it from the prefixedLabel
+                prefixedlabel = labels[0]
+                prefix = prefixedlabel.split(' | ')[0]
+            labels = graph.preferredLabel(subject, lang=self.lang)
             if labels:
-                # We have at least 1 @en label. Return it.
-                return labels[0][1]
+                # We have at least 1 @{self.lang} label. Return it.
+                if prefix:
+                    return f'{prefix} | {labels[0][1]}'
+                else:
+                    return labels[0][1]
             else:
-                # No defined label. Use default
-                return default
+                # No defined label (maybe the language is not
+                # available). Use prefixedlabel, fallback on default
+                return prefixedlabel or default
 
         def get_comment(graph, subject, default=""):
             """Return the comment@en for the object.
             """
-            results = list(graph.query(PREFIX + 'SELECT ?comment WHERE { <%s> rdfs:comment ?comment . FILTER langMatches( lang(?comment), "en" ) }' % str(subject)))
+            results = list(graph.query(f'''{PREFIX} SELECT ?comment WHERE {{ <{str(subject)}> rdfs:comment ?comment . FILTER langMatches( lang(?comment), "{self.lang}" ) }}'''))
             if results:
                 return str(results[0][0])
             else:
-                return default
+                # Try without specifying language
+                results = list(graph.query(f'''{PREFIX} SELECT ?comment WHERE {{ <{str(subject)}> rdfs:comment ?comment . }}'''))
+                if results:
+                    return str(results[0][0])
+                else:
+                    return default
 
         # Dictionary holding a mapping between old ids and new ids. It
         # will be stored as package-level metadata, in order to be
