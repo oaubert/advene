@@ -191,7 +191,7 @@ class TypeChecker(FeatureChecker):
 
 @register_checker
 class EmptyContentChecker(FeatureChecker):
-    name = "EmptyContent"
+    name = "Empty Content"
     description = _("This table presents the annotations that have an empty content.")
     def build_widget(self):
         self.table = AnnotationTable(controller=self.controller)
