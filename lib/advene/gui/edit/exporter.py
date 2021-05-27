@@ -66,9 +66,9 @@ class AnnotationExporter(AdhocView):
         self.widget = self.build_widget()
 
     def export(self, b, *p):
+        fname = self.get_filename() or self.filename
         if self.exporter is None:
             ec = self.exporters.get_current_element()
-            fname = self.filename or self.get_filename()
 
             if fname.startswith('file://'):
                 fname = fname.replace('file://', '')
@@ -78,7 +78,6 @@ class AnnotationExporter(AdhocView):
             self.exporter = e
         else:
             e = self.exporter
-            fname = self.filename or self.get_filename()
         e.set_options(self.optionform.options)
         e.set_source(self.source)
         e.get_preferences().update(dict(self.optionform.options))
@@ -170,7 +169,7 @@ class AnnotationExporter(AdhocView):
                                        default_dir=str(config.data.path['data']),
                                        default_file=self.get_filename())
             if name is not None:
-                button.set_label(name)
+                self.fname_label.set_label(name)
             return True
 
         self.fname_button = Gtk.Button()
@@ -180,7 +179,7 @@ class AnnotationExporter(AdhocView):
         self.fname_button.connect('clicked', filename_chooser)
 
         default_exporter = exporter_items[0][0](self.controller, self.source, callback=self.progress_callback)
-        default_filename = default_exporter.get_filename(source=self.source)
+        default_filename = self.filename or default_exporter.get_filename(source=self.source)
         self.set_filename(default_filename)
 
         line.pack_start(self.fname_button, True, True, 0)
