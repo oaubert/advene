@@ -173,14 +173,14 @@ class AdAOWLImporter(GenericImporter):
             schema.setMetaData(config.data.namespace, "ontology_uri", str(s))
             if not self.progress(progress, "Creating schema %s" % schema.title):
                 break
-            atnodes = [ at[0] for at in graph.query(PREFIX + """SELECT ?at WHERE { <%s> ao:hasAnnotationType ?at . OPTIONAL { ?at ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number )} ORDER BY xsd:integer(?number)""" % str(s)) ]
+            atnodes = [ at[0] for at in graph.query(f"""{PREFIX} SELECT ?at WHERE {{ <{s}> ao:hasAnnotationType ?at . OPTIONAL {{ ?at ao:sequentialNumber ?number }} . BIND ( COALESCE( ?number, 0 ) as ?number )}} ORDER BY xsd:integer(?number)""") ]
             for atnode in atnodes:
                 at_id = atnode.rpartition('/')[-1]
                 label = get_label(graph, atnode, at_id)
                 description = get_comment(graph, atnode)
                 # Set completions
                 values = [ (t[0], str(t[1]))
-                           for t in graph.query(PREFIX + """SELECT ?x ?label WHERE { <%s> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "en" ) OPTIONAL { ?x ao:sequentialNumber ?number } . BIND ( COALESCE( ?number, 0 ) as ?number ) } ORDER BY xsd:integer(?number)""" % str(atnode)) ]
+                           for t in graph.query(f"""{PREFIX} SELECT ?x ?label WHERE {{ <{atnode}> ao:hasPredefinedValue ?x . ?x rdfs:label ?label . FILTER ( lang(?label) = "{self.lang}" ) OPTIONAL {{ ?x ao:sequentialNumber ?number }} . BIND ( COALESCE( ?number, 0 ) as ?number ) }} ORDER BY xsd:integer(?number)""") ]
                 if (atnode, RDF.type, AO.PredefinedValuesAnnotationType) in graph or values:
                     mimetype = "text/x-advene-keyword-list"
                 elif (atnode, RDF.type, AO.NumericValuesAnnotationType) in graph:
