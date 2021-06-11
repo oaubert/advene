@@ -1737,7 +1737,9 @@ class AdveneGUI:
         self.pane['west']=Gtk.HPaned()
         self.pane['east']=Gtk.HPaned()
         self.pane['south']=Gtk.VPaned()
+        self.pane['south'].set_wide_handle(True)
         self.pane['fareast']=Gtk.HPaned()
+        self.pane['fareast'].set_wide_handle(True)
 
         # pack all together
         self.pane['west'].add1(self.viewbook['west'].widget)
