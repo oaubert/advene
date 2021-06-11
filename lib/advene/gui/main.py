@@ -3856,7 +3856,7 @@ class AdveneGUI:
                 # and display a warning - it will be a small
                 # hindrance for template edition, but will avoid
                 # silently not saving package information by mistake
-                dialog.message_dialog(_("Template option is activated - workspace will not be saved"))
+                dialog.message_dialog(_("Template option is activated - workspace will not be saved.\nModify Edit/Package properties if this is an unwanted behaviour."))
                 workspace_save = False
 
             modified = [ p for p in self.edit_popups if p.get_modified() ]
