@@ -3850,16 +3850,16 @@ class AdveneGUI:
             elif config.data.preferences['save-default-workspace'] == 'ask':
                 save=dialog.message_dialog(_("Do you want to save the current workspace ?"),
                                            icon=Gtk.MessageType.QUESTION)
+            modified = [ p for p in self.edit_popups if p.get_modified() ]
+            if modified and config.data.preferences['apply-edited-elements-on-save']:
+                for p in modified:
+                    p.apply_cb()
             if save and not package.isTemplate():
                 self.workspace_save('_default_workspace')
                 default=self.controller.package.getMetaData (config.data.namespace, "default_adhoc")
                 if not default:
                     self.controller.package.setMetaData (config.data.namespace, "default_adhoc", '_default_workspace')
             alias=self.controller.aliases[package]
-            modified = [ p for p in self.edit_popups if p.get_modified() ]
-            if modified and config.data.preferences['apply-edited-elements-on-save']:
-                for p in modified:
-                    p.apply_cb()
             try:
                 self.controller.save_package (alias=alias)
             except (OSError, IOError) as e:
