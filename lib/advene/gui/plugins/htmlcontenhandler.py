@@ -825,7 +825,7 @@ class HTMLContentHandler (ContentHandler):
         sw2.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw2.add(context_data)
 
-        p=Gtk.HPaned()
+        p = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
         p.add1(sw2)
         p.add2(sw)
         # Hide by default

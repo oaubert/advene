@@ -902,8 +902,8 @@ if __name__ == "__main__":
     t.get_buffer().connect('mark-set', cursor_moved)
     context_data.show()
 
-    p=Gtk.HPaned()
-    sw=Gtk.ScrolledWindow()
+    p = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+    sw = Gtk.ScrolledWindow()
     sw.add(context_data)
     p.add1(sw)
     p.add2(sb)

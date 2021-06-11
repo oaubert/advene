@@ -1732,13 +1732,15 @@ class AdveneGUI:
 
         # create the viewbooks
         for pos in ('east', 'west', 'south', 'fareast'):
-            self.viewbook[pos]=ViewBook(controller=self.controller, location=pos)
+            self.viewbook[pos] = ViewBook(controller=self.controller, location=pos)
 
-        self.pane['west']=Gtk.HPaned()
-        self.pane['east']=Gtk.HPaned()
-        self.pane['south']=Gtk.VPaned()
+        self.pane['west'] = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+        self.pane['east'] = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+        self.pane['south'] = Gtk.Paned.new(Gtk.Orientation.VERTICAL)
+        self.pane['fareast'] = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
+
+        # Specify wide handles
         self.pane['south'].set_wide_handle(True)
-        self.pane['fareast']=Gtk.HPaned()
         self.pane['fareast'].set_wide_handle(True)
 
         # pack all together

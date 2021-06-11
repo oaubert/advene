@@ -843,7 +843,7 @@ class Evaluator:
             sw=Gtk.ScrolledWindow()
             sw.add(self.logwidget)
 
-            pane=Gtk.VPaned()
+            pane = Gtk.Paned.new(Gtk.Orientation.VERTICAL)
             vbox.add(pane)
             pane.add1(f)
             pane.pack2(sw)
