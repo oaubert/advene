@@ -380,7 +380,7 @@ class ViewBook(AdhocView):
         elif targetType == config.data.target_type['annotation-type']:
             at=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
             if at is None:
-                logger.error("Unhandled case in viewbook (targetType=relation) for %s", v.id)
+                logger.error("Unhandled case in viewbook (targetType=annotation-type) for %s", v.id)
                 return True
             # Propose a menu to open various views for the annotation-type:
             menu=Gtk.Menu()
@@ -399,6 +399,33 @@ class ViewBook(AdhocView):
                     (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=at, destination=self.location, label=_("Browsing %s") % title)),
                 ):
                 i=Gtk.MenuItem("    " + label, use_underline=False)
+                i.connect('activate', action)
+                menu.append(i)
+            menu.show_all()
+            menu.popup_at_pointer(None)
+            return True
+        elif targetType == config.data.target_type['relation-type']:
+            rt = self.controller.package.relationTypes.get(str(selection.get_data(), 'utf8'))
+            if rt is None:
+                logger.error("Unhandled case in viewbook (targetType=relation type) for %s", v.id)
+                return True
+            # Propose a menu to open various views for the relation-type:
+            menu = Gtk.Menu()
+            title = self.controller.get_title(rt, max_size=40)
+            i = Gtk.MenuItem(_("Use relation-type %s :") % title, use_underline=False)
+            talespath = 'here/relationTypes/%s' % rt.id
+            menu.append(i)
+            for label, action in (
+                    (_("to edit it"), lambda i : self.controller.gui.open_adhoc_view('edit', element=rt, destination=self.location)),
+                    (_("to create a new static view"), lambda i: create_and_open_view([ rt ])),
+                    (_("as a transcription"), lambda i: self.controller.gui.open_adhoc_view('transcription', source='%s/annotations/sorted' % talespath, destination=self.location, label=title)),
+                    (_("in a timeline"), lambda i: self.controller.gui.open_adhoc_view('timeline', elements=rt.annotations, annotationtypes=list(set(a.type for a in rt.annotations)), destination=self.location, label=title)),
+                    (_("as a montage"), lambda i: self.controller.gui.open_adhoc_view('montage', elements=rt.annotations, destination=self.location, label=title)),
+                    (_("in a table"), lambda i: self.controller.gui.open_adhoc_view('table', source='%s/annotations' % talespath, destination=self.location, label=title)),
+                    (_("in a query"), lambda i: self.controller.gui.open_adhoc_view('interactivequery', here=rt, destination=self.location, label=_("Query %s") % title)),
+                    (_("in the TALES browser"), lambda i: self.controller.gui.open_adhoc_view('browser', element=rt, destination=self.location, label=_("Browsing %s") % title)),
+                ):
+                i = Gtk.MenuItem("    " + label, use_underline=False)
                 i.connect('activate', action)
                 menu.append(i)
             menu.show_all()
@@ -499,6 +526,7 @@ class ViewBook(AdhocView):
                                                             'query',
                                                             'schema',
                                                             'annotation-type',
+                                                            'relation-type',
                                                             'annotation',
                                                             'relation',
                                                             'timestamp'),
