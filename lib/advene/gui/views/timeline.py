@@ -1920,14 +1920,19 @@ class TimeLine(AdhocView):
         if widget.keypress(widget, event, annotation):
             return True
 
-        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK & Gdk.ModifierType.SHIFT_MASK:
             # Control-return: split at current player position
-            self.controller.split_annotation(annotation, self.controller.player.current_position_value)
-            return True
+            pos = self.controller.player.current_position_value
+            if pos in annotation.fragment:
+                self.controller.split_annotation(annotation, pos)
+                return True
+            return False
         elif event.keyval == Gdk.KEY_a:
             self.controller.gui.adjust_annotation_bound(annotation, 'begin')
+            return True
         elif event.keyval == Gdk.KEY_A:
             self.controller.gui.adjust_annotation_bound(annotation, 'end')
+            return True
         elif event.keyval == Gdk.KEY_p:
             # Play
             f=widget.annotation_fraction()
@@ -1946,7 +1951,7 @@ class TimeLine(AdhocView):
             c.update_status(status="seek", position=position)
             c.gui.set_current_annotation(annotation)
             return True
-        elif event.keyval == Gdk.KEY_Return:
+        elif event.keyval == Gdk.KEY_Return and not (event.get_state() & Gdk.ModifierType.CONTROL_MASK):
             # Quick edit
             self.quick_edit(annotation, button=widget)
             return True
@@ -2361,18 +2366,39 @@ class TimeLine(AdhocView):
             self.fraction_adj.set_value(1.0/pow(2, event.keyval-49))
             self.set_middle_position(pos)
             return True
+        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            # Control-return: create an annotation in the current line
+            # Create a new annotation
+            # Determine type line
+            x, y = win.get_pointer()
+            # Convert x, y (relative to the layout allocation) into
+            # values relative to the whole layout size
+            y = int(win.get_vadjustment().get_value() + y)
+            sel_types=[ at
+                        for (at, p) in self.layer_position.items()
+                        if p <= y <= p + self.get_element_height(at) + config.data.preferences['timeline']['interline-height'] ]
+            logger.warning(sel_types)
+            if sel_types:
+                el = self.controller.create_annotation(position=int(self.controller.player.current_position_value),
+                                                       type=sel_types[0])
+                if el is not None:
+                    b = self.create_annotation_widget(el)
+                    b.show()
+            return True
         elif event.keyval == Gdk.KEY_plus and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Zoom in
             a=self.fraction_adj
             pos=self.get_middle_position()
             a.set_value(min(a.get_value() + a.get_page_increment(), a.get_upper()))
             self.set_middle_position(pos)
+            return True
         elif event.keyval == Gdk.KEY_plus and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # Zoom out
             a=self.fraction_adj
             pos=self.get_middle_position()
             a.set_value(max(a.get_value() - a.get_page_increment(), a.get_lower()))
             self.set_middle_position(pos)
+            return True
         elif event.keyval == Gdk.KEY_e:
             if isinstance(self.quickview.annotation, Annotation):
                 self.controller.gui.edit_element(self.quickview.annotation)
