@@ -3844,26 +3844,26 @@ class AdveneGUI:
             self.on_save_as1_activate (package=package)
         else:
             # Save the current workspace
-            save=False
+            workspace_save = False
             if config.data.preferences['save-default-workspace'] == 'always':
-                save=True
+                workspace_save = True
             elif config.data.preferences['save-default-workspace'] == 'ask':
-                save=dialog.message_dialog(_("Do you want to save the current workspace ?"),
-                                           icon=Gtk.MessageType.QUESTION)
+                workspace_save = dialog.message_dialog(_("Do you want to save the current workspace ?"),
+                                                       icon=Gtk.MessageType.QUESTION)
 
-            if save and package.isTemplate() and config.data.preferences['expert-mode']:
+            if workspace_save and package.isTemplate() and config.data.preferences['expert-mode']:
                 # Handle isTemplate option only in expert-mode,
                 # and display a warning - it will be a small
                 # hindrance for template edition, but will avoid
                 # silently not saving package information by mistake
-                dialog.message_dialog(_("Template option is activated - workspace and annotations will not be saved"))
-                save = False
+                dialog.message_dialog(_("Template option is activated - workspace will not be saved"))
+                workspace_save = False
 
             modified = [ p for p in self.edit_popups if p.get_modified() ]
             if modified and config.data.preferences['apply-edited-elements-on-save']:
                 for p in modified:
                     p.apply_cb()
-            if save:
+            if workspace_save:
                 self.workspace_save('_default_workspace')
                 default=self.controller.package.getMetaData (config.data.namespace, "default_adhoc")
                 if not default:
