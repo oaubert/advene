@@ -176,7 +176,7 @@ montage -tile x1 -mode Concatenate 0*g final.png
 
 ** timeline: Center on related annotation
 
-** timeline: find a way to render overlapping buttons (cf goocanvas)
+** timeline: find a way to render overlapping annotations
 
 * transcribe: add a small timeline on the top that displays the
 position of current marks in the video (with small lines) [cf linkmap
@@ -1664,8 +1664,6 @@ http://books.xmlschemata.org/relaxng/relax-CHP-19.html
 
 ** ensure that timestamps are always displayed
 
-** timeline: select a region to fit to window (cf goocanvas)
-
 * video widget: black background + expand for video + minimal size to
    prevent resize artifacts
 
@@ -2182,11 +2180,6 @@ http://www.onlamp.com/pub/a/onlamp/2005/04/28/kupu.html
 * Use ElementEditBegin/End to implement a basic undo feature
 
 * timeline: shift-Del should honour selection
-
-* pseudo-Wysiwyg component (using gtk.Layout / goocanvas /
-   gtk.TextView ?)
-
-* See http://damien.krotkine.com/claws/  for packaging native MacOS X gtk
 
 * focus on something more sensible than New button at startup
 

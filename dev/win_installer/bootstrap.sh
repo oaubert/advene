@@ -37,7 +37,6 @@ function main {
         mingw-w64-$MSYS2_ARCH-python3-cairo \
         mingw-w64-$MSYS2_ARCH-python3-pip \
         mingw-w64-$MSYS2_ARCH-gtksourceview3  \
-        mingw-w64-$MSYS2_ARCH-goocanvas \
         mingw-w64-$MSYS2_ARCH-libsrtp \
         mingw-w64-$MSYS2_ARCH-python3-pillow
 
