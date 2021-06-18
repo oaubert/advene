@@ -107,12 +107,10 @@ function install_deps {
     # Packages to remove
     build_pacman --noconfirm -Rdds \
         mingw-w64-"${ARCH}"-shared-mime-info \
-        mingw-w64-"${ARCH}"-python-pip \
         mingw-w64-"${ARCH}"-ncurses \
         mingw-w64-"${ARCH}"-tk \
         mingw-w64-"${ARCH}"-tcl \
         mingw-w64-"${ARCH}"-openexr \
-        mingw-w64-"${ARCH}"-zbar \
         mingw-w64-"${ARCH}"-gsl
 
     build_pacman --noconfirm -Rdds mingw-w64-"${ARCH}"-python2 || true
