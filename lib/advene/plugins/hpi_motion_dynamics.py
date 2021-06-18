@@ -1,5 +1,5 @@
-# Motion Dynamics Extractor plugin for advene to estimate perceived motion changes ins a video based on optical flow
-# computation.
+# Motion Dynamics Extractor plugin - estimate perceived motion changes based on optical flow computation.
+#
 #    Copyright (C) 2021  Christian Hentschel (christian.hentschel@hpi.de), Jacob Löbkens (jcbl423@gmail.com)
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -15,20 +15,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 from gettext import gettext as _
 
-import cv2
+try:
+    import cv2
+    import numpy as np
+    missing_modules = False
+except:
+    missing_modules = True
 
 from advene.util.gstimporter import GstImporter
 
 name = "Motion Dynamics Extractor"
 
-
 def register(controller=None):
-    controller.register_importer(MotionDynamicsExtractor)
+    if not missing_modules:
+        controller.register_importer(MotionDynamicsExtractor)
     return True
-
 
 class MotionDynamicsExtractor(GstImporter):
     name = _("Motion Dynamics Extractor")
