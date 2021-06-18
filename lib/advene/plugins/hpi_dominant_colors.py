@@ -18,12 +18,17 @@ import logging
 
 from gettext import gettext as _
 
-import cv2
-import numpy as np
 import json
 
-import scipy.spatial
-from scipy.cluster.vq import vq
+try:
+    # Some of these modules may not be available in all installs
+    import cv2
+    import numpy as np
+    import scipy.spatial
+    from scipy.cluster.vq import vq
+    missing_modules = False
+except:
+    missing_modules = True
 
 from advene.util.gstimporter import GstImporter
 
@@ -96,7 +101,7 @@ class DomCol(object):
 
 
 class DomColExtractor(GstImporter):
-    name = _("Dominant Color Extractor")
+    name = _("HPI Dominant Color Extractor")
     annotation_filter = False
 
     def can_handle(fname):
@@ -317,5 +322,6 @@ class DomColExtractor(GstImporter):
 
 
 def register(controller=None):
-    controller.register_importer(DomColExtractor)
+    if not missing_modules:
+        controller.register_importer(DomColExtractor)
     return True
