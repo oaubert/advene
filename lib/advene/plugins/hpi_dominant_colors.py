@@ -187,6 +187,9 @@ class DomColExtractor(GstImporter):
         """
         unmet_requirements = []
 
+        if self.source_type is None or not self.source_type.annotations:
+            unmet_requirements.append(_("Cannot find any annotation"))
+
         if self.colorspace not in ["rgb", "hsv", "cie-lab"]:
             unmet_requirements.append(_("Unsupported color space: {cs}".format(
                 cs=self.colorspace)))
