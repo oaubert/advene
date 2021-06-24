@@ -24,8 +24,6 @@ events and triggering actions.
 import logging
 logger = logging.getLogger(__name__)
 
-import advene.core.config as config
-
 import time
 import sched
 import threading
@@ -353,16 +351,6 @@ class ECAEngine:
         A special named parameter is delay, which will be given in ms.
         It contains the delay to apply to the rule execution.
         """
-        if config.data.preferences['record-actions']:
-            # FIXME: we should not store the whole element, it is too costly
-            d=dict(kw)
-            d['event_name'] = event_name
-            d['parameters'] = param
-            self.event_history.append(d)
-            for v in self.views_to_notify:
-                # should only be TraceBuilder plugin or other trace building system
-                #v.receive(d)
-                v.equeue.put(d)
         immediate=False
         if 'immediate' in kw:
             immediate=True

@@ -153,9 +153,6 @@ class DummyGlade:
         self.adhoc_hbox=Gtk.HBox()
         self.toolbar_container.pack_start(self.adhoc_hbox, True, True, 0)
 
-        self.traces_switch=Gtk.HBox()
-        self.toolbar_container.pack_start(self.traces_switch, False, True, 0)
-
         self.search_hbox=Gtk.HBox()
         self.toolbar_container.pack_start(self.search_hbox, False, True, 0)
         v.pack_start(self.toolbar_container, False, True, 0)
@@ -525,29 +522,6 @@ class AdveneGUI:
             d.destroy()
             return True
 
-        # Trace switch button
-        tsb = self.gui.traces_switch
-        b=Gtk.Button()
-
-        def trace_toggle(w):
-            i=Gtk.Image()
-            if config.data.preferences['record-actions']:
-                config.data.preferences['record-actions']=False
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_off.png') ))
-                w.set_tooltip_text(_('Tracing : ') + _('off'))
-            else:
-                config.data.preferences['record-actions']=True
-                i.set_from_file(config.data.advenefile( ( 'pixmaps', 'traces_on.png') ))
-                w.set_tooltip_text(_('Tracing : ') + _('on'))
-            w.set_image(i)
-            return
-        # Invert the preference, so that calling the trace_toggle
-        # will correctly update the button as well as the setting.
-        config.data.preferences['record-actions']=not config.data.preferences['record-actions']
-        trace_toggle(b)
-        b.connect('clicked', trace_toggle)
-        tsb.pack_start(b, False, True, 0)
-        tsb.show_all()
         self.quicksearch_button=get_small_stock_button(Gtk.STOCK_FIND)
         self.quicksearch_entry=Gtk.Entry()
         self.quicksearch_entry.set_tooltip_text(_('String to search'))
@@ -3195,12 +3169,6 @@ class AdveneGUI:
                 # Need to save
                 l=[ alias for (alias, p) in self.controller.packages.items() if p._modified and alias != 'advene' ]
                 if l:
-                    if c.tracers and config.data.preferences['record-actions']:
-                        try:
-                            fn = c.tracers[0].export()
-                            logger.info("trace exported to %s", fn)
-                        except Exception:
-                            logger.error("error exporting trace", exc_info=True)
                     if config.data.preferences['package-auto-save'] == 'always':
                         c.queue_action(do_save, l)
                     else:
@@ -4318,7 +4286,6 @@ Image cache information: %(imagecache)s
             ("Esperanto", 'eo'),
             ("Francais", 'fr_FR'),
         )))
-        ew.add_checkbox(_("Record activity trace"), "record-actions", _("Record activity trace"))
         ew.add_checkbox(_("Expert mode"), "expert-mode", _("Offer advanced possibilities"))
         ew.add_checkbox(_("Prefer WYSIWYG"), "prefer-wysiwyg", _("Use WYSIWYG editors when possible (HTML, SVG)"))
         ew.add_accelerator(_("Player control modifier"), 'player-shortcuts-modifier', _("Generic player control modifier: key used in combination with arrows/space/tab to control the player. Click the button and press key+space to choose the modifier."))
