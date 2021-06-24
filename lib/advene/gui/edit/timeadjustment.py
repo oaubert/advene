@@ -173,36 +173,51 @@ class TimeAdjustment:
         hb.show()
 
         def handle_scroll_event(button, event):
+            # We modify the value only if Control is pressed
             if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
-                i=config.data.preferences['scroll-increment']
-            elif event.get_state() & Gdk.ModifierType.SHIFT_MASK:
-                i=config.data.preferences['second-scroll-increment']
-            else:
-                # 1 frame
-                i = self.controller.frame2time(1)
+                i = config.data.preferences['scroll-increment']
+                if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
+                    i = config.data.preferences['second-scroll-increment']
+                else:
+                    # 1 frame
+                    i = self.controller.frame2time(1)
 
-            if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.LEFT:
-                incr=-i
-            elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.RIGHT:
-                incr=i
+                if event.direction == Gdk.ScrollDirection.DOWN or event.direction == Gdk.ScrollDirection.LEFT:
+                    incr = -i
+                elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.RIGHT:
+                    incr = i
 
-            if not self.set_value(self.value + incr):
-                return True
-            return True
+                if not self.set_value(self.value + incr):
+                    return True
+            return False
+
+        # vbox is window-less so cannot get events. Since we want to handle scroll and keypress,
+        # we have to wrap it inside a GtkEventBox
+        # https://developer.gnome.org/gtk3/stable/chap-input-handling.html#event-masks
+        eb = Gtk.EventBox()
+        eb.set_above_child(True)
+        eb.set_visible_window(False)
+
+        # Make sure vbox gets events
+        eb.add_events(Gdk.EventMask.KEY_PRESS_MASK |
+                      Gdk.EventMask.SCROLL_MASK)
+        eb.add(vbox)
+
+        eb.show_all()
 
         if self.editable:
             # The widget can receive drops from annotations
-            vbox.connect('drag-data-received', self.drag_received)
-            vbox.drag_dest_set(Gtk.DestDefaults.MOTION |
+            eb.connect('drag-data-received', self.drag_received)
+            eb.drag_dest_set(Gtk.DestDefaults.MOTION |
                                Gtk.DestDefaults.HIGHLIGHT |
                                Gtk.DestDefaults.ALL,
                                config.data.get_target_types('annotation', 'timestamp'),
                                Gdk.DragAction.LINK)
 
-            vbox.connect('scroll-event', handle_scroll_event)
+            eb.connect('scroll-event', handle_scroll_event)
 
-        vbox.show_all()
-        return vbox
+        eb.show_all()
+        return eb
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:
