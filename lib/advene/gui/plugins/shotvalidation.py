@@ -284,14 +284,27 @@ class ShotValidation(AdhocView):
         vbox.pack_start(self.statusbar, False, True, 0)
 
         self.set_index(0)
-        vbox.connect('key-press-event', self.handle_keypress)
-        vbox.connect('scroll-event', self.handle_scroll_event)
 
-        vbox.show_all()
+        # vbox is window-less so cannot get events. Since we want to handle scroll and keypress,
+        # we have to wrap it inside a GtkEventBox
+        # https://developer.gnome.org/gtk3/stable/chap-input-handling.html#event-masks
+
+        eb = Gtk.EventBox()
+        eb.set_above_child(True)
+        eb.set_visible_window(False)
+
+        # Make sure vbox gets events
+        eb.add_events(Gdk.EventMask.KEY_PRESS_MASK |
+                      Gdk.EventMask.SCROLL_MASK)
+        eb.connect('key-press-event', self.handle_keypress)
+        eb.connect('scroll-event', self.handle_scroll_event)
+        eb.add(vbox)
+
+        eb.show_all()
         # Hack: since the view if often launched from the timeline
         # view, moving the mouse in timeline steals the focus from the
         # window. Let's only grab focus after a small timeout, so that
         # the user has time to get the mouse out of the timeline
         # window
         GObject.timeout_add(2000, lambda: self.next_button.grab_focus())
-        return vbox
+        return eb
