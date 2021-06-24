@@ -28,6 +28,7 @@ from gettext import gettext as _
 from advene.gui.views import AdhocView
 from advene.gui.edit.frameselector import FrameSelector
 import advene.util.helper as helper
+from advene.util.tools import clamp
 
 name="Shot validation view plugin"
 
@@ -153,7 +154,7 @@ class ShotValidation(AdhocView):
     def validate_and_next(self, new):
         """Validate the current annotation and display the next one.
         """
-        i = self.index
+        i = clamp(self.index, 0, len(self.annotations) - 1)
         annotation = self.annotations[i]
         batch=object()
 
