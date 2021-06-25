@@ -77,22 +77,27 @@ class webkit_wrapper:
         if hit_test.context_is_link():
             self.notify(label=hit_test.get_link_uri())
 
+    def on_decide_policy(self, view, decision, decision_type):
+        logger.debug(f"Decide policy {decision_type} {decision.get_request().get_uri()}")
+        if decision_type == WebKit2.PolicyDecisionType.NAVIGATION_ACTION:
+            url = decision.get_request().get_uri()
+            l = urllib.parse.urlparse(url)
+            if self.no_content_re.match(l[2]):
+                # No content - stop navigation
+                decision.ignore()
+                # Trigger request ourselves since we prevented Webkit to do it
+                # And ignore the result since we know it is a no_content action
+                urllib.request.urlopen(url)
+                return True
+        return False
+
     def build_widget(self):
         w = WebKit2.WebView()
         w.connect('load-changed', self.on_load_changed)
         w.connect('load-failed', self.on_load_failed)
         w.connect('mouse-target-changed', self.on_mouse_target_changed)
 
-        def update_location(url):
-            l=urllib.parse.urlparse(url)
-            if self.no_content_re.match(l[2]):
-                # webkit does not correctly handle 204 return code.
-                # Automatically go back.
-                # FIXME: to be removed once webkit is fixed.
-                self.back()
-            if self.notify:
-                self.notify(url=url)
-            return False
+        w.connect('decide-policy', self.on_decide_policy)
 
         def update_label(c):
             if self.notify:
