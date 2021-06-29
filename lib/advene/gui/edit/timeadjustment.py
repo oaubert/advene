@@ -191,33 +191,19 @@ class TimeAdjustment:
                     return True
             return False
 
-        # vbox is window-less so cannot get events. Since we want to handle scroll and keypress,
-        # we have to wrap it inside a GtkEventBox
-        # https://developer.gnome.org/gtk3/stable/chap-input-handling.html#event-masks
-        eb = Gtk.EventBox()
-        eb.set_above_child(True)
-        eb.set_visible_window(False)
-
-        # Make sure vbox gets events
-        eb.add_events(Gdk.EventMask.KEY_PRESS_MASK |
-                      Gdk.EventMask.SCROLL_MASK)
-        eb.add(vbox)
-
-        eb.show_all()
-
         if self.editable:
-            # The widget can receive drops from annotations
-            eb.connect('drag-data-received', self.drag_received)
-            eb.drag_dest_set(Gtk.DestDefaults.MOTION |
+            # The screenshot representation can receive drops from annotations
+            self.image.connect('drag-data-received', self.drag_received)
+            self.image.drag_dest_set(Gtk.DestDefaults.MOTION |
                                Gtk.DestDefaults.HIGHLIGHT |
                                Gtk.DestDefaults.ALL,
                                config.data.get_target_types('annotation', 'timestamp'),
                                Gdk.DragAction.LINK)
 
-            eb.connect('scroll-event', handle_scroll_event)
+            self.image.connect('scroll-event', handle_scroll_event)
 
-        eb.show_all()
-        return eb
+        vbox.show_all()
+        return vbox
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['annotation']:

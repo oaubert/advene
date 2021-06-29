@@ -786,6 +786,7 @@ class TimestampMarkWidget(GenericColorButtonWidget):
     def __init__(self, container=None):
         GenericColorButtonWidget.__init__(self, container=container)
         self.default_size=(8, self.container.get_element_height(self))
+        self.add_events(Gdk.EventMask.SCROLL_MASK)
 
     def draw(self, context, width, height):
         """Draw the widget in the cache pixmap.
@@ -935,7 +936,7 @@ class TimestampRepresentation(Gtk.Button):
         self.valid_screenshot = False
         self.label=Gtk.Label()
         box.pack_start(self.image, False, True, 0)
-        box.pack_start(self.label, False, True, 0)
+        box.pack_start(self.label, False, False, 0)
         if not self.visible_label:
             self.label.set_no_show_all(True)
             self.label.hide()
@@ -945,7 +946,7 @@ class TimestampRepresentation(Gtk.Button):
         self.refresh()
 
         self.connect('button-press-event', self._button_press_handler)
-
+        self.add_events(Gdk.EventMask.SCROLL_MASK)
         enable_drag_source(self, self.get_value, self.controller)
 
         def enter_bookmark(widget, event):
