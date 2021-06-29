@@ -2805,6 +2805,24 @@ class AdveneController:
         exporter.website_export()
         return True
 
+    def update_admin_views_from_template(self):
+        """Automatically merge admin views from template package.
+        """
+        template = Package (uri="new_pkg",
+                            source=config.data.advenefile(config.data.templatefilename))
+        differ = Differ(template, self.package)
+        diff = list(differ.diff())
+        counter = { 'update_content': 0,
+                    'new': 0 }
+        for name, s, d, action, value in diff:
+            if (isinstance(s, View)
+                and s.id.startswith('_')
+                and s.id != '_default_workspace'
+                and name in ('update_content', 'new')):
+                action(s, d)
+                counter[name] += 1
+        return counter
+
 if __name__ == '__main__':
     cont = AdveneController()
     try:

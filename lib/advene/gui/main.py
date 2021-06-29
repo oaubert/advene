@@ -294,6 +294,7 @@ class AdveneGUI:
                 ), "" ),
                 #                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
                 #                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
+                ( _("Update admin views"), self.on_merge_template_package_activate, _("Update admin views from template package") ),
                 ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
                 ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
             ), "" ),
@@ -4677,6 +4678,13 @@ Image cache information: %(imagecache)s
             dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
             return True
         self.open_adhoc_view('packageimporter', sourcepackage=source, destpackage=self.controller.package)
+        return True
+
+    def on_merge_template_package_activate(self, button=None, data=None):
+        counter = self.controller.update_admin_views_from_template()
+        message = _("Template package update - created %(new)d view(s), updated %(update_content)d view(s)") % counter
+        logger.info(message)
+        dialog.message_dialog(message)
         return True
 
     def on_save_workspace_as_package_view1_activate (self, button=None, data=None):

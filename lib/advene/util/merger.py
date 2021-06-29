@@ -646,7 +646,7 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     If exclude is specified, then it is a dict of the action names
     that should not be merged.  keys describe actions
     (update_meta_title...), value can be: all (excluding all elements), package
-    (for package only)
+    (for package only), except_default_workspace (for views)
 
     If outputname is None, then the result is not saved.
 
