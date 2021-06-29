@@ -115,9 +115,9 @@ function install_deps {
 
     build_pacman --noconfirm -Rdds mingw-w64-"${ARCH}"-python2 || true
 
-    PIP_REQUIREMENTS="rdflib requests opencv-python"
+    PIP_REQUIREMENTS="rdflib requests"
 
-    build_pip install --no-deps ":all:" --upgrade \
+    build_pip install --no-deps --no-binary ":all:" --upgrade \
         --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr ["\\n"] [" "])
 
 }
