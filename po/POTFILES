@@ -3,14 +3,12 @@
 ../lib/advene/gui/widget.py
 ../lib/advene/gui/main.py
 ../lib/advene/gui/plugins/shotvalidation.py
-../lib/advene/gui/plugins/eventaccumulator.py
 ../lib/advene/gui/plugins/htmlcontenhandler.py
 ../lib/advene/gui/plugins/logmessages.py
 ../lib/advene/gui/plugins/packageimporter.py
 ../lib/advene/gui/plugins/actions.py
 ../lib/advene/gui/plugins/kinect.py
 ../lib/advene/gui/plugins/contenthandlers.py
-../lib/advene/gui/plugins/tracepreview.py
 ../lib/advene/gui/plugins/videoplayer.py
 ../lib/advene/gui/views/singletonpopup.py
 ../lib/advene/gui/views/caption.py
@@ -62,6 +60,7 @@
 ../lib/advene/plugins/dominantcolor.py
 ../lib/advene/plugins/ted.py
 ../lib/advene/plugins/cutter.py
+../lib/advene/plugins/hpi_motion_dynamics.py
 ../lib/advene/plugins/ttl.py
 ../lib/advene/plugins/shotdetect.py
 ../lib/advene/plugins/iiif_export.py
@@ -84,6 +83,7 @@
 ../lib/advene/plugins/keywords.py
 ../lib/advene/plugins/motioncells.py
 ../lib/advene/plugins/scenechange.py
+../lib/advene/plugins/hpi_dominant_colors.py
 ../lib/advene/plugins/base_importers.py
 ../lib/advene/plugins/dcp.py
 ../lib/advene/plugins/dummyimporter.py
