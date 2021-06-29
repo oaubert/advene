@@ -56,6 +56,18 @@ from advene.model.view import View
 from advene.model.query import Query
 import advene.util.helper as helper
 
+DEFAULT_EXCLUDE_RULES = {
+    'update_meta_is_template': 'all',
+    'update_meta_media_uri': 'all',
+    'update_meta_mediafile': 'all',
+    'update_meta_duration': 'all',
+    'update_meta_default_utbv': 'all',
+    'update_meta_default_stbv': 'all',
+    'update_meta_title': 'package',
+    'update_meta_description': 'package',
+    'update_content': 'except_default_workspace'
+}
+
 class Differ:
     """Returns a structure diff of two packages.
     """
@@ -659,17 +671,7 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     }
     if exclude is None:
         # Reasonable default settings.
-        exclude = {
-            'update_meta_is_template': 'all',
-            'update_meta_media_uri': 'all',
-            'update_meta_mediafile': 'all',
-            'update_meta_duration': 'all',
-            'update_meta_default_utbv': 'all',
-            'update_meta_default_stbv': 'all',
-            'update_meta_title': 'package',
-            'update_meta_description': 'package',
-            'update_content': 'except_default_workspace'
-        }
+        exclude = DEFAULT_EXCLUDE_RULES
 
     if isinstance(to_be_merged, Package):
         to_be_merged = [ to_be_merged ]
