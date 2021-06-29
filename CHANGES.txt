@@ -1,9 +1,10 @@
 advene (3.13) unstable; urgency=medium
 
-  * MacOS X installer rewrite - Mac OS X versions will now be available.
+  * MacOS X installer rewrite - Mac OS X versions will now be available,
+    thanks to funding from the AdA project
 
   * Timeline: Control-Return in the timeline background creates an
-    annotation at player time.
+    annotation at player time
 
   * Package merge interface: add shortcut buttons to select views/structure
 
