@@ -117,7 +117,7 @@ function install_deps {
 
     PIP_REQUIREMENTS="rdflib requests opencv-python"
 
-    build_pip install --no-deps --no-binary ":all:" --upgrade \
+    build_pip install --no-deps ":all:" --upgrade \
         --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr ["\\n"] [" "])
 
 }
