@@ -287,15 +287,19 @@ class FrameSelector:
         eb = Gtk.EventBox()
         ar = Gtk.Arrow(Gtk.ArrowType.RIGHT, Gtk.ShadowType.IN)
         ar.set_tooltip_text(_("Click to see more frames or scroll with the mouse wheel"))
+        eb.add_events(Gdk.EventMask.SCROLL_MASK
+                      | Gdk.EventMask.KEY_PRESS_MASK
+                      | Gdk.EventMask.BUTTON_PRESS_MASK
+                      | Gdk.EventMask.BUTTON_RELEASE_MASK
+                      )
+        eb.connect('scroll-event', self.handle_scroll_event)
+        eb.connect('key-press-event', self.handle_key_press)
         eb.connect('button-press-event', lambda b,e: self.update_offset(+1))
         eb.add(ar)
         hb.pack_start(eb, False, True, 0)
 
         vb.add(hb)
 
-        vb.set_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.KEY_PRESS_MASK)
-        vb.connect('scroll-event', self.handle_scroll_event)
-        vb.connect('key-press-event', self.handle_key_press)
 
         self.update_timestamp(self.timestamp)
         return vb
