@@ -290,7 +290,7 @@ class ShotValidation(AdhocView):
         # https://developer.gnome.org/gtk3/stable/chap-input-handling.html#event-masks
 
         eb = Gtk.EventBox()
-        eb.set_above_child(True)
+        eb.set_above_child(False)
         eb.set_visible_window(False)
 
         # Make sure vbox gets events
