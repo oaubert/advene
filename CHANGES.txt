@@ -1,3 +1,24 @@
+advene (3.13) unstable; urgency=medium
+
+  * MacOS X installer rewrite - Mac OS X versions will now be available.
+
+  * Timeline: Control-Return in the timeline background creates an
+    annotation at player time.
+
+  * Package merge interface: add shortcut buttons to select views/structure
+
+  * Prevent mistakenly not saving environment because of Template option
+
+  * Relation-types can now be drag and dropped to viewbooks (mostly from
+    Finder view) in order to visualise them
+
+  * New media analysis plugins contributed by HPI's Christian Hentschel:
+    Dominant Color Extraction and Motion Dynamics Extraction.
+
+  * OWL import: add language option
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Tue, 29 Jun 2021 15:25:49 +0200
+
 advene (3.12) unstable; urgency=medium
 
   * Note-taking: new shortcut Escape (Play or Pause + seek -2s)
