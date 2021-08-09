@@ -1,0 +1,26 @@
+cff-version: 1.1.0
+message: Please cite the following works when using this software.
+authors:
+  - family-names: Aubert
+    given-names: Olivier
+    orcid: "https://orcid.org/0000-0001-8204-1567"
+  - family-names: Prié
+    given-names: Yannick
+    orcid: "https://orcid.org/0000-0002-7068-0836"
+title: Advene
+license: GPL-2.0-or-later
+repository-code: "https://github.com/oaubert/advene/"
+preferred-citation:
+  type: article
+  title: Advene: active reading through hypervideo
+  authors:
+    - family-names: Aubert
+      given-names: Olivier
+      orcid: "https://orcid.org/0000-0001-8204-1567"
+    - family-names: Prié
+      given-names: Yannick
+      orcid: "https://orcid.org/0000-0002-7068-0836"
+  doi: 10.1145/1083356.1083405
+  identifiers:
+    - type: doi
+      value: 10.1145/1083356.1083405
