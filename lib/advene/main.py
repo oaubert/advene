@@ -37,14 +37,14 @@ def main(app_dir=None):
 
     if app_dir is not None:
         # Chances are that we are running from a development tree
-        logging.warning("Using specified path %s" % str(app_dir))
+        logger.warning("Using specified path %s" % str(app_dir))
         config.data.fix_paths(str(app_dir))
 
     # Check for directories
     for d in ('resources', 'web'):
         dir_path = config.data.path[d]
         if not dir_path.exists():
-            logging.error("""Error: the %s directory does not exist.
+            logger.error("""Error: the %s directory does not exist.
 Advene seems to be either badly installed or badly configured (maybe both).
 Aborting.""", dir_path)
             sys.exit(1)
@@ -107,7 +107,7 @@ Aborting.""", dir_path)
         # A non-empty value overrides the system default
         os.environ['LANGUAGE'] = config.data.preferences['language']
 
-    logging.warning("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
+    logger.warning("%s run at %s on %s", config.data.version_string, time.strftime("%d/%m/%y %H:%M:%S %Z"), sys.platform)
 
     import gi
     gi.require_version('Gtk', '3.0')
@@ -119,7 +119,7 @@ Aborting.""", dir_path)
         import advene.core.controller
         c = advene.core.controller.AdveneController()
         c.init()
-        logging.warning("Available export filters:\n%s",
+        logger.warning("Available export filters:\n%s",
                      "\n".join("%s\t: %s (.%s extension)" % (v.get_id(),
                                                              v.name,
                                                              v.extension)
@@ -133,12 +133,12 @@ Aborting.""", dir_path)
         c.init()
         l = [ v for v in c.get_export_filters() if v.get_id() == filter ]
         if not l:
-            logging.error("Export filter %s is not defined", filter)
+            logger.error("Export filter %s is not defined", filter)
             c.on_exit()
             sys.exit(1)
         l = l[0]
         if not config.data.args:
-            logging.error("Syntax: advene -f filter_name [-o output=foo.ext] input.azp")
+            logger.error("Syntax: advene -f filter_name [-o output=foo.ext] input.azp")
             c.on_exit()
             sys.exit(1)
         ext = l.extension
@@ -150,9 +150,9 @@ Aborting.""", dir_path)
                 output = ".".join((os.path.splitext(f)[0], ext))
                 # In this case, we do not want to overwrite existing files
                 if os.path.exists(output):
-                    logging.error("Output file %s already exists. Remove it before proceeding.", output)
+                    logger.error("Output file %s already exists. Remove it before proceeding.", output)
                     continue
-            logging.warning("Converting %s into %s", f, output)
+            logger.warning("Converting %s into %s", f, output)
             c.load_package(f)
             # FIXME: could trigger events?
             c.apply_export_filter(c.package, l, output)
@@ -166,7 +166,7 @@ Aborting.""", dir_path)
         c.main()
 
     if config.data.os in ('linux', ) and 'DISPLAY' not in os.environ:
-        logging.error("The DISPLAY environment variable is not set. Cannot continue.")
+        logger.error("The DISPLAY environment variable is not set. Cannot continue.")
         sys.exit(1)
 
     import advene.gui.main
@@ -179,7 +179,7 @@ Aborting.""", dir_path)
         # prof.close()
         gui.main(config.data.args)
     except Exception:
-        logging.warning("Got exception. Stopping services...", exc_info=True)
+        logger.warning("Got exception. Stopping services...", exc_info=True)
 
         if logfile is not None:
             d = Gtk.MessageDialog(None,
