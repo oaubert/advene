@@ -399,7 +399,7 @@ class Evaluator:
         # Handle variable assignment only for restricted forms of
         # variable names (so that we do not mistake named parameters
         # in function calls)
-        m=re.match(r'([\[\]\'\"\w\.-]+?)=(.+)', expr)
+        m=re.match(r'([\[\]\'\"\w\.-]+?)\s*=\s*(.+)', expr)
         if m is not None:
             symbol=m.group(1)
             expr=m.group(2)
