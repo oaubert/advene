@@ -205,7 +205,7 @@ class TextImporter(GenericImporter):
             else:
                 try:
                     end = helper.parse_time(data[1])
-                except helper.InvalidTimestamp:
+                except (IndexError, helper.InvalidTimestamp):
                     end = None
 
                 if self.timestampmode == 'begin' or (self.timestampmode == 'auto' and end is None):
@@ -215,7 +215,10 @@ class TextImporter(GenericImporter):
                     data = whitespace_re.split(l, 1)
                     if stored_data is None:
                         # First line. Just buffer timestamp and data
-                        stored_data = data[1]
+                        try:
+                            stored_data = data[1]
+                        except IndexError:
+                            stored_data = "Data"
                         stored_begin = begin
                     else:
                         if self.first_word_is_type:
@@ -232,7 +235,10 @@ class TextImporter(GenericImporter):
                             'type': type_.strip(),
                         }
                         stored_begin = begin
-                        stored_data = data[1]
+                        try:
+                            stored_data = data[1]
+                        except IndexError:
+                            stored_data = "Data"
                     index += 1
                     continue
                 elif end is None and self.timestampmode == 'both':
