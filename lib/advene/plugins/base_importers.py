@@ -57,6 +57,7 @@ class TextImporter(GenericImporter):
     The text importer handles input files with 1 annotation per
     line. Each line consists in whitespace-separated data items
     (whitespace can be any number of actual space or tab characters).
+    Lines starting with # are considered as comments and are ignored.
 
     The format of each line is either
 
@@ -160,6 +161,10 @@ class TextImporter(GenericImporter):
             if not l or not self.progress(f.tell() / filesize):
                 break
             l = l.strip()
+
+            if l.startswith('#'):
+                # Comment
+                continue
             data = whitespace_re.split(l, 2)
 
             if not data:
