@@ -2408,7 +2408,7 @@ class AdveneController:
         """General exit callback."""
         if not self.cleanup_done:
             # Stop the event handler
-            if config.data.debug and getattr(self, '_state'):
+            if config.data.debug and getattr(self, '_state', None):
                 start=self._state
                 end=self.event_handler.dump()
                 import difflib
