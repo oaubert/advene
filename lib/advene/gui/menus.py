@@ -66,3 +66,24 @@ def update_player_menu(menu, current):
 
     return menu
 
+def update_package_list (menu, controller):
+    """Update the list of loaded packages.
+    """
+    # Remove all previous menuitems
+    menu.remove_all()
+
+    # Rebuild the list
+    for ident, p in controller.packages.items():
+        if ident == 'advene':
+            continue
+        if p == controller.package:
+            label = '> ' + ident
+        else:
+            label = '  ' + ident
+        if p._modified:
+            label += _(' (modified)')
+        i = Gio.MenuItem.new(label, 'app.activate_package')
+        i.set_attribute_value("target", GLib.Variant.new_string(ident))
+        menu.append_item(i)
+    return True
+

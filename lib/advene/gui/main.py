@@ -45,7 +45,7 @@ import urllib.request, urllib.error
 
 import advene.core.config as config
 import advene.core.version
-from advene.gui.menus import RecentFilesMenu, update_player_menu
+from advene.gui.menus import RecentFilesMenu, update_player_menu, update_package_list
 
 import gi
 gi.require_version('Gdk', '3.0')
@@ -447,6 +447,11 @@ class AdveneApplication(Gtk.Application):
             self.controller.select_player(player)
             return True
         self.register_action("select_player", select_player)
+
+        def activate_package(action, alias: Variant.str):
+            self.controller.activate_package (alias.get_string())
+            return True
+        self.register_action("activate_package", activate_package)
 
         self.toolbuttons = {}
         for (ident, stock, callback, tip) in (
@@ -2424,38 +2429,6 @@ class AdveneApplication(Gtk.Application):
         self.open_adhoc_view('exporterview', title=title, source=element, exporterclass=exporterclass)
         return True
 
-    def update_package_list (self):
-        """Update the list of loaded packages.
-        """
-        # FIXME: dynamic rebuild
-        return True
-        menu=self.gui.package_list_menu
-
-        def activate_package(button, alias):
-            self.controller.activate_package (alias)
-            return True
-
-        # Remove all previous menuitems
-        menu.foreach(menu.remove)
-
-        # Rebuild the list
-        for a, p in self.controller.packages.items():
-            if a == 'advene':
-                continue
-            if p == self.controller.package:
-                name = '> ' + a
-            else:
-                name = '  ' + a
-            if p._modified:
-                name += _(' (modified)')
-            i=Gtk.MenuItem(label=str(name), use_underline=False)
-            i.connect('activate', activate_package, a)
-            i.set_tooltip_text(_("Activate %s") % self.controller.get_title(p))
-            menu.append(i)
-
-        menu.show_all()
-        return True
-
     arrow_list={ 'linux': '\u25b8',
                  'darwin': '\u25b6',
                  'win32': '>' }
@@ -2854,7 +2827,7 @@ class AdveneApplication(Gtk.Application):
         modified, in order to reflect changes.
         """
         self.update_stbv_list()
-        self.update_package_list()
+        update_package_list(self.gui.menu_map['packages'], self.controller)
         return
 
     def manage_package_save (self, context, parameters):
@@ -4705,10 +4678,6 @@ Image cache information: %(imagecache)s
                               controller=self.controller)
         rt=cr.popup()
         return rt
-
-    def on_package_list_activate(self, menu=None):
-        self.update_package_list()
-        return True
 
     def on_merge_package_activate(self, button=None, data=None):
         if config.data.path['data']:
