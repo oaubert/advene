@@ -28,3 +28,15 @@ python3 -m cProfile  -o /tmp/foo.profile -s time python_script_to_profile
 kcachegrind /tmp/foo.kcachegrind
 
 ~/.local/bin/snakeviz /tmp/foo.profile
+
+# Interactive Gtk inspector
+
+You can get an interactive Gtk inspector to debug Gtk/Actions using
+
+GTK_DEBUG=interactive ./bin/advene
+
+Or you can set the appropriate GSettings:
+
+gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
+
+and invoke the inspector at runtime using Control-Shift-I
