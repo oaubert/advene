@@ -2723,6 +2723,17 @@ class AdveneGUI:
                 dialog.center_on_mouse(w)
         elif destination in ('south', 'east', 'west', 'fareast'):
             self.viewbook[destination].add_view(view, name=str(label))
+            # Make sure the pane is minimally visible
+            min_size = config.data.preferences['gui']['min-pane-size']
+            pane = self.pane[destination]
+            if destination == 'west':
+                # position > min_size
+                if pane.get_position() < min_size:
+                    pane.set_position(min_size)
+            else:
+                # Other side: max_position - position > min_size
+                if pane.props.max_position - pane.props.position < min_size:
+                    pane.set_position(pane.props.max_position - min_size)
         return view
 
     def get_adhoc_view_instance_from_id(self, ident):
