@@ -169,15 +169,17 @@ Aborting.""", dir_path)
         logger.error("The DISPLAY environment variable is not set. Cannot continue.")
         sys.exit(1)
 
-    import advene.gui.main
-    gui = advene.gui.main.AdveneGUI()
+    from advene.gui.main import AdveneApplication
+    app = AdveneApplication()
     try:
         # import hotshot
         # filename = "/tmp/pythongrind.prof"
         # prof = hotshot.Profile(filename, lineevents=1)
         # prof.runcall(gui.main, config.data.args)
         # prof.close()
-        gui.main(config.data.args)
+        logger.debug("Before app.main" )
+        app.main(config.data.args)
+        logger.warning("After app.main" )
     except Exception:
         logger.warning("Got exception. Stopping services...", exc_info=True)
 

@@ -18,7 +18,7 @@
 #
 """Advene GUI.
 
-This module defines the main GUI class, L{AdveneGUI}. It defines the
+This module defines the main GUI class, L{AdveneApp}. It defines the
 important methods and the various GUI callbacks (generally all methods
 with the C{on_} prefix).
 """
@@ -50,6 +50,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
+from gi.repository import Gio
 from gi.repository import Gtk
 from gi.repository import Pango
 
@@ -128,20 +129,25 @@ from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
 from advene.gui.views.caption import CaptionView
 
-class DummyGlade:
-    """Transition class.
-    """
-    def __init__(self, menu_definition):
-        """Main window definition.
-        """
-        self.win=Gtk.Window()
+class AdveneWindow(Gtk.ApplicationWindow):
+    def __init__(self, application, *p, menu_definition=None):
+        super().__init__(application=application, *p)
 
-        v=Gtk.VBox()
-        self.win.add(v)
+        self.application = application
 
-        self.menubar=Gtk.MenuBar()
-        self.build_menubar(menu_definition, self.menubar)
-        v.pack_start(self.menubar, False, True, 0)
+        # For backward compatibility
+        self.win = self
+
+        self.insert_action_group("app", application)
+        self.menu_model = self.build_menu(menu_definition)
+
+        # layout
+        self.layout = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.add(self.layout)
+
+        # create menubar widget from the model
+        self.menubar = Gtk.MenuBar.new_from_model(self.menu_model)
+        self.layout.pack_start(self.menubar, False, False, 0)
 
         self.toolbar_container=Gtk.HBox()
 
@@ -155,62 +161,67 @@ class DummyGlade:
 
         self.search_hbox=Gtk.HBox()
         self.toolbar_container.pack_start(self.search_hbox, False, True, 0)
-        v.pack_start(self.toolbar_container, False, True, 0)
+        self.layout.pack_start(self.toolbar_container, False, True, 0)
 
         self.application_space = Gtk.VBox()
-        v.add(self.application_space)
+        self.layout.pack_start(self.application_space, True, True, 0)
 
+        # Bottom bar
         self.bottombar = Gtk.HBox()
-
         self.statusbar = Gtk.Statusbar()
+        self.bottombar.pack_start(self.statusbar, True, False, 0)
+        self.layout.pack_start(self.bottombar, False, False, 0)
 
-        # Modify font size. First find the embedded label
-        w=self.statusbar
-        while hasattr(w, 'get_children'):
-            w=w.get_children()[0]
-        w.modify_font(Pango.FontDescription("sans 9"))
+        # self.connect('destroy', Gtk.main_quit)
+        self.show_all()
 
-        self.bottombar.pack_start(self.statusbar, True, True, 0)
-        v.pack_start(self.bottombar, False, True, 0)
+    def make_shortcuts(self, shortcuts):
+        # See https://github.com/sk1project/color-picker/blob/master/src/wal-gtk3/base.py
+        accel = Gtk.AccelGroup()
+        for shortcut, callback in shortcuts:
+            modifier = {
+                'None': 0,
+                'Ctrl': Gdk.ModifierType.CONTROL_MASK,
+                'Alt': Gdk.ModifierType.META_MASK,
+                'Shift': Gdk.ModifierType.SHIFT_MASK,
+                'Ctrl-Shift': Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK}.get(shortcut[0])
+            accel.connect(Gdk.keyval_from_name(shortcut[1]), modifier,
+                          0, callback)
+        self.add_accel_group(accel)
 
-        self.win.show_all()
+    def build_menu(self, items, menu=None):
 
-    def build_menubar(self, items, menu=None):
-        """Populate the menu with data taken from items.
-        """
         if menu is None:
-            menu=Gtk.Menu()
-        for (name, action, tooltip) in items:
-            if name.startswith('gtk-'):
-                i=Gtk.ImageMenuItem(stock_id=name)
-            elif not name:
-                i=Gtk.SeparatorMenuItem()
-            else:
-                i=Gtk.MenuItem.new_with_mnemonic(name)
-            if isinstance(action, tuple):
-                # There is a submenu
-                m=self.build_menubar(action)
-                i.set_submenu(m)
-            elif action is not None:
-                i.connect('activate', action)
-            if tooltip:
-                i.set_tooltip_text(tooltip)
+            menu = Gio.Menu()
 
-            # Menu-specific customizations
-            if name == _("_Select player"):
-                self.select_player_menuitem=i
-            elif name == _("_View"):
-                self.adhoc_view_menuitem=i
-            elif name == _("Packages"):
-                self.package_list_menu=Gtk.Menu()
-                i.set_submenu(self.package_list_menu)
-            elif name == _("Open recent"):
-                self.recent_menuitem = i
-            menu.append(i)
+        for (label, callback, tooltip, name) in items:
+            if not label:
+                # New section
+                menu.append_section("", self.build_menu(callback))
+            else:
+                if isinstance(callback, tuple):
+                    # Submenu
+                    if name == "packages":
+                        i = self.package_list_menu = Gio.Menu()
+                    else:
+                        i = self.build_menu(callback)
+                    menu.append_submenu(label, i)
+                elif name:
+                    i = Gio.MenuItem.new(label, f"app.{name}")
+                    menu.append_item(i)
+
+                # Menu-specific customizations
+                if name == "player_select":
+                    self.select_player_menuitem = i
+                elif name == 'adhoc_view':
+                    self.adhoc_view_menuitem = i
+                elif name == 'open_recent':
+                    self.recent_menuitem = i
+
         return menu
 
-class AdveneGUI:
-    """Main GUI class.
+class AdveneApplication(Gtk.Application):
+    """Main application class.
 
     Some entry points in the methods:
       - L{__init__} and L{main} : GUI initialization
@@ -233,9 +244,14 @@ class AdveneGUI:
     @ivar preferences: the current preferences
     @type preferences: dict
     """
-    def __init__ (self):
-        """Initializes the GUI and other attributes.
-        """
+    def __init__(self, application_id="org.advene.application",
+                 *args, **kwargs):
+        super().__init__(*args, application_id=application_id,
+                         flags=Gio.ApplicationFlags.HANDLES_OPEN,
+                         **kwargs)
+        self.gui = None
+        #self.settings = Settings.new()
+
         self.init_config()
         self.main_thread = threading.currentThread()
         self.logbuffer = Gtk.TextBuffer()
@@ -247,106 +263,173 @@ class AdveneGUI:
 
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
+        # Text abbreviations
+        self.text_abbreviations = dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() )
+
         # The KeyboardInput event has a 'keyname' parameter ("F1" to "F12")
         # available through the request/keyname TALES expression
         self.controller.register_event('KeyboardInput', _("Input from the keyboard (function keys)"))
 
-        menu_definition=(
+        self.menu_definition=(
             (_("_File"), (
-                ( _("_New package"), self.on_new1_activate, _("Create a new package")),
-                ( _("_Open package"), self.on_open1_activate, _("Open a package") ),
-                ( _("Open recent"), None, _("Show recently opened packages") ),
-                ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package") ),
-                ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as...") ),
-                ( _("Close package"), self.on_close1_activate, _("Close the package") ),
-                ( "", None, "" ),
-                ( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)") ),
-                ( _("Save workspace"), (
-                    ( _("...as package view"), self.on_save_workspace_as_package_view1_activate, "" ),
-                    ( _("...as standard workspace"), self.on_save_workspace_as_default1_activate, _("Use the current layout as standard workspace in the future") )), ""),
-                ( "", None, "" ),
-                ( _("Associate a video _File"), self.on_b_addfile_clicked, _("Associate a video file") ),
-                ( _("Associate a _DVD"), self.on_b_selectdvd_clicked, _("Associate a chapter from a DVD") ),
-                ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address") ),
-                ( "", None, "" ),
-                ( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source") ),
-                ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms")),
-                ( "", None, "" ),
-                ( _("_Merge packages"), self.on_merge_package_activate, _("Merge elements from other packages") ),
-                ( _("Import package"), self.on_import_package_activate, _("Import elements from another package") ),
-                ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters") ),
-                ( "", None, "" ),
-                ( _("_Export..."), self.on_export_activate, _("Export data to another format") ),
-                ( _("_Website export..."), self.on_website_export_activate, _("Export views to a website") ),
-                ( "", None, "" ),
-                ( _("_Quit"), self.on_exit, "" ),
-            ), "" ),
+                ("", # Empty label -> section (and not submenu)
+                 (( _("_New package"), self.on_new1_activate, _("Create a new package"), 'new'),
+                  ( _("_Open package"), self.on_open1_activate, _("Open a package"), 'open' ),
+                  ( _("Open recent"), None, _("Show recently opened packages"), 'open_recent' ),
+                  ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package"), 'save' ),
+                  ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as..."), 'save_as' ),
+                  ( _("Close package"), self.on_close1_activate, _("Close the package"), 'close' ),
+                  ),
+                 "", ""),
+                ("",
+                 (( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)"), "session_save" ),
+                  ( _("Save workspace"), (
+                      ( _("...as package view"), self.on_save_workspace_as_package_view1_activate, "", "workspace_save" ),
+                      ( _("...as standard workspace"), self.on_save_workspace_as_default1_activate, _("Use the current layout as standard workspace in the future"), "workspace_save_as_default")),
+                    "", ""),
+                  ),
+                 "", ""),
+                ("",
+                 (( _("Associate a video _File"), self.on_b_addfile_clicked, _("Associate a video file"), "open_video_file" ),
+                  ( _("Associate a _DVD"), self.on_b_selectdvd_clicked, _("Associate a chapter from a DVD"), "open_video_dvd" ),
+                  ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address"), "open_video_stream" ),
+                  ),
+                 "", ""),
+                ("",
+                 (( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source"), "import_file" ),
+                  ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms"), "process_video"),
+                  ), "", ""),
+                ("",
+                 (( _("_Merge packages"), self.on_merge_package_activate, _("Merge elements from other packages"), "package_merge" ),
+                  ( _("Import package"), self.on_import_package_activate, _("Import elements from another package"), "package_import" ),
+                  ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters"), "dvd_chapters_import" ),
+                  ),
+                 "", ""),
+                ("",
+                 (( _("_Export..."), self.on_export_activate, _("Export data to another format"), "package_export" ),
+                  ( _("_Website export..."), self.on_website_export_activate, _("Export views to a website"), "package_export_website" ),
+                  ),
+                 "", ""),
+                ( _("_Quit"), self.on_exit, "", "quit" ),
+            ), "", "" ),
             (_("_Edit"), (
-                ( _("_Undo") + " [Ctrl-Z]", self.undo, "" ),
-                ( _("_Find"), self.on_find1_activate, "" ),
-                ( _("_Delete") + " [Del]", self.on_delete1_activate, "" ),
+                ( _("_Undo") + " [Ctrl-Z]", self.undo, "", "undo" ),
+                ( _("_Find"), self.on_find1_activate, "", "find" ),
+                ( _("_Delete") + " [Del]", self.on_delete1_activate, "", "delete" ),
                 ( _("Create"), (
-                    ( _("Schema"), self.on_create_schema_activate, "" ),
-                    ( _("View"), self.on_create_view_activate, "" ),
-                    ( _("Query"), self.on_create_query_activate, "" ),
-                    ( _("Annotation Type"), self.on_create_annotation_type_activate, "" ),
-                    ( _("Relation Type"), self.on_create_relation_type_activate, "" ),
-                ), "" ),
-                #                    ( _("Package _Imports"), self.on_package_imports1_activate, _("Edit imported element from other packages") ),
-                #                    ( _("_Standard Ruleset"), self.on_edit_ruleset1_activate, _("Edit the standard rules") ),
-                ( _("Update admin views"), self.on_merge_template_package_activate, _("Update admin views from template package") ),
-                ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties") ),
-                ( _("P_references"), self.on_preferences1_activate, _("Interface preferences") ),
-            ), "" ),
+                    ( _("Schema"), self.on_create_schema_activate, "", "create_schema"),
+                    ( _("View"), self.on_create_view_activate, "", "create_view"),
+                    ( _("Query"), self.on_create_query_activate, "", "create_query"),
+                    ( _("Annotation Type"), self.on_create_annotation_type_activate, "", "create_annotation_type"),
+                    ( _("Relation Type"), self.on_create_relation_type_activate, "", "create_relation_type"),
+                ), "", "" ),
+                ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties"), "package_properties" ),
+                ( _("P_references"), self.on_preferences1_activate, _("Interface preferences"), "preferences" ),
+            ), "", "" ),
             (_("_View"), (
                 # Note: this will be populated from registered_adhoc_views
-                ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser") ),
-                ( "", None, "" ),
-                ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)")),
-                ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window") ),
-                ( _("Webserver log"), self.on_webserver_log1_activate, "" ),
-            ), "" ),
+                ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser"), "open_web_browser" ),
+                ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)"), "simplify_interface"),
+                ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window"), "evaluator" ),
+                ( _("Webserver log"), self.on_webserver_log1_activate, "", "open_web_logs" ),
+            ), "", "adhoc_view" ),
             (_("_Player"), (
-                ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code") ),
-                ( _("Verify video _Checksum"), self.verify_video_checksum, _("Verify the video checksum, if available.") ),
-                ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk") ),
-                ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache") ),
-                ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player") ),
-                ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media") ),
-                ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds") ),
-                ( _("_Select player"), None, _("Select the player plugin") ),
-            ), "" ),
+                ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code"), "goto_timecode" ),
+                ( _("Verify video _Checksum"), self.verify_video_checksum, _("Verify the video checksum, if available."), "verify_video_checksum" ),
+                ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk"), "imagecache_save" ),
+                ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache"), "imagecache_reset" ),
+                ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player"), "player_restart" ),
+                ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media"), "media_information" ),
+                ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds"), "screenshot_update" ),
+                ( _("_Select player"), None, _("Select the player plugin"), "player_select" ),
+            ), "", "" ),
             (_("Packages"), (
-                ( _("No package"), None, "" ),
-            ), "" ),
+                ( _("No package"), None, "", "" ),
+            ), "", "packages" ),
             (_("_Help"), (
-                ( _("Help"), self.on_help1_activate, "" ),
-                ( _("Get support"), self.on_support1_activate, "" ),
-                ( _("Check for updates"), self.check_for_update, "" ),
-                ( _("Display shortcuts"), self.on_helpshortcuts_activate, "" ),
-                ( _("Display logfile"), self.on_advene_log_display, _("Display log messages")),
-                ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail.")),
-                ( _("_About"), self.on_about1_activate, "" ),
-            ), "" ),
+                ( _("Help"), self.on_help1_activate, "", "help" ),
+                ( _("Get support"), self.on_support1_activate, "", "help_support" ),
+                ( _("Check for updates"), self.check_for_update, "", "help_updates" ),
+                ( _("Display shortcuts"), self.on_helpshortcuts_activate, "", "help_shortcuts" ),
+                ( _("Display logfile"), self.on_advene_log_display, _("Display log messages"), "help_open_log"),
+                ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail."), "help_open_log_folder"),
+                ( _("_About"), self.on_about1_activate, "", "help_about" ),
+            ), "", "" ),
         )
+        # This will add the actions to self, so
+        # they should be registered as "app.{action_name}"
+        self.register_actions(self.menu_definition)
 
-        self.gui = DummyGlade(menu_definition)
+    def register_actions(self, menu_definition):
+        for (label, callback, tooltip, name) in menu_definition:
+            if isinstance(callback, tuple):
+                self.register_actions(callback)
+            elif name:
+                action = Gio.SimpleAction.new(name, None)
+                if callback is not None:
+                    action.connect("activate", callback)
+                #group.add_action_with_accel(action, "<Ctrl><Alt>o")
+                self.add_action(action)
 
-        dialog.set_default_transient_parent(self.gui.win)
+    def menu_to_actiondict(self, m=None):
+        if m is None:
+            m = self.get_menubar()
+        ad = dict()
+        for i in range(m.get_n_items()):
+            action = m.get_item_attribute_value(i, Gio.MENU_ATTRIBUTE_ACTION)
+            if action is not None:
+                ad[str(action).strip("'")] = (m, i)
+            if m.get_item_link(i, Gio.MENU_LINK_SECTION):
+                ad.update(self.menu_to_actiondict(m.get_item_link(i, Gio.MENU_LINK_SECTION)))
+            if m.get_item_link(i, Gio.MENU_LINK_SUBMENU):
+                ad.update(self.menu_to_actiondict(m.get_item_link(i, Gio.MENU_LINK_SUBMENU)))
+        return ad
 
+    def menu_dump(self, m=None):
+        if m is None:
+            m = self.get_menubar()
+        # Dump a menu structure definition
+        return [
+            {
+                'icon': m.get_item_attribute_value(i, Gio.MENU_ATTRIBUTE_ICON),
+                'label': m.get_item_attribute_value(i, Gio.MENU_ATTRIBUTE_LABEL),
+                'target': m.get_item_attribute_value(i, Gio.MENU_ATTRIBUTE_TARGET),
+                'action': m.get_item_attribute_value(i, Gio.MENU_ATTRIBUTE_ACTION),
+                'action_namespace': m.get_item_attribute_value(i, Gio.MENU_ATTRIBUTE_ACTION_NAMESPACE),
+                'section': None if m.get_item_link(i, Gio.MENU_LINK_SECTION) is None else self.menu_dump(m.get_item_link(i, Gio.MENU_LINK_SECTION)),
+                'submenu': None if m.get_item_link(i, Gio.MENU_LINK_SUBMENU) is None else self.menu_dump(m.get_item_link(i, Gio.MENU_LINK_SUBMENU))
+            }
+            for i in range(m.get_n_items())
+            ]
+
+    def initialize_gui(self):
+        logger.debug("initialize_gui")
+        # Windows are associated with the application
+        # when the last one is closed the application shuts down
+        self.gui = AdveneWindow(application=self, menu_definition=self.menu_definition)
+        self.set_menubar(self.gui.menu_model)
+
+        dialog.set_default_transient_parent(self.gui)
+
+        # Recent menu
         f = Gtk.RecentFilter()
         f.add_application(GObject.get_application_name())
         recent = Gtk.RecentChooserMenu()
         recent.add_filter(f)
         recent.set_show_icons(False)
         recent.set_sort_type(Gtk.RecentSortType.MRU)
-        self.gui.recent_menuitem.set_submenu(recent)
         def open_history_file(rec):
             fname = rec.get_current_uri()
             fname = unquote(fname)
             self.on_open1_activate(filename=fname)
             return True
         recent.connect('item-activated', open_history_file)
+
+        # FIXME: dynamically add to appropriate gtk.menuitem
+        # self.gui.recent_menuitem.set_submenu(recent)
+
+        #menu = self.gui.get_menubar()
+        #sm = menu.get_item_link(0, Gio.MENU_LINK_SUBMENU)
 
         self.toolbuttons = {}
         for (ident, stock, callback, tip) in (
@@ -451,7 +534,7 @@ class AdveneGUI:
         b.show()
 
         # Resize the main window
-        window=self.gui.win
+        window=self.gui
         window.connect('key-press-event', self.on_win_key_press_event)
         window.connect('delete-event', self.on_exit)
         self.init_window_size(window, 'main')
@@ -489,7 +572,7 @@ class AdveneGUI:
             """Display a dialog allowing to edit quicksearch-sources setting.
             """
             d = Gtk.Dialog(title=_("Quicksearch lists"),
-                           parent=self.gui.win,
+                           parent=self.gui,
                            flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                            buttons=( Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                      Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
@@ -578,11 +661,210 @@ class AdveneGUI:
 
         self.edit_accumulator = None
 
-        # Text abbreviations
-        self.text_abbreviations =  dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() )
-
         # Populate default STBV and type lists
         self.update_gui()
+
+        # FIXME: We have to register LogWindow actions before we load the ruleset
+        # but we should have an introspection method to do this automatically
+        self.logwindow = advene.gui.views.logwindow.LogWindow(controller=self.controller)
+        self.register_view(self.logwindow)
+
+        self.visualisationwidget = self.get_visualisation_widget()
+        self.gui.application_space.add(self.visualisationwidget)
+
+        self.visual_id = None
+
+        # Adhoc view toolbuttons signal handling
+        def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
+            if targetType == config.data.target_type['adhoc-view']:
+                selection.set(selection.get_target(), 8, encode_drop_parameters(name=name))
+                return True
+            return False
+
+        def adhoc_view_drag_begin(widget, context, pixmap, view_name):
+            w=Gtk.Window(Gtk.WindowType.POPUP)
+            w.set_decorated(False)
+            hb=Gtk.HBox()
+            i=Gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            hb.pack_start(i, False, True, 0)
+            hb.pack_start(Gtk.Label(view_name), False, False, 0)
+            w.add(hb)
+            w.show_all()
+            Gtk.drag_set_icon_widget(context, w, 16, 16)
+            return True
+
+        def open_view(widget, name, destination='default'):
+            self.open_adhoc_view(name, destination=destination)
+            return True
+
+        def open_view_menu(widget, name):
+            """Open the view menu.
+
+            In expert mode, directly open the view. Else, display a
+            popup menu proposing the various places where the view can
+            be opened.
+            """
+            if name == 'webbrowser':
+                open_view(widget, name)
+                return True
+
+            if config.data.preferences['expert-mode']:
+                # In expert mode, directly open the view. Experts know
+                # how to use drag and drop anyway.
+                open_view(widget, name)
+                return True
+
+            menu=Gtk.Menu()
+
+            for (label, destination) in (
+                    (_("Open this view..."), 'default'),
+                    (_("...in its own window"), 'popup'),
+                    (_("...embedded east of the video"), 'east'),
+                    (_("...embedded west of the video"), 'west'),
+                    (_("...embedded south of the video"), 'south'),
+                    (_("...embedded at the right of the window"), 'fareast')):
+                item = Gtk.MenuItem(label)
+                item.connect('activate', open_view, name, destination)
+                menu.append(item)
+
+            menu.show_all()
+            menu.popup_at_pointer(None)
+
+            return True
+
+        # Populate the Views submenu
+        adhoc_views = [ self.registered_adhoc_views[name] for name in sorted(self.registered_adhoc_views) ]
+        adhoc_views_menu_dict = dict( (cl.view_name, (cl.view_name,
+                                                      lambda action, param: open_view_menu(name),
+                                                      cl.tooltip,
+                                                      f'app.adhoc_view_{cl.view_id}') )
+                                      for cl in adhoc_views)
+        self.register_actions(adhoc_views_menu_dict.values())
+        # Build the menu
+        adhoc_views_menu = self.gui.build_menu(adhoc_views_menu_dict.values())
+
+        menu = self.gui.adhoc_view_menuitem
+        it = Gio.MenuItem.new(_("_All available views"), 'app.all_views')
+        it.set_submenu(adhoc_views_menu)
+
+        # Generate the adhoc view buttons
+        hb=self.gui.adhoc_hbox
+        item_index = 0
+        for name, tip, pixmap in (
+                ('timeline', _('Timeline'), 'timeline.png'),
+                ('finder', _('Package finder'), 'finder.png'),
+                ('transcription', _('Transcription of annotations'), 'transcription.png'),
+                ('table', _('Annotation table'), 'table.png'),
+
+                ('', '', ''),
+                ('transcribe', _('Note-taking editor'), 'transcribe.png'),
+                ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
+                ('', '', ''),
+
+                ('tagbag', _("Bag of tags"), 'tagbag.png'),
+                ('browser', _('TALES explorer'), 'browser.png'),
+                ('checker', _('Constraint checker'), 'checker.png'),
+                ('montage', _("Dynamic montage"), 'montage.png'),
+                ('videoplayer', _("Video player"), 'videoplayer.png'),
+                ('', '', ''),
+
+                ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
+                ('comment', _("Create or open a comment view"), 'comment.png'),
+                ('', '', ''),
+
+                ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
+                ('editionhistory', _("Display edition history"), 'editionhistory.png'),
+            ):
+            if not name:
+                # Separator
+                # FIXME: let's ignore it for the moment (conversion to Gio.Menu)
+                continue
+            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
+                continue
+            if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
+                self.log("Missing basic adhoc view %s" % name)
+                continue
+            b=Gtk.Button()
+            i=Gtk.Image()
+            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
+            b.add(i)
+            b.set_tooltip_text(tip)
+            b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
+            b.connect('drag-data-get', adhoc_view_drag_sent, name)
+            b.connect('clicked', open_view_menu, name)
+            b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
+                              config.data.get_target_types('adhoc-view'), Gdk.DragAction.COPY)
+            hb.pack_start(b, False, True, 0)
+            if name == 'webbrowser' and (self.controller.server is None or not self.controller.server.is_running()):
+                b.set_sensitive(False)
+                b.set_tooltip_text(_("The webserver could not be started. Static views cannot be accessed."))
+            if name in adhoc_views_menu_dict:
+                (label, callback, tooltip, action_name) = adhoc_views_menu_dict
+                menu.append_item(Gio.MenuItem.new(label, action_name))
+        hb.show_all()
+
+        #menu = Gio.Menu()
+        # FIXME: to fix
+        #self.gui.select_player_menuitem.set_submenu(menu)
+        #self.build_player_menu()
+
+        defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
+        if os.path.exists(defaults):
+            try:
+                # a default workspace has been saved. Load it and
+                # ignore the default adhoc view specification.
+                stream=open(defaults, encoding='utf-8')
+                tree=ET.parse(stream)
+                stream.close()
+                self.workspace_restore(tree.getroot())
+            except:
+                logger.error("Cannot restore default workspace", exc_info=True)
+        else:
+            # Open default views
+            self.open_adhoc_view('timeline', destination='south')
+            self.open_adhoc_view('tree', destination='fareast')
+
+        # If there were unknown arguments, propose to import them
+        for uri in self.controller.unknown_args:
+            self.open_adhoc_view('importerview', filename=uri)
+
+        # Use small toolbar button everywhere
+        Gtk.Settings.get_default().set_property('gtk_toolbar_icon_size', Gtk.IconSize.SMALL_TOOLBAR)
+        play=self.player_toolbar.get_children()[0]
+        play.set_can_focus(True)
+        play.grab_focus()
+        self.update_control_toolbar(self.player_toolbar)
+
+        self.event_source_update_display=GObject.timeout_add (100, self.update_display)
+        self.event_source_slow_update_display=GObject.timeout_add (1000, self.slow_update_display)
+        # Do we need to make an update check
+        if (config.data.preferences['update-check']
+            and time.time() - config.data.preferences['last-update'] >= 7 * 24 * 60 * 60):
+            config.data.preferences['last-update']=time.time()
+            self.check_for_update()
+        # Everything is ready. We can notify the ApplicationStart
+        self.controller.notify ("ApplicationStart")
+        if config.data.debug:
+            self.controller._state=self.controller.event_handler.dump()
+        Gtk.main ()
+        self.controller.notify ("ApplicationEnd")
+
+    def do_startup(self, *args, **kwargs):
+        logger.debug(f"do_startup {args}")
+        Gtk.Application.do_startup(self)
+
+        # self.settings.connect("changed", self.on_settings_changed)
+        if not self.gui:
+            self.initialize_gui()
+
+    def do_activate(self, *args, **kwargs):
+        logger.debug(f"do_activate {args}")
+        # Gtk.Application.do_activate(self)
+        #if self._application_id == 'org.gnome.gitlab.somas.Apostrophe.Devel':
+        #    self.window.get_style_context().add_class('devel')
+        if self.gui:
+            self.gui.present()
 
     def init_gettext(self):
         """Proxy for the module-level init_gettext method.
@@ -1116,21 +1398,14 @@ class AdveneGUI:
         self.renderer = m
         return True
 
-    def main (self, args=None):
-        """Mainloop : Gtk mainloop setup.
+    def main(self, args=None):
+        """Mainloop : App mainloop setup.
 
         @param args: list of arguments
         @type args: list
         """
         if args is None:
             args=[]
-        # FIXME: We have to register LogWindow actions before we load the ruleset
-        # but we should have an introspection method to do this automatically
-        self.logwindow=advene.gui.views.logwindow.LogWindow(controller=self.controller)
-        self.register_view(self.logwindow)
-
-        self.visualisationwidget=self.get_visualisation_widget()
-        self.gui.application_space.add(self.visualisationwidget)
 
         def media_changed(context, parameters):
             if config.data.preferences['player-autostart'] and not 'record' in self.controller.player.player_capabilities:
@@ -1194,191 +1469,9 @@ class AdveneGUI:
                                                                  method=method)
 
         self.controller.init(args)
-
-        self.visual_id = None
-
-        # Adhoc view toolbuttons signal handling
-        def adhoc_view_drag_sent(widget, context, selection, targetType, eventTime, name):
-            if targetType == config.data.target_type['adhoc-view']:
-                selection.set(selection.get_target(), 8, encode_drop_parameters(name=name))
-                return True
-            return False
-
-        def adhoc_view_drag_begin(widget, context, pixmap, view_name):
-            w=Gtk.Window(Gtk.WindowType.POPUP)
-            w.set_decorated(False)
-            hb=Gtk.HBox()
-            i=Gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            hb.pack_start(i, False, True, 0)
-            hb.pack_start(Gtk.Label(view_name), False, False, 0)
-            w.add(hb)
-            w.show_all()
-            Gtk.drag_set_icon_widget(context, w, 16, 16)
-            return True
-
-        def open_view(widget, name, destination='default'):
-            self.open_adhoc_view(name, destination=destination)
-            return True
-
-        def open_view_menu(widget, name):
-            """Open the view menu.
-
-            In expert mode, directly open the view. Else, display a
-            popup menu proposing the various places where the view can
-            be opened.
-            """
-            if name == 'webbrowser':
-                open_view(widget, name)
-                return True
-
-            if config.data.preferences['expert-mode']:
-                # In expert mode, directly open the view. Experts know
-                # how to use drag and drop anyway.
-                open_view(widget, name)
-                return True
-
-            menu=Gtk.Menu()
-
-            for (label, destination) in (
-                    (_("Open this view..."), 'default'),
-                    (_("...in its own window"), 'popup'),
-                    (_("...embedded east of the video"), 'east'),
-                    (_("...embedded west of the video"), 'west'),
-                    (_("...embedded south of the video"), 'south'),
-                    (_("...embedded at the right of the window"), 'fareast')):
-                item = Gtk.MenuItem(label)
-                item.connect('activate', open_view, name, destination)
-                menu.append(item)
-
-            menu.show_all()
-            menu.popup_at_pointer(None)
-
-            return True
-
-        # Populate the View submenu
-        menu = self.gui.adhoc_view_menuitem.get_submenu()
-        it = Gtk.MenuItem(_("_All available views"), use_underline=True)
-        menu.prepend(it)
-        it.show()
-        m = Gtk.Menu()
-        it.set_submenu(m)
-        for name in sorted(self.registered_adhoc_views, reverse=True):
-            cl=self.registered_adhoc_views[name]
-            it=Gtk.MenuItem('_' + cl.view_name, use_underline=True)
-            it.set_tooltip_text(cl.tooltip)
-            it.connect('activate', open_view_menu, name)
-            m.prepend(it)
-
-        # Generate the adhoc view buttons
-        hb=self.gui.adhoc_hbox
-        item_index = 0
-        for name, tip, pixmap in (
-                ('timeline', _('Timeline'), 'timeline.png'),
-                ('finder', _('Package finder'), 'finder.png'),
-                ('transcription', _('Transcription of annotations'), 'transcription.png'),
-                ('table', _('Annotation table'), 'table.png'),
-
-                ('', '', ''),
-                ('transcribe', _('Note-taking editor'), 'transcribe.png'),
-                ('activebookmarks', _('Active bookmarks'), 'bookmarks.png'),
-                ('', '', ''),
-
-                ('tagbag', _("Bag of tags"), 'tagbag.png'),
-                ('browser', _('TALES explorer'), 'browser.png'),
-                ('checker', _('Constraint checker'), 'checker.png'),
-                ('montage', _("Dynamic montage"), 'montage.png'),
-                ('videoplayer', _("Video player"), 'videoplayer.png'),
-                ('', '', ''),
-
-                ('webbrowser', _('Open a comment view in the web browser'), 'web.png'),
-                ('comment', _("Create or open a comment view"), 'comment.png'),
-                ('', '', ''),
-
-                ('editaccumulator', _('Edit window placeholder (annotation and relation edit windows will be put here)'), 'editaccumulator.png'),
-                ('editionhistory', _("Display edition history"), 'editionhistory.png'),
-            ):
-            if not name:
-                # Separator
-                b=Gtk.VSeparator()
-                hb.pack_start(b, False, False, 5)
-
-                it = Gtk.SeparatorMenuItem()
-                menu.insert(it, item_index)
-                item_index = item_index + 1
-                continue
-            if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
-                continue
-            if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
-                self.log("Missing basic adhoc view %s" % name)
-                continue
-            b=Gtk.Button()
-            i=Gtk.Image()
-            i.set_from_file(config.data.advenefile( ( 'pixmaps', pixmap) ))
-            b.add(i)
-            b.set_tooltip_text(tip)
-            b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
-            b.connect('drag-data-get', adhoc_view_drag_sent, name)
-            b.connect('clicked', open_view_menu, name)
-            b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
-                              config.data.get_target_types('adhoc-view'), Gdk.DragAction.COPY)
-            hb.pack_start(b, False, True, 0)
-            if name == 'webbrowser' and (self.controller.server is None or not self.controller.server.is_running()):
-                b.set_sensitive(False)
-                b.set_tooltip_text(_("The webserver could not be started. Static views cannot be accessed."))
-            if name in self.registered_adhoc_views:
-                it = Gtk.MenuItem(self.registered_adhoc_views[name].view_name, use_underline=False)
-                it.connect('activate', open_view_menu, name)
-                it.set_tooltip_text(tip)
-                menu.insert(it, item_index)
-                item_index = item_index + 1
-        hb.show_all()
-        menu.show_all()
-
-        menu=Gtk.Menu()
-        self.gui.select_player_menuitem.set_submenu(menu)
-        self.build_player_menu()
-
-        defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
-        if os.path.exists(defaults):
-            try:
-                # a default workspace has been saved. Load it and
-                # ignore the default adhoc view specification.
-                stream=open(defaults, encoding='utf-8')
-                tree=ET.parse(stream)
-                stream.close()
-                self.workspace_restore(tree.getroot())
-            except:
-                logger.error("Cannot restore default workspace", exc_info=True)
-        else:
-            # Open default views
-            self.open_adhoc_view('timeline', destination='south')
-            self.open_adhoc_view('tree', destination='fareast')
-
-        # If there were unknown arguments, propose to import them
-        for uri in self.controller.unknown_args:
-            self.open_adhoc_view('importerview', filename=uri)
-
-        # Use small toolbar button everywhere
-        Gtk.Settings.get_default().set_property('gtk_toolbar_icon_size', Gtk.IconSize.SMALL_TOOLBAR)
-        play=self.player_toolbar.get_children()[0]
-        play.set_can_focus(True)
-        play.grab_focus()
-        self.update_control_toolbar(self.player_toolbar)
-
-        self.event_source_update_display=GObject.timeout_add (100, self.update_display)
-        self.event_source_slow_update_display=GObject.timeout_add (1000, self.slow_update_display)
-        # Do we need to make an update check
-        if (config.data.preferences['update-check']
-            and time.time() - config.data.preferences['last-update'] >= 7 * 24 * 60 * 60):
-            config.data.preferences['last-update']=time.time()
-            self.check_for_update()
-        # Everything is ready. We can notify the ApplicationStart
-        self.controller.notify ("ApplicationStart")
-        if config.data.debug:
-            self.controller._state=self.controller.event_handler.dump()
-        Gtk.main ()
-        self.controller.notify ("ApplicationEnd")
+        logger.debug(" Before self.run")
+        self.run()
+        logger.debug(" After self.run")
 
     def check_for_update(self, *p):
         timeout=socket.getdefaulttimeout()
@@ -2346,6 +2439,8 @@ class AdveneGUI:
     def update_package_list (self):
         """Update the list of loaded packages.
         """
+        # FIXME: dynamic rebuild
+        return True
         menu=self.gui.package_list_menu
 
         def activate_package(button, alias):
@@ -2819,7 +2914,7 @@ class AdveneGUI:
 
         @return: a boolean (~desactivation)
         """
-        p=context.evaluateValue('package')
+        p = context.evaluateValue('package')
         self.log (_("Package %(uri)s loaded: %(annotations)s and %(relations)s.")
                   % {
                       'uri': p.uri,
@@ -2894,12 +2989,13 @@ class AdveneGUI:
             return False
 
         # Display in statusbar
-        cid=self.gui.statusbar.get_context_id('info')
-        if not isinstance(msg, str):
-            msg = str(msg, 'utf-8', 'replace')
-        message_id=self.gui.statusbar.push(cid, msg.replace("\n", " - "))
-        # Display the message only 4 seconds
-        GObject.timeout_add(4000, undisplay, cid, message_id)
+        if self.gui:
+            cid = self.gui.statusbar.get_context_id('info')
+            if not isinstance(msg, str):
+                msg = str(msg, 'utf-8', 'replace')
+            message_id=self.gui.statusbar.push(cid, msg.replace("\n", " - "))
+            # Display the message only 4 seconds
+            GObject.timeout_add(4000, undisplay, cid, message_id)
 
         # Store into logbuffer
         buf = self.logbuffer
@@ -3504,7 +3600,14 @@ class AdveneGUI:
         if self.controller.on_exit():
             # Memorize application window size/position
             self.resize_cb(self.gui.win, None, 'main')
-            Gtk.main_quit()
+            logger.debug(" before self.quit" )
+            self.quit()
+            # This is a hack for making the app actually exit. It
+            # should be automatic at the end of main(), but some
+            # references seem to be held (esp. in registered signal)
+            # that seem to prevent the framework to exit itself.
+            sys.exit(0)
+            logger.debug(" after self.quit" )
             return False
         else:
             return True
@@ -4832,9 +4935,9 @@ Image cache information: %(imagecache)s
         return True
 
 if __name__ == '__main__':
-    v = AdveneGUI ()
+    app = AdveneApplication ()
     try:
-        v.main (config.data.args)
+        app.main(config.data.args)
     except Exception as e:
         e, v, tb = sys.exc_info()
         logger.error(config.data.version_string)
