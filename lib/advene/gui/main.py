@@ -27,6 +27,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from collections import OrderedDict
+from enum import Enum
 import io
 import locale
 import os
@@ -38,11 +39,13 @@ import sys
 import textwrap
 import threading
 import time
+from typing import get_type_hints
 from urllib.parse import unquote
 import urllib.request, urllib.error
 
 import advene.core.config as config
 import advene.core.version
+from advene.gui.menus import RecentFilesMenu, update_player_menu
 
 import gi
 gi.require_version('Gdk', '3.0')
@@ -51,6 +54,7 @@ from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gio
+from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
 
@@ -139,7 +143,8 @@ class AdveneWindow(Gtk.ApplicationWindow):
         self.win = self
 
         self.insert_action_group("app", application)
-        self.menu_model = self.build_menu(menu_definition)
+        self.menu_map = {}
+        self.menu_model = self.build_menu(menu_definition, self.menu_map)
 
         # layout
         self.layout = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -189,7 +194,10 @@ class AdveneWindow(Gtk.ApplicationWindow):
                           0, callback)
         self.add_accel_group(accel)
 
-    def build_menu(self, items, menu=None):
+    def build_menu(self, items, menu_map=None, menu=None):
+
+        if menu_map is None:
+            menu_map = {}
 
         if menu is None:
             menu = Gio.Menu()
@@ -197,28 +205,27 @@ class AdveneWindow(Gtk.ApplicationWindow):
         for (label, callback, tooltip, name) in items:
             if not label:
                 # New section
-                menu.append_section("", self.build_menu(callback))
+                menu.append_section("", self.build_menu(callback, menu_map))
             else:
                 if isinstance(callback, tuple):
                     # Submenu
-                    if name == "packages":
-                        i = self.package_list_menu = Gio.Menu()
-                    else:
-                        i = self.build_menu(callback)
+                    i = self.build_menu(callback, menu_map)
                     menu.append_submenu(label, i)
+                    menu_map[name] = i
+                elif isinstance(callback, Gio.Menu):
+                    menu.append_submenu(label, callback)
+                    menu_map[name] = callback
                 elif name:
                     i = Gio.MenuItem.new(label, f"app.{name}")
                     menu.append_item(i)
-
-                # Menu-specific customizations
-                if name == "player_select":
-                    self.select_player_menuitem = i
-                elif name == 'adhoc_view':
-                    self.adhoc_view_menuitem = i
-                elif name == 'open_recent':
-                    self.recent_menuitem = i
+                    menu_map[name] = i
 
         return menu
+
+class Variant(Enum):
+    str = GLib.VariantType.new("s")
+    int = GLib.VariantType.new("i")
+    bool = GLib.VariantType.new("b")
 
 class AdveneApplication(Gtk.Application):
     """Main application class.
@@ -275,7 +282,7 @@ class AdveneApplication(Gtk.Application):
                 ("", # Empty label -> section (and not submenu)
                  (( _("_New package"), self.on_new1_activate, _("Create a new package"), 'new'),
                   ( _("_Open package"), self.on_open1_activate, _("Open a package"), 'open' ),
-                  ( _("Open recent"), None, _("Show recently opened packages"), 'open_recent' ),
+                  ( _("Open recent"), RecentFilesMenu(Gtk.RecentManager.get_default()), _("Show recently opened packages"), 'open_recent' ),
                   ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package"), 'save' ),
                   ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as..."), 'save_as' ),
                   ( _("Close package"), self.on_close1_activate, _("Close the package"), 'close' ),
@@ -332,6 +339,7 @@ class AdveneApplication(Gtk.Application):
                 ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)"), "simplify_interface"),
                 ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window"), "evaluator" ),
                 ( _("Webserver log"), self.on_webserver_log1_activate, "", "open_web_logs" ),
+                ( _("Open view"), Gio.Menu(), "", "open_adhoc_view")
             ), "", "adhoc_view" ),
             (_("_Player"), (
                 ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code"), "goto_timecode" ),
@@ -341,11 +349,9 @@ class AdveneApplication(Gtk.Application):
                 ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player"), "player_restart" ),
                 ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media"), "media_information" ),
                 ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds"), "screenshot_update" ),
-                ( _("_Select player"), None, _("Select the player plugin"), "player_select" ),
+                ( _("_Select player"), Gio.Menu(), _("Select the player plugin"), "player_select" ),
             ), "", "" ),
-            (_("Packages"), (
-                ( _("No package"), None, "", "" ),
-            ), "", "packages" ),
+            (_("Packages"), Gio.Menu(), "", "packages" ),
             (_("_Help"), (
                 ( _("Help"), self.on_help1_activate, "", "help" ),
                 ( _("Get support"), self.on_support1_activate, "", "help_support" ),
@@ -360,16 +366,33 @@ class AdveneApplication(Gtk.Application):
         # they should be registered as "app.{action_name}"
         self.register_actions(self.menu_definition)
 
+    def register_action(self, name, callback=None):
+        """Register a function as an action
+
+        To specify that the action expects a parameter, use type
+        hinting with a Variant enum value as type.
+        """
+        parameter_type = None
+        if callback is not None:
+            types = get_type_hints(callback).values()
+            if types:
+                typ = list(types)[0]
+                if isinstance(typ, Variant):
+                    parameter_type = typ.value
+        action = Gio.SimpleAction.new(name, parameter_type)
+        if callback is not None:
+            action.connect("activate", callback)
+            #group.add_action_with_accel(action, "<Ctrl><Alt>o")
+        self.add_action(action)
+
     def register_actions(self, menu_definition):
         for (label, callback, tooltip, name) in menu_definition:
             if isinstance(callback, tuple):
                 self.register_actions(callback)
+            elif isinstance(callback, Gio.Menu):
+                pass
             elif name:
-                action = Gio.SimpleAction.new(name, None)
-                if callback is not None:
-                    action.connect("activate", callback)
-                #group.add_action_with_accel(action, "<Ctrl><Alt>o")
-                self.add_action(action)
+                self.register_action(name, callback)
 
     def menu_to_actiondict(self, m=None):
         if m is None:
@@ -411,25 +434,19 @@ class AdveneApplication(Gtk.Application):
 
         dialog.set_default_transient_parent(self.gui)
 
-        # Recent menu
-        f = Gtk.RecentFilter()
-        f.add_application(GObject.get_application_name())
-        recent = Gtk.RecentChooserMenu()
-        recent.add_filter(f)
-        recent.set_show_icons(False)
-        recent.set_sort_type(Gtk.RecentSortType.MRU)
-        def open_history_file(rec):
-            fname = rec.get_current_uri()
-            fname = unquote(fname)
+        def open_history_file(action, filename: Variant.str):
+            filename = filename.get_string()
+            logger.warning(f"open_history_file {filename}")
+            fname = unquote(filename)
             self.on_open1_activate(filename=fname)
             return True
-        recent.connect('item-activated', open_history_file)
+        self.register_action("file-open-recent", open_history_file)
 
-        # FIXME: dynamically add to appropriate gtk.menuitem
-        # self.gui.recent_menuitem.set_submenu(recent)
-
-        #menu = self.gui.get_menubar()
-        #sm = menu.get_item_link(0, Gio.MENU_LINK_SUBMENU)
+        def select_player(action, player: Variant.str):
+            player = config.data.players[player.get_string()]
+            self.controller.select_player(player)
+            return True
+        self.register_action("select_player", select_player)
 
         self.toolbuttons = {}
         for (ident, stock, callback, tip) in (
@@ -736,21 +753,17 @@ class AdveneApplication(Gtk.Application):
         # Populate the Views submenu
         adhoc_views = [ self.registered_adhoc_views[name] for name in sorted(self.registered_adhoc_views) ]
         adhoc_views_menu_dict = dict( (cl.view_name, (cl.view_name,
-                                                      lambda action, param: open_view_menu(name),
+                                                      lambda action, param: open_view_menu(None, cl.view_id),
                                                       cl.tooltip,
                                                       f'app.adhoc_view_{cl.view_id}') )
                                       for cl in adhoc_views)
         self.register_actions(adhoc_views_menu_dict.values())
-        # Build the menu
-        adhoc_views_menu = self.gui.build_menu(adhoc_views_menu_dict.values())
 
-        menu = self.gui.adhoc_view_menuitem
-        it = Gio.MenuItem.new(_("_All available views"), 'app.all_views')
-        it.set_submenu(adhoc_views_menu)
+        # Build the menu of all defined views
+        adhoc_views_menu = self.gui.build_menu(adhoc_views_menu_dict.values(), menu=self.gui.menu_map['open_adhoc_view'])
 
         # Generate the adhoc view buttons
         hb=self.gui.adhoc_hbox
-        item_index = 0
         for name, tip, pixmap in (
                 ('timeline', _('Timeline'), 'timeline.png'),
                 ('finder', _('Package finder'), 'finder.png'),
@@ -801,13 +814,10 @@ class AdveneApplication(Gtk.Application):
                 b.set_tooltip_text(_("The webserver could not be started. Static views cannot be accessed."))
             if name in adhoc_views_menu_dict:
                 (label, callback, tooltip, action_name) = adhoc_views_menu_dict
-                menu.append_item(Gio.MenuItem.new(label, action_name))
+                adhoc_views_menu.append_item(Gio.MenuItem.new(label, action_name))
         hb.show_all()
 
-        #menu = Gio.Menu()
-        # FIXME: to fix
-        #self.gui.select_player_menuitem.set_submenu(menu)
-        #self.build_player_menu()
+        update_player_menu(self.gui.menu_map['player_select'], self.controller.player.player_id)
 
         defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
         if os.path.exists(defaults):
@@ -1930,7 +1940,7 @@ class AdveneApplication(Gtk.Application):
         # The player is initialized. We can register the drawable id
         p.set_widget(self.drawable, self.drawable_container)
         self.update_control_toolbar(self.player_toolbar)
-        self.build_player_menu()
+        update_player_menu(self.gui.menu_map['player_select'], self.controller.player.player_id)
 
     def player_play_pause(self, event):
         p=self.controller.player
@@ -2222,28 +2232,6 @@ class AdveneApplication(Gtk.Application):
         # Call update_control_toolbar()
         self.update_control_toolbar(tb)
         return tb
-
-    def build_player_menu(self):
-        menu = self.gui.select_player_menuitem.get_submenu()
-        if menu.get_children():
-            # The menu was previously populated, but the player may have changed.
-            # Clear it to update it.
-            menu.foreach(menu.remove)
-
-        # Populate the "Select player" menu
-        for ident, p in config.data.players.items():
-            def select_player(i, p):
-                self.controller.select_player(p)
-                return True
-            if self.controller.player.player_id == ident:
-                ident="> %s" % ident
-            else:
-                ident="   %s" % ident
-            i=Gtk.MenuItem(ident)
-            i.connect('activate', select_player, p)
-            menu.append(i)
-            i.show()
-        return True
 
     def update_control_toolbar(self, tb=None):
         """Update player control toolbar.
