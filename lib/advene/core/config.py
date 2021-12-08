@@ -30,8 +30,7 @@ It is meant to be used this way::
 import logging
 logger = logging.getLogger(__name__)
 
-# FIXME: cf http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/473846
-# for windows-specific paths
+import collections.abc
 import sys
 import os
 import pickle
@@ -62,6 +61,20 @@ def find_in_path(name):
         if fullname.exists():
             return fullname
     return None
+
+def deep_update(d, u):
+    """Utility function to deep_update dicts.
+    Used for preferences updating.
+
+    It assumes that source key types are stable (i.e. a integer value
+    will not be updated to a dict)
+    """
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = deep_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -168,6 +181,12 @@ class Config:
                 'shotdetect': advenedir / 'Contents' / 'Resources' / 'share' / 'shotdetect',
                 }
         else:
+            imagecache = os.environ.get('XDG_CACHE_HOME', None)
+            if imagecache:
+                imagecache = imagecache / 'advene'
+            else:
+                imagecache = Path.home() / '.cache' / 'advene'
+            imagecache.mkdir(parents=True, exist_ok=True)
             self.path = {
                 # Advene modules path
                 'advene': Path('/usr/lib/advene'),
@@ -176,7 +195,7 @@ class Config:
                 # Advene data files default path
                 'data': Path.home(),
                 # Imagecache save directory
-                'imagecache': Path('/tmp'),
+                'imagecache': imagecache,
                 # Web data files
                 'web': Path('/usr/share/advene/web'),
                 # Movie files search path. _ is the
@@ -221,7 +240,9 @@ class Config:
                             },
             'windowposition': {},
             'remember-window-size': True,
-            'gui': { 'popup-textwidth': 40 },
+            'gui': { 'popup-textwidth': 40,
+                     # Enforce this min-pane-size when opening views
+                     'min-pane-size': 40 },
             # Timestamp format. Extended notation with %.S to display
             # seconds as floating-point data, with milliseconds.
             'timestamp-format': '%H:%M:%.S',
@@ -766,7 +787,8 @@ class Config:
             except EOFError:
                 logger.error("Cannot load old prefs file", exc_info=True)
                 return None
-        d.update(prefs)
+        # There may be nested dicts in the structure, so use the deep_update utility
+        deep_update(d, prefs)
         return prefs
 
     def save_preferences_file(self, d=None, name='advene'):
