@@ -478,8 +478,7 @@ class AdveneApplication(Gtk.Application):
                 recent.set_show_icons(False)
                 recent.set_sort_type(Gtk.RecentSortType.MRU)
                 b.set_menu(recent)
-                # FIXME: use file-open-recent action
-                recent.connect('item-activated', open_history_file)
+                recent.connect('item-activated', lambda rec: self.activate_action('file-open-recent', GLib.Variant.new_string(rec.get_current_uri())))
             elif stock.startswith('gtk-'):
                 b = Gtk.ToolButton(stock)
             else:
