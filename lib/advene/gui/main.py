@@ -339,7 +339,7 @@ class AdveneApplication(Gtk.Application):
                 ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)"), "simplify_interface"),
                 ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window"), "evaluator" ),
                 ( _("Webserver log"), self.on_webserver_log1_activate, "", "open_web_logs" ),
-                ( _("Open view"), Gio.Menu(), "", "open_adhoc_view")
+                ( _("Open view"), Gio.Menu(), "", "adhoc_view_menu")
             ), "", "adhoc_view" ),
             (_("_Player"), (
                 ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code"), "goto_timecode" ),
@@ -349,9 +349,9 @@ class AdveneApplication(Gtk.Application):
                 ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player"), "player_restart" ),
                 ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media"), "media_information" ),
                 ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds"), "screenshot_update" ),
-                ( _("_Select player"), Gio.Menu(), _("Select the player plugin"), "player_select" ),
+                ( _("_Select player"), Gio.Menu(), _("Select the player plugin"), "player_select_menu" ),
             ), "", "" ),
-            (_("Packages"), Gio.Menu(), "", "packages" ),
+            (_("Packages"), Gio.Menu(), "", "package_list_menu" ),
             (_("_Help"), (
                 ( _("Help"), self.on_help1_activate, "", "help" ),
                 ( _("Get support"), self.on_support1_activate, "", "help_support" ),
@@ -446,12 +446,12 @@ class AdveneApplication(Gtk.Application):
             player = config.data.players[player.get_string()]
             self.controller.select_player(player)
             return True
-        self.register_action("select_player", select_player)
+        self.register_action("select-player", select_player)
 
         def activate_package(action, alias: Variant.str):
             self.controller.activate_package (alias.get_string())
             return True
-        self.register_action("activate_package", activate_package)
+        self.register_action("activate-package", activate_package)
 
         self.toolbuttons = {}
         for (ident, stock, callback, tip) in (
@@ -478,6 +478,7 @@ class AdveneApplication(Gtk.Application):
                 recent.set_show_icons(False)
                 recent.set_sort_type(Gtk.RecentSortType.MRU)
                 b.set_menu(recent)
+                # FIXME: use file-open-recent action
                 recent.connect('item-activated', open_history_file)
             elif stock.startswith('gtk-'):
                 b = Gtk.ToolButton(stock)
@@ -760,12 +761,12 @@ class AdveneApplication(Gtk.Application):
         adhoc_views_menu_dict = dict( (cl.view_name, (cl.view_name,
                                                       lambda action, param: open_view_menu(None, cl.view_id),
                                                       cl.tooltip,
-                                                      f'app.adhoc_view_{cl.view_id}') )
+                                                      f'adhoc_view_{cl.view_id}') )
                                       for cl in adhoc_views)
         self.register_actions(adhoc_views_menu_dict.values())
 
         # Build the menu of all defined views
-        adhoc_views_menu = self.gui.build_menu(adhoc_views_menu_dict.values(), menu=self.gui.menu_map['open_adhoc_view'])
+        adhoc_views_menu = self.gui.build_menu(adhoc_views_menu_dict.values(), menu=self.gui.menu_map['adhoc_view_menu'])
 
         # Generate the adhoc view buttons
         hb=self.gui.adhoc_hbox
@@ -822,7 +823,7 @@ class AdveneApplication(Gtk.Application):
                 adhoc_views_menu.append_item(Gio.MenuItem.new(label, action_name))
         hb.show_all()
 
-        update_player_menu(self.gui.menu_map['player_select'], self.controller.player.player_id)
+        update_player_menu(self.gui.menu_map['player_select_menu'], self.controller.player.player_id)
 
         defaults=config.data.advenefile( ('defaults', 'workspace.xml'), 'settings')
         if os.path.exists(defaults):
@@ -1945,7 +1946,7 @@ class AdveneApplication(Gtk.Application):
         # The player is initialized. We can register the drawable id
         p.set_widget(self.drawable, self.drawable_container)
         self.update_control_toolbar(self.player_toolbar)
-        update_player_menu(self.gui.menu_map['player_select'], self.controller.player.player_id)
+        update_player_menu(self.gui.menu_map['player_select_menu'], self.controller.player.player_id)
 
     def player_play_pause(self, event):
         p=self.controller.player
@@ -2827,7 +2828,7 @@ class AdveneApplication(Gtk.Application):
         modified, in order to reflect changes.
         """
         self.update_stbv_list()
-        update_package_list(self.gui.menu_map['packages'], self.controller)
+        update_package_list(self.gui.menu_map['package_list_menu'], self.controller)
         return
 
     def manage_package_save (self, context, parameters):

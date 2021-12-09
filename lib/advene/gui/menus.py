@@ -60,7 +60,7 @@ def update_player_menu(menu, current):
             label = "> %s" % ident
         else:
             label = "   %s" % ident
-        i = Gio.MenuItem.new(label, 'app.select_player')
+        i = Gio.MenuItem.new(label, 'app.select-player')
         i.set_attribute_value("target", GLib.Variant.new_string(ident))
         menu.append_item(i)
 
@@ -82,7 +82,7 @@ def update_package_list (menu, controller):
             label = '  ' + ident
         if p._modified:
             label += _(' (modified)')
-        i = Gio.MenuItem.new(label, 'app.activate_package')
+        i = Gio.MenuItem.new(label, 'app.activate-package')
         i.set_attribute_value("target", GLib.Variant.new_string(ident))
         menu.append_item(i)
     return True
