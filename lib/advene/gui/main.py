@@ -27,7 +27,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from collections import OrderedDict
-from enum import Enum
+
 import io
 import locale
 import os
@@ -54,7 +54,6 @@ from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 from gi.repository import Gio
-from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Pango
 
@@ -104,6 +103,7 @@ import advene.util.merger
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position,\
     dialog, encode_drop_parameters, overlay_svg_as_png,\
     name2color, predefined_content_mimetypes, get_drawable
+from advene.gui.actions import Variant, to_variant, from_variant
 from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
@@ -217,15 +217,14 @@ class AdveneWindow(Gtk.ApplicationWindow):
                     menu_map[name] = callback
                 elif name:
                     i = Gio.MenuItem.new(label, f"app.{name}")
+                    #if parameter:
+                    #    i.set_attribute_value(
+                    #        "target", to_variant(item.get_uri())
+                    #    )
                     menu.append_item(i)
                     menu_map[name] = i
 
         return menu
-
-class Variant(Enum):
-    str = GLib.VariantType.new("s")
-    int = GLib.VariantType.new("i")
-    bool = GLib.VariantType.new("b")
 
 class AdveneApplication(Gtk.Application):
     """Main application class.
@@ -435,7 +434,7 @@ class AdveneApplication(Gtk.Application):
         dialog.set_default_transient_parent(self.gui)
 
         def open_history_file(action, filename: Variant.str):
-            filename = filename.get_string()
+            filename = from_variant(filename)
             logger.warning(f"open_history_file {filename}")
             fname = unquote(filename)
             self.on_open1_activate(filename=fname)
@@ -443,13 +442,13 @@ class AdveneApplication(Gtk.Application):
         self.register_action("file-open-recent", open_history_file)
 
         def select_player(action, player: Variant.str):
-            player = config.data.players[player.get_string()]
+            player = config.data.players[from_variant(player)]
             self.controller.select_player(player)
             return True
         self.register_action("select-player", select_player)
 
         def activate_package(action, alias: Variant.str):
-            self.controller.activate_package (alias.get_string())
+            self.controller.activate_package(from_variant(alias))
             return True
         self.register_action("activate-package", activate_package)
 
@@ -478,7 +477,7 @@ class AdveneApplication(Gtk.Application):
                 recent.set_show_icons(False)
                 recent.set_sort_type(Gtk.RecentSortType.MRU)
                 b.set_menu(recent)
-                recent.connect('item-activated', lambda rec: self.activate_action('file-open-recent', GLib.Variant.new_string(rec.get_current_uri())))
+                recent.connect('item-activated', lambda rcmenu: self.activate_action('file-open-recent', to_variant(rcmenu.get_current_uri())))
             elif stock.startswith('gtk-'):
                 b = Gtk.ToolButton(stock)
             else:
@@ -755,17 +754,23 @@ class AdveneApplication(Gtk.Application):
 
             return True
 
+        def action_open_adhoc_view(action, viewid: Variant.str):
+            open_view_menu(None, from_variant(viewid))
+            return True
+        self.register_action('open-adhoc-view', action_open_adhoc_view)
+
         # Populate the Views submenu
         adhoc_views = [ self.registered_adhoc_views[name] for name in sorted(self.registered_adhoc_views) ]
         adhoc_views_menu_dict = dict( (cl.view_name, (cl.view_name,
-                                                      lambda action, param: open_view_menu(None, cl.view_id),
+                                                      None,
                                                       cl.tooltip,
-                                                      f'adhoc_view_{cl.view_id}') )
+                                                      f"open-adhoc-view('{cl.view_id}')") )
                                       for cl in adhoc_views)
-        self.register_actions(adhoc_views_menu_dict.values())
 
         # Build the menu of all defined views
-        adhoc_views_menu = self.gui.build_menu(adhoc_views_menu_dict.values(), menu=self.gui.menu_map['adhoc_view_menu'])
+        adhoc_views_menu = self.gui.build_menu(sorted(adhoc_views_menu_dict.values(),
+                                                      key=lambda t: t[0]),
+                                               menu=self.gui.menu_map['adhoc_view_menu'])
 
         # Generate the adhoc view buttons
         hb=self.gui.adhoc_hbox

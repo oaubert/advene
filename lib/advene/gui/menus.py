@@ -9,11 +9,12 @@ import gi
 gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gio
-from gi.repository import GLib
 from gi.repository import GObject
 from gi.repository import Gtk
 
 import advene.core.config as config
+
+from advene.gui.actions import to_variant, menuitem_new
 
 # Copied from https://github.dev/gaphor/gaphor/blob/master/gaphor/ui/recentfiles.py
 class RecentFilesMenu(Gio.Menu):
@@ -35,20 +36,14 @@ class RecentFilesMenu(Gio.Menu):
         APPNAME = GObject.get_application_name()
         for item in recent_manager.get_items():
             if APPNAME in item.get_applications():
-                menu_item = Gio.MenuItem.new(
-                    item.get_uri_display(), "app.file-open-recent"
-                )
-                filename, _host = GLib.filename_from_uri(item.get_uri())
-                menu_item.set_attribute_value(
-                    "target", GLib.Variant.new_string(filename)
-                )
+                menu_item = menuitem_new(item.get_uri_display(),
+                                         "app.file-open-recent",
+                                         item.get_uri())
                 self.append_item(menu_item)
                 if self.get_n_items() > 7:
                     break
         if self.get_n_items() == 0:
-            self.append_item(
-                Gio.MenuItem.new(_("No recently opened files"), None)
-            )
+            self.append_item(menuitem_new(_("No recently opened files")))
 
 def update_player_menu(menu, current):
     """Update the Player select menu
@@ -60,10 +55,9 @@ def update_player_menu(menu, current):
             label = "> %s" % ident
         else:
             label = "   %s" % ident
-        i = Gio.MenuItem.new(label, 'app.select-player')
-        i.set_attribute_value("target", GLib.Variant.new_string(ident))
-        menu.append_item(i)
-
+        menu.append_item(menuitem_new(label,
+                                      'app.select-player',
+                                      ident))
     return menu
 
 def update_package_list (menu, controller):
@@ -83,7 +77,7 @@ def update_package_list (menu, controller):
         if p._modified:
             label += _(' (modified)')
         i = Gio.MenuItem.new(label, 'app.activate-package')
-        i.set_attribute_value("target", GLib.Variant.new_string(ident))
+        i.set_attribute_value("target", to_variant(ident))
         menu.append_item(i)
     return True
 
