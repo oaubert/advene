@@ -148,7 +148,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
         if height is None:
             height = w.get_height()
         if width <= 0:
-            logger.warning("Error: width %d <= 0 for %s", width, self.element.id)
+            logger.debug("Error: width %d <= 0 for %s", width, self.element.id)
             width = 5
         # Obviously wrong size. Make it large enough so that it gets noticed.
         # Python raises an error if > 2147483647
