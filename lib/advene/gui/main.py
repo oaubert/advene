@@ -3738,58 +3738,50 @@ class AdveneApplication(Gtk.Application):
             self.edit_element(a)
         return True
 
+    @named_action(name="app.focus-quicksearch", shortcut="<Primary>k")
+    def on_focus_quicksearch(self, *p):
+        """Get the cursor in the quicksearch entry
+        """
+        self.quicksearch_entry.grab_focus()
+        self.quicksearch_entry.select_region(0, -1)
+        return True
+
+    @named_action(name="app.notebook-close-tab", shortcut="<Primary>w")
+    def on_notebook_close_tab(self, *p):
+        win = self.get_windows()[0]
+        focus = win.get_focus()
+        if focus is not None:
+            nb = focus.get_ancestor(Gtk.Notebook)
+            if nb:
+                nb.remove_page(nb.get_current_page())
+        return True
+
+    @named_action(name="app.notebook-previous-tab", shortcut="<Primary>Page_Up")
+    def on_notebox_previous_tab(self, *p):
+        win = self.get_windows()[0]
+        nb = win.get_focus().get_ancestor(Gtk.Notebook)
+        if nb:
+            p = nb.get_current_page()
+            if p > 0:
+                nb.set_current_page(p - 1)
+        return True
+
+    @named_action(name="app.notebook-next-tab", shortcut="<Primary>Page_Down")
+    def on_notebox_next_tab(self, *p):
+        win = self.get_windows()[0]
+        nb = win.get_focus().get_ancestor(Gtk.Notebook)
+        if nb:
+            p = nb.get_current_page()
+            if p < nb.get_n_pages() - 1:
+                nb.set_current_page(p + 1)
+        return True
+
     def on_win_key_press_event (self, win=None, event=None):
         """Keypress handling.
         """
         # Player shortcuts
         if self.process_player_shortcuts(win, event):
             return True
-
-        # Control-shortcuts
-        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
-            # The Control-key is held. Special actions :
-            if event.keyval == Gdk.KEY_e:
-                # Popup the evaluator window
-                self.popup_evaluator()
-                return True
-            elif event.keyval == Gdk.KEY_k:
-                # Get the cursor in the quicksearch entry
-                self.quicksearch_entry.grab_focus()
-                self.quicksearch_entry.select_region(0, -1)
-                return True
-            elif event.keyval == Gdk.KEY_q:
-                self.on_exit()
-                return True
-            elif event.keyval == Gdk.KEY_s:
-                if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
-                    self.on_save_as1_activate()
-                else:
-                    self.on_save1_activate()
-                return True
-            elif event.keyval == Gdk.KEY_z:
-                self.undo()
-                return True
-            elif event.keyval == Gdk.KEY_w:
-                focus = win.get_focus()
-                if focus is not None:
-                    nb = focus.get_ancestor(Gtk.Notebook)
-                    if nb:
-                        nb.remove_page(nb.get_current_page())
-                return True
-            elif event.keyval == Gdk.KEY_Page_Up:
-                nb = win.get_focus().get_ancestor(Gtk.Notebook)
-                if nb:
-                    p = nb.get_current_page()
-                    if p > 0:
-                        nb.set_current_page(p - 1)
-                return True
-            elif event.keyval == Gdk.KEY_Page_Down:
-                nb = win.get_focus().get_ancestor(Gtk.Notebook)
-                if nb:
-                    p = nb.get_current_page()
-                    if p < nb.get_n_pages() - 1:
-                        nb.set_current_page(p + 1)
-                return True
         return False
 
     @named_action(name="app.new-package")
