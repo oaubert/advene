@@ -39,7 +39,6 @@ import sys
 import textwrap
 import threading
 import time
-from typing import get_type_hints
 from urllib.parse import unquote
 import urllib.request, urllib.error
 
@@ -103,7 +102,7 @@ import advene.util.merger
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position,\
     dialog, encode_drop_parameters, overlay_svg_as_png,\
     name2color, predefined_content_mimetypes, get_drawable
-from advene.gui.actions import Variant, to_variant, named_action, register_named_actions
+from advene.gui.actions import to_variant, named_action, register_named_actions
 from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
@@ -359,26 +358,6 @@ class AdveneApplication(Gtk.Application):
                 ( _("_About"), "app.about", "", "help_about" ),
             ), "", "" ),
         )
-
-    # FIXME: move to gui.action / @named_action
-    def register_action(self, name, callback=None):
-        """Register a function as an action
-
-        To specify that the action expects a parameter, use type
-        hinting with a Variant enum value as type.
-        """
-        parameter_type = None
-        if callback is not None:
-            types = get_type_hints(callback).values()
-            if types:
-                typ = list(types)[0]
-                if isinstance(typ, Variant):
-                    parameter_type = typ.value
-        action = Gio.SimpleAction.new(name, parameter_type)
-        if callback is not None:
-            action.connect("activate", callback)
-            #group.add_action_with_accel(action, "<Ctrl><Alt>o")
-        self.add_action(action)
 
     def menu_to_actiondict(self, m=None):
         if m is None:
