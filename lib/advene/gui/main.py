@@ -425,12 +425,12 @@ class AdveneApplication(Gtk.Application):
                 ('open', Gtk.STOCK_OPEN, 'open-dialog', _("Open a package file")),
                 ('save', Gtk.STOCK_SAVE, 'save', _("Save the current package")),
                 ('save_as', Gtk.STOCK_SAVE_AS, 'save-as', _("Save the package with a new name")),
-                ('select_file', 'moviefile.png', 'open-video', _("Select movie file...")),
-                ('select_dvd', Gtk.STOCK_CDROM, 'open-dvd', _("Select DVD")),
+                ('select_file', 'moviefile.png', 'open-video', _("Open video file...")),
+                ('select_dvd', Gtk.STOCK_CDROM, 'open-dvd', _("Open DVD")),
                 (None, None, None, None),
                 ('undo', Gtk.STOCK_UNDO, 'undo', _("Undo")),
                 (None, None, None, None),
-                ('create_text_annotation', 'text_annotation.png', 'create-text_annotation', _("Create a text annotation")),
+                ('create_text_annotation', 'text_annotation.png', 'create-text-annotation', _("Create a text annotation")),
                 ('create_svg_annotation', 'svg_annotation.png', 'create-svg-annotation', _("Create a graphical annotation")),
         ):
             if stock is None:
