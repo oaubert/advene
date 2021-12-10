@@ -103,7 +103,7 @@ import advene.util.merger
 from advene.gui.util import get_pixmap_button, get_small_stock_button, image_from_position,\
     dialog, encode_drop_parameters, overlay_svg_as_png,\
     name2color, predefined_content_mimetypes, get_drawable
-from advene.gui.actions import Variant, to_variant, from_variant
+from advene.gui.actions import Variant, to_variant, named_action, register_named_actions
 from advene.gui.util.playpausebutton import PlayPauseButton
 import advene.gui.plugins.actions
 import advene.gui.plugins.contenthandlers
@@ -202,25 +202,21 @@ class AdveneWindow(Gtk.ApplicationWindow):
         if menu is None:
             menu = Gio.Menu()
 
-        for (label, callback, tooltip, name) in items:
+        for (label, action, tooltip, name) in items:
             if not label:
                 # New section
-                menu.append_section("", self.build_menu(callback, menu_map))
+                menu.append_section("", self.build_menu(action, menu_map))
             else:
-                if isinstance(callback, tuple):
+                if isinstance(action, tuple):
                     # Submenu
-                    i = self.build_menu(callback, menu_map)
+                    i = self.build_menu(action, menu_map)
                     menu.append_submenu(label, i)
                     menu_map[name] = i
-                elif isinstance(callback, Gio.Menu):
-                    menu.append_submenu(label, callback)
-                    menu_map[name] = callback
-                elif name:
-                    i = Gio.MenuItem.new(label, f"app.{name}")
-                    #if parameter:
-                    #    i.set_attribute_value(
-                    #        "target", to_variant(item.get_uri())
-                    #    )
+                elif isinstance(action, Gio.Menu):
+                    menu.append_submenu(label, action)
+                    menu_map[name] = action
+                elif action:
+                    i = Gio.MenuItem.new(label, action)
                     menu.append_item(i)
                     menu_map[name] = i
 
@@ -272,6 +268,9 @@ class AdveneApplication(Gtk.Application):
         # Text abbreviations
         self.text_abbreviations = dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() )
 
+        # Register defined actions in this instance
+        register_named_actions(self)
+
         # The KeyboardInput event has a 'keyname' parameter ("F1" to "F12")
         # available through the request/keyname TALES expression
         self.controller.register_event('KeyboardInput', _("Input from the keyboard (function keys)"))
@@ -279,92 +278,89 @@ class AdveneApplication(Gtk.Application):
         self.menu_definition=(
             (_("_File"), (
                 ("", # Empty label -> section (and not submenu)
-                 (( _("_New package"), self.on_new1_activate, _("Create a new package"), 'new'),
-                  ( _("_Open package"), self.on_open1_activate, _("Open a package"), 'open' ),
+                 (( _("_New package"), 'app.new-package', _("Create a new package"), 'new'),
+                  ( _("_Open package"), 'app.open-dialog', _("Open a package"), 'open' ),
                   ( _("Open recent"), RecentFilesMenu(Gtk.RecentManager.get_default()), _("Show recently opened packages"), 'open_recent' ),
-                  ( _("_Save package") + " [Ctrl-S]", self.on_save1_activate, _("Save the package"), 'save' ),
-                  ( _("Save package as..."), self.on_save_as1_activate, _("Save the package as..."), 'save_as' ),
-                  ( _("Close package"), self.on_close1_activate, _("Close the package"), 'close' ),
+                  ( _("_Save package") + " [Ctrl-S]", 'app.save', _("Save the package"), 'save' ),
+                  ( _("Save package as..."), 'app.save-as', _("Save the package as..."), 'save_as' ),
+                  ( _("Close package"), 'app.close', _("Close the package"), 'close' ),
                   ),
                  "", ""),
                 ("",
-                 (( _("Save session"), self.on_save_session1_activate, _("Save the current session (list of opened packages)"), "session_save" ),
+                 (( _("Save session"), 'app.save-session', _("Save the current session (list of opened packages)"), "session_save" ),
                   ( _("Save workspace"), (
-                      ( _("...as package view"), self.on_save_workspace_as_package_view1_activate, "", "workspace_save" ),
-                      ( _("...as standard workspace"), self.on_save_workspace_as_default1_activate, _("Use the current layout as standard workspace in the future"), "workspace_save_as_default")),
+                      ( _("...as package view"), 'app.save-workspace-as-view', "", "workspace_save" ),
+                      ( _("...as standard workspace"), 'app.save-workspace-as-default', _("Use the current layout as standard workspace in the future"), "workspace_save_as_default")),
                     "", ""),
                   ),
                  "", ""),
                 ("",
-                 (( _("Associate a video _File"), self.on_b_addfile_clicked, _("Associate a video file"), "open_video_file" ),
-                  ( _("Associate a _DVD"), self.on_b_selectdvd_clicked, _("Associate a chapter from a DVD"), "open_video_dvd" ),
-                  ( _("Associate a _Video stream"), self.on_select_a_video_stream1_activate, _("Enter a video stream address"), "open_video_stream" ),
+                 (( _("Associate a video _File"), 'app.open-video', _("Associate a video file"), "open_video_file" ),
+                  ( _("Associate a _DVD"), 'app.open-dvd', _("Associate a chapter from a DVD"), "open_video_dvd" ),
+                  ( _("Associate a _Video URL"), 'app.open-video-stream', _("Enter a video URL address"), "open_video_stream" ),
                   ),
                  "", ""),
                 ("",
-                 (( _("_Import File"), self.on_import_file1_activate, _("Import data from an external source"), "import_file" ),
-                  ( _("_Process video"), self.on_process_video_activate, _("Import data from video processing algorithms"), "process_video"),
+                 (( _("_Import File"), 'app.import-file', _("Import data from an external source"), "import_file" ),
+                  ( _("_Process video"), 'app.process-video', _("Import data from video processing algorithms"), "process_video"),
                   ), "", ""),
                 ("",
-                 (( _("_Merge packages"), self.on_merge_package_activate, _("Merge elements from other packages"), "package_merge" ),
-                  ( _("Import package"), self.on_import_package_activate, _("Import elements from another package"), "package_import" ),
-                  ( _("Import _DVD chapters"), self.on_import_dvd_chapters1_activate, _("Create annotations based on DVD chapters"), "dvd_chapters_import" ),
+                 (( _("_Merge packages"), 'app.merge-package', _("Merge elements from other packages"), "package_merge" ),
+                  ( _("Import package"), 'app.import-package', _("Import elements from another package"), "package_import" ),
+                  ( _("Import _DVD chapters"), 'app.import-dvd-chapters', _("Create annotations based on DVD chapters"), "dvd_chapters_import" ),
                   ),
                  "", ""),
                 ("",
-                 (( _("_Export..."), self.on_export_activate, _("Export data to another format"), "package_export" ),
-                  ( _("_Website export..."), self.on_website_export_activate, _("Export views to a website"), "package_export_website" ),
+                 (( _("_Export..."), 'app.export', _("Export data to another format"), "package_export" ),
+                  ( _("_Website export..."), 'app.export-website', _("Export views to a website"), "package_export_website" ),
                   ),
                  "", ""),
-                ( _("_Quit"), self.on_exit, "", "quit" ),
+                ( _("_Quit"), 'app.quit', "", "quit" ),
             ), "", "" ),
             (_("_Edit"), (
-                ( _("_Undo") + " [Ctrl-Z]", self.undo, "", "undo" ),
-                ( _("_Find"), self.on_find1_activate, "", "find" ),
-                ( _("_Delete") + " [Del]", self.on_delete1_activate, "", "delete" ),
+                ( _("_Undo") + " [Ctrl-Z]", 'app.undo', "", "undo" ),
+                ( _("_Find"), 'app.find', "", "find" ),
                 ( _("Create"), (
-                    ( _("Schema"), self.on_create_schema_activate, "", "create_schema"),
-                    ( _("View"), self.on_create_view_activate, "", "create_view"),
-                    ( _("Query"), self.on_create_query_activate, "", "create_query"),
-                    ( _("Annotation Type"), self.on_create_annotation_type_activate, "", "create_annotation_type"),
-                    ( _("Relation Type"), self.on_create_relation_type_activate, "", "create_relation_type"),
+                    ( _("Schema"), 'app.create-schema', "", "create_schema"),
+                    ( _("View"), 'app.create-view', "", "create_view"),
+                    ( _("Query"), 'app.create-query', "", "create_query"),
+                    ( _("Annotation Type"), 'app.create-annotation-type', "", "create_annotation_type"),
+                    ( _("Relation Type"), 'app.create-relation-type', "", "create_relation_type"),
                 ), "", "" ),
-                ( _("P_ackage properties"), self.on_package_properties1_activate, _("Edit package properties"), "package_properties" ),
-                ( _("P_references"), self.on_preferences1_activate, _("Interface preferences"), "preferences" ),
+                ( _("P_ackage properties"), 'app.edit-package-properties', _("Edit package properties"), "package_properties" ),
+                ( _("P_references"), 'app.edit-preferences', _("Interface preferences"), "preferences" ),
             ), "", "" ),
             (_("_View"), (
                 # Note: this will be populated from registered_adhoc_views
-                ( _("_Start Web Browser"), self.on_adhoc_web_browser_activate, _("Start the web browser"), "open_web_browser" ),
-                ( _("Simplify interface"), self.on_simplify_interface_activate, _("Simplify the application interface (toggle)"), "simplify_interface"),
-                ( _("Evaluator") + " [Ctrl-e]", self.on_evaluator2_activate, _("Open python evaluator window"), "evaluator" ),
-                ( _("Webserver log"), self.on_webserver_log1_activate, "", "open_web_logs" ),
+                ( _("_Start Web Browser"), "app.open-adhoc-view('webbrowser')", _("Start the web browser"), "open_web_browser" ),
+                ( _("Simplify interface"), "app.simplify-interface", _("Simplify the application interface (toggle)"), "simplify_interface"),
+                ( _("Evaluator") + " [Ctrl-e]", "app.evaluator", _("Open python evaluator window"), "evaluator" ),
+                ( _("Webserver log"), "app.show-webserver-log", "", "open_web_logs" ),
                 ( _("Open view"), Gio.Menu(), "", "adhoc_view_menu")
             ), "", "adhoc_view" ),
             (_("_Player"), (
-                ( _("Go to _Time"), self.goto_time_dialog, _("Goto a specified time code"), "goto_timecode" ),
-                ( _("Verify video _Checksum"), self.verify_video_checksum, _("Verify the video checksum, if available."), "verify_video_checksum" ),
-                ( _("Save _ImageCache"), self.on_save_imagecache1_activate, _("Save the contents of the ImageCache to disk"), "imagecache_save" ),
-                ( _("Reset ImageCache"), self.on_reset_imagecache_activate, _("Reset the ImageCache"), "imagecache_reset" ),
-                ( _("_Restart player"), self.on_restart_player1_activate, _("Restart the player"), "player_restart" ),
-                ( _("Display _Media information"), self.on_view_mediainformation_activate, _("Display information about the current media"), "media_information" ),
-                ( _("Update annotation screenshots"), self.update_annotation_screenshots, _("Update screenshots for annotation bounds"), "screenshot_update" ),
+                ( _("Go to _Time"), "app.goto-time-dialog", _("Goto a specified time code"), "goto_timecode" ),
+                ( _("Verify video _Checksum"), "app.verify-video-checksum", _("Verify the video checksum, if available."), "verify_video_checksum" ),
+                ( _("Save _ImageCache"), "app.save-imagecache", _("Save the contents of the ImageCache to disk"), "imagecache_save" ),
+                ( _("Reset ImageCache"), "app.reset-imagecache", _("Reset the ImageCache"), "imagecache_reset" ),
+                ( _("_Restart player"), "app.player-restart", _("Restart the player"), "player_restart" ),
+                ( _("Display _Media information"), "app.show-media-information", _("Display information about the current media"), "media_information" ),
+                ( _("Update annotation screenshots"), "app.update-screenshots", _("Update screenshots for annotation bounds"), "screenshot_update" ),
                 ( _("_Select player"), Gio.Menu(), _("Select the player plugin"), "player_select_menu" ),
             ), "", "" ),
             (_("Packages"), Gio.Menu(), "", "package_list_menu" ),
             (_("_Help"), (
-                ( _("Help"), self.on_help1_activate, "", "help" ),
-                ( _("Get support"), self.on_support1_activate, "", "help_support" ),
-                ( _("Check for updates"), self.check_for_update, "", "help_updates" ),
-                ( _("Display shortcuts"), self.on_helpshortcuts_activate, "", "help_shortcuts" ),
-                ( _("Display logfile"), self.on_advene_log_display, _("Display log messages"), "help_open_log"),
-                ( _("Open logfile folder"), self.on_advene_log_folder_display, _("Display logfile folder. It can help when sending the advene.log file by e-mail."), "help_open_log_folder"),
-                ( _("_About"), self.on_about1_activate, "", "help_about" ),
+                ( _("Help"), "app.help", "", "help" ),
+                ( _("Get support"), "app.help-support", "", "help_support" ),
+                ( _("Check for updates"), "app.check-for-update", "", "help_updates" ),
+                ( _("Display shortcuts"), "app.help-shortcuts", "", "help_shortcuts" ),
+                ( _("Display logfile"), "app.show-log", _("Display log messages"), "help_open_log"),
+                ( _("Open logfile folder"), "app.show-logfile", _("Display logfile folder. It can help when sending the advene.log file by e-mail."), "help_open_log_folder"),
+                ( _("_About"), "app.about", "", "help_about" ),
             ), "", "" ),
         )
-        # This will add the actions to self, so
-        # they should be registered as "app.{action_name}"
-        self.register_actions(self.menu_definition)
 
+    # FIXME: move to gui.action / @named_action
     def register_action(self, name, callback=None):
         """Register a function as an action
 
@@ -383,15 +379,6 @@ class AdveneApplication(Gtk.Application):
             action.connect("activate", callback)
             #group.add_action_with_accel(action, "<Ctrl><Alt>o")
         self.add_action(action)
-
-    def register_actions(self, menu_definition):
-        for (label, callback, tooltip, name) in menu_definition:
-            if isinstance(callback, tuple):
-                self.register_actions(callback)
-            elif isinstance(callback, Gio.Menu):
-                pass
-            elif name:
-                self.register_action(name, callback)
 
     def menu_to_actiondict(self, m=None):
         if m is None:
@@ -433,37 +420,18 @@ class AdveneApplication(Gtk.Application):
 
         dialog.set_default_transient_parent(self.gui)
 
-        def open_history_file(action, filename: Variant.str):
-            filename = from_variant(filename)
-            logger.warning(f"open_history_file {filename}")
-            fname = unquote(filename)
-            self.on_open1_activate(filename=fname)
-            return True
-        self.register_action("file-open-recent", open_history_file)
-
-        def select_player(action, player: Variant.str):
-            player = config.data.players[from_variant(player)]
-            self.controller.select_player(player)
-            return True
-        self.register_action("select-player", select_player)
-
-        def activate_package(action, alias: Variant.str):
-            self.controller.activate_package(from_variant(alias))
-            return True
-        self.register_action("activate-package", activate_package)
-
         self.toolbuttons = {}
-        for (ident, stock, callback, tip) in (
-                ('open', Gtk.STOCK_OPEN, self.on_open1_activate, _("Open a package file")),
-                ('save', Gtk.STOCK_SAVE, self.on_save1_activate, _("Save the current package")),
-                ('save_as', Gtk.STOCK_SAVE_AS, self.on_save_as1_activate, _("Save the package with a new name")),
-                ('select_file', 'moviefile.png', self.on_b_addfile_clicked, _("Select movie file...")),
-                ('select_dvd', Gtk.STOCK_CDROM, self.on_b_selectdvd_clicked, _("Select DVD")),
+        for (ident, stock, action_name, tip) in (
+                ('open', Gtk.STOCK_OPEN, 'open-dialog', _("Open a package file")),
+                ('save', Gtk.STOCK_SAVE, 'save', _("Save the current package")),
+                ('save_as', Gtk.STOCK_SAVE_AS, 'save-as', _("Save the package with a new name")),
+                ('select_file', 'moviefile.png', 'open-video', _("Select movie file...")),
+                ('select_dvd', Gtk.STOCK_CDROM, 'open-dvd', _("Select DVD")),
                 (None, None, None, None),
-                ('undo', Gtk.STOCK_UNDO, self.undo, _("Undo")),
+                ('undo', Gtk.STOCK_UNDO, 'undo', _("Undo")),
                 (None, None, None, None),
-                ('create_text_annotation', 'text_annotation.png', self.on_create_text_annotation, _("Create a text annotation")),
-                ('create_svg_annotation', 'svg_annotation.png', self.on_create_svg_annotation, _("Create a graphical annotation")),
+                ('create_text_annotation', 'text_annotation.png', 'create-text_annotation', _("Create a text annotation")),
+                ('create_svg_annotation', 'svg_annotation.png', 'create-svg-annotation', _("Create a graphical annotation")),
         ):
             if stock is None:
                 b = Gtk.SeparatorToolItem()
@@ -477,7 +445,7 @@ class AdveneApplication(Gtk.Application):
                 recent.set_show_icons(False)
                 recent.set_sort_type(Gtk.RecentSortType.MRU)
                 b.set_menu(recent)
-                recent.connect('item-activated', lambda rcmenu: self.activate_action('file-open-recent', to_variant(rcmenu.get_current_uri())))
+                recent.connect('item-activated', lambda rcmenu: self.activate_action('open', to_variant(rcmenu.get_current_uri())))
             elif stock.startswith('gtk-'):
                 b = Gtk.ToolButton(stock)
             else:
@@ -486,8 +454,9 @@ class AdveneApplication(Gtk.Application):
                 b = Gtk.ToolButton(icon_widget=i)
             if tip is not None:
                 b.set_tooltip_text(tip)
-            if callback is not None:
-                b.connect('clicked', callback)
+            if action_name is not None:
+                b.connect('clicked', lambda b, a: self.activate_action(a), action_name)
+
             self.gui.fileop_toolbar.insert(b, -1)
             if ident is not None:
                 self.toolbuttons[ident] = b
@@ -715,56 +684,12 @@ class AdveneApplication(Gtk.Application):
             Gtk.drag_set_icon_widget(context, w, 16, 16)
             return True
 
-        def open_view(widget, name, destination='default'):
-            self.open_adhoc_view(name, destination=destination)
-            return True
-
-        def open_view_menu(widget, name):
-            """Open the view menu.
-
-            In expert mode, directly open the view. Else, display a
-            popup menu proposing the various places where the view can
-            be opened.
-            """
-            if name == 'webbrowser':
-                open_view(widget, name)
-                return True
-
-            if config.data.preferences['expert-mode']:
-                # In expert mode, directly open the view. Experts know
-                # how to use drag and drop anyway.
-                open_view(widget, name)
-                return True
-
-            menu=Gtk.Menu()
-
-            for (label, destination) in (
-                    (_("Open this view..."), 'default'),
-                    (_("...in its own window"), 'popup'),
-                    (_("...embedded east of the video"), 'east'),
-                    (_("...embedded west of the video"), 'west'),
-                    (_("...embedded south of the video"), 'south'),
-                    (_("...embedded at the right of the window"), 'fareast')):
-                item = Gtk.MenuItem(label)
-                item.connect('activate', open_view, name, destination)
-                menu.append(item)
-
-            menu.show_all()
-            menu.popup_at_pointer(None)
-
-            return True
-
-        def action_open_adhoc_view(action, viewid: Variant.str):
-            open_view_menu(None, from_variant(viewid))
-            return True
-        self.register_action('open-adhoc-view', action_open_adhoc_view)
-
         # Populate the Views submenu
         adhoc_views = [ self.registered_adhoc_views[name] for name in sorted(self.registered_adhoc_views) ]
         adhoc_views_menu_dict = dict( (cl.view_name, (cl.view_name,
-                                                      None,
+                                                      f"app.open-adhoc-view('{cl.view_id}')",
                                                       cl.tooltip,
-                                                      f"open-adhoc-view('{cl.view_id}')") )
+                                                      f"toolbar-adhoc-view-{cl.view_id}") )
                                       for cl in adhoc_views)
 
         # Build the menu of all defined views
@@ -815,7 +740,7 @@ class AdveneApplication(Gtk.Application):
             b.set_tooltip_text(tip)
             b.connect('drag-begin', adhoc_view_drag_begin, pixmap, tip)
             b.connect('drag-data-get', adhoc_view_drag_sent, name)
-            b.connect('clicked', open_view_menu, name)
+            b.connect('clicked', lambda b, v: self.activate_action("open-adhoc-view", v), to_variant(name))
             b.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
                               config.data.get_target_types('adhoc-view'), Gdk.DragAction.COPY)
             hb.pack_start(b, False, True, 0)
@@ -1225,6 +1150,18 @@ class AdveneApplication(Gtk.Application):
                 pass
         return True
 
+    @named_action(name="app.select-player")
+    def select_player(self, player: str):
+        player = config.data.players[player]
+        self.controller.select_player(player)
+        return True
+
+    @named_action(name="app.activate-package")
+    def activate_package(self, alias: str):
+        self.controller.activate_package(alias)
+        return True
+
+    @named_action(name="app.goto-time-dialog")
     def goto_time_dialog(self, *p):
         """Display a dialog to go to a given time.
         """
@@ -1233,6 +1170,7 @@ class AdveneApplication(Gtk.Application):
             self.controller.update_status("seek", t)
         return True
 
+    @named_action(name="app.verify-video-checksum")
     def verify_video_checksum(self, *p):
         name = helper.uri2path(self.controller.get_default_media())
         if not name:
@@ -1493,6 +1431,7 @@ class AdveneApplication(Gtk.Application):
         self.run()
         logger.debug(" After self.run")
 
+    @named_action(name="app.check-for-update")
     def check_for_update(self, *p):
         timeout=socket.getdefaulttimeout()
         try:
@@ -1952,49 +1891,68 @@ class AdveneApplication(Gtk.Application):
         self.update_control_toolbar(self.player_toolbar)
         update_player_menu(self.gui.menu_map['player_select_menu'], self.controller.player.player_id)
 
-    def player_play_pause(self, event):
-        p=self.controller.player
+    @named_action(name="app.player-play-pause")
+    def player_play_pause(self, event=None):
+        p = self.controller.player
+        if not p.get_uri() and not 'record' in p.player_capabilities:
+            # No movie file is defined yet. Propose to choose one.
+            self.on_b_addfile_clicked()
+            return True
         if p.is_playing():
-            self.controller.update_status('pause')
+            if 'record' in p.player_capabilities:
+                self.controller.update_status("stop")
+            else:
+                self.controller.update_status("pause")
         else:
-            self.controller.update_status('start')
+            if 'record' in p.player_capabilities:
+                self.controller.update_status("start")
+            else:
+                self.controller.update_status("resume")
+        return True
 
-    def player_forward(self, event):
-        if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
+    @named_action(name="app.player-forward")
+    def player_forward(self, event=None):
+        if event and event.get_state() & Gdk.ModifierType.SHIFT_MASK:
             i='second-time-increment'
         else:
             i='time-increment'
         self.controller.update_status("seek_relative", config.data.preferences[i], notify=False)
 
-    def player_rewind(self, event):
-        if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
+    @named_action(name="app.player-rewind")
+    def player_rewind(self, event=None):
+        if event and event.get_state() & Gdk.ModifierType.SHIFT_MASK:
             i='second-time-increment'
         else:
             i='time-increment'
         self.controller.update_status("seek_relative", -config.data.preferences[i], notify=False)
 
-    def player_forward_frame(self, event):
-        if config.data.preferences['custom-updown-keys'] or event.get_state() & Gdk.ModifierType.SHIFT_MASK:
+    @named_action(name="app.player-forward-frame")
+    def player_forward_frame(self, event=None):
+        if config.data.preferences['custom-updown-keys'] or (event and event.get_state() & Gdk.ModifierType.SHIFT_MASK):
             self.controller.update_status("seek_relative", +config.data.preferences['third-time-increment'], notify=False)
         else:
             self.controller.move_frame(+1)
 
-    def player_rewind_frame(self, event):
-        if config.data.preferences['custom-updown-keys'] or event.get_state() & Gdk.ModifierType.SHIFT_MASK:
+    @named_action(name="app.player-rewind-frame")
+    def player_rewind_frame(self, event=None):
+        if config.data.preferences['custom-updown-keys'] or (event and event.get_state() & Gdk.ModifierType.SHIFT_MASK):
             self.controller.update_status("seek_relative", -config.data.preferences['third-time-increment'], notify=False)
         else:
             self.controller.move_frame(-1)
 
-    def player_create_bookmark(self, event):
+    @named_action(name="app.player-create-bookmark")
+    def player_create_bookmark(self, event=None):
         p=self.controller.player
         if p.is_playing():
             self.create_bookmark(p.current_position_value,
-                                 insert_after_current=(event.get_state() & Gdk.ModifierType.SHIFT_MASK))
+                                 insert_after_current=(event and event.get_state() & Gdk.ModifierType.SHIFT_MASK))
 
-    def player_home(self, event):
+    @named_action(name="app.player-goto-start")
+    def player_home(self, event=None):
         self.controller.update_status("seek", 0)
 
-    def player_end(self, event):
+    @named_action(name="app.player-goto-end")
+    def player_end(self, event=None):
         c=self.controller
         c.update_status("seek_relative", -config.data.preferences['time-increment'])
 
@@ -2204,7 +2162,7 @@ class AdveneApplication(Gtk.Application):
             ('playpause',
              _("Play/Pause [Control-Tab / Control-Space]"),
              Gtk.STOCK_MEDIA_PLAY,
-             self.on_b_play_clicked),
+             self.player_play_pause),
             ('rewind',
              _("Rewind (%.02f s) [Control-Left]") % (config.data.preferences['time-increment'] / 1000.0),
              Gtk.STOCK_MEDIA_REWIND,
@@ -2360,6 +2318,7 @@ class AdveneApplication(Gtk.Application):
         pop=self.open_adhoc_view('edit', element=element, destination=destination)
         return pop
 
+    @named_action(name="app.undo", shortcut="<Primary>z")
     def undo(self, *p):
         """Undo the last modifying action.
         """
@@ -2369,7 +2328,8 @@ class AdveneApplication(Gtk.Application):
             pass
         return True
 
-    def save_snapshot_as(self, position, filename=None, retry=True):
+    @named_action(name="app.save-snapshot")
+    def save_snapshot_as(self, position=None, filename=None, retry=True):
         """Save the snapshot for the given position into a file.
 
         If supported by the player, it will save the full-resolution screenshot.
@@ -2384,6 +2344,9 @@ class AdveneApplication(Gtk.Application):
                     self.controller.queue_action(dialog.message_dialog, _("Screenshot saved in\n %s") % str(fname), modal=False)
             except Exception as e:
                 self.controller.queue_action(dialog.message_dialog, _("Could not save screenshot:\n %s") % str(e), icon=Gtk.MessageType.ERROR, modal=False)
+
+        if position is None:
+            position = self.controller.update()
 
         if filename is None:
             name = "%s-%010d.png" % (
@@ -2421,7 +2384,11 @@ class AdveneApplication(Gtk.Application):
                            self.controller.package.imagecache.get(position))
         return True
 
-    def export_element(self, element, filter_id=None):
+    @named_action(name="app.export-package")
+    def export_element(self, element=None, filter_id=None):
+        if element is None:
+            element = self.controller.package
+
         if isinstance(element, Package):
             title=_("Export package data")
         elif isinstance(element, AnnotationType):
@@ -2628,7 +2595,8 @@ class AdveneApplication(Gtk.Application):
             self.controller.notify("ViewEditEnd", view=v)
         return True
 
-    def open_adhoc_view(self, name, label=None, destination='default', parameters=None, **kw):
+    @named_action(name="app.open-adhoc-view")
+    def open_adhoc_view(self, name: str, label=None, destination='default', parameters=None, **kw):
         """Open the given adhoc view.
 
         Destination can be: 'popup', 'south', 'west', 'east', 'fareast' or None.
@@ -2796,6 +2764,38 @@ class AdveneApplication(Gtk.Application):
                 if pane.props.max_position - pane.props.position < min_size:
                     pane.set_position(pane.props.max_position - min_size)
         return view
+
+    @named_action(name="app.open-adhoc-view-menu")
+    def open_adhoc_view_menu(self, viewname: str):
+        """Open a adhoc view, with a menu to specify destination
+
+        In expert mode, directly open the view. Else, display a
+        popup menu proposing the various places where the view can
+        be opened.
+        """
+        if config.data.preferences['expert-mode']:
+            # In expert mode, directly open the view. Experts know
+            # how to use drag and drop anyway.
+            self.open_adhoc_view(viewname)
+            return True
+
+        menu = Gtk.Menu()
+
+        for (label, destination) in (
+                (_("Open this view..."), 'default'),
+                (_("...in its own window"), 'popup'),
+                (_("...embedded east of the video"), 'east'),
+                (_("...embedded west of the video"), 'west'),
+                (_("...embedded south of the video"), 'south'),
+                (_("...embedded at the right of the window"), 'fareast')):
+            item = Gtk.MenuItem(label)
+            item.connect('activate', lambda b, n, d: self.open_adhoc_view(n, destination=d))
+            menu.append(item)
+
+        menu.show_all()
+        menu.popup_at_pointer(None)
+
+        return True
 
     def get_adhoc_view_instance_from_id(self, ident):
         """Return the adhoc view instance matching the identifier.
@@ -3062,6 +3062,7 @@ class AdveneApplication(Gtk.Application):
         """
         return CreateElementPopup(*p, **kw)
 
+    @named_action(name="app.evaluator", shortcut="<Primary>e")
     def popup_evaluator(self, localsdict=None):
         p=self.controller.package
         try:
@@ -3256,7 +3257,8 @@ class AdveneApplication(Gtk.Application):
             debug_slow_update_hook(self.controller)
         return True
 
-    def search_string(self, s):
+    @named_action(name="app.search-string")
+    def search_string(self, s: str):
         if not ' ' in s:
             # Single-word search. Forward to existing note-taking or
             # transcription views.
@@ -3525,6 +3527,7 @@ class AdveneApplication(Gtk.Application):
         self.make_pane_visible('fareast')
         return True
 
+    @named_action(name="app.quit", shortcut="<Primary>q")
     def on_exit(self, source=None, event=None):
         """Generic exit callback."""
         for a, p in self.controller.packages.items():
@@ -3682,7 +3685,8 @@ class AdveneApplication(Gtk.Application):
 
         return True
 
-    # Callbacks functions
+    # Callbacks functions/actions
+    @named_action(name="app.create-text-annotation")
     def on_create_text_annotation(self, win=None, event=None):
         c = self.controller
         if c.player.is_playing():
@@ -3708,6 +3712,7 @@ class AdveneApplication(Gtk.Application):
             self.edit_element(a)
         return True
 
+    @named_action(name="app.create-svg-annotation")
     def on_create_svg_annotation(self, win=None, event=None):
         c = self.controller
         self.controller.update_snapshot(c.player.current_position_value)
@@ -3787,6 +3792,7 @@ class AdveneApplication(Gtk.Application):
                 return True
         return False
 
+    @named_action(name="app.new-package")
     def on_new1_activate (self, button=None, data=None):
         """New package. Erase the current one.
         """
@@ -3799,6 +3805,7 @@ class AdveneApplication(Gtk.Application):
             self.controller.load_package ()
         return True
 
+    @named_action(name="app.close")
     def on_close1_activate (self, button=None, data=None):
         p=self.controller.package
         if p._modified:
@@ -3827,9 +3834,14 @@ class AdveneApplication(Gtk.Application):
 
         return True
 
+    @named_action(name="app.open")
+    def on_open_url(self, url: str):
+        self.on_open1_activate(filename=url)
+
+    @named_action(name="app.open-dialog")
     def on_open1_activate (self, button=None, data=None, filename=None):
         """Open a file selector to load a package.
-"""
+        """
         if config.data.path['data']:
             d=str(config.data.path['data'])
         else:
@@ -3883,6 +3895,7 @@ class AdveneApplication(Gtk.Application):
             self.set_busy_cursor(False)
         return True
 
+    @named_action(name="app.save", shortcut="<Primary>s")
     def on_save1_activate (self, button=None, package=None):
         """Save the current package."""
         if package is None:
@@ -3925,6 +3938,7 @@ class AdveneApplication(Gtk.Application):
                                       Gtk.MessageType.ERROR)
         return True
 
+    @named_action(name="app.save-as", shortcut="<Primary><Shift>s")
     def on_save_as1_activate (self, button=None, package=None):
         """Save the package with a new name."""
         if package is None:
@@ -3981,6 +3995,7 @@ class AdveneApplication(Gtk.Application):
                                       Gtk.MessageType.ERROR)
         return True
 
+    @named_action(name="app.save-session")
     def on_save_session1_activate (self, button=None, data=None):
         """Save the current session.
         """
@@ -4002,7 +4017,7 @@ class AdveneApplication(Gtk.Application):
             self.log(_("Session saved in %s") % filename)
         return True
 
-
+    @named_action(name="app.import-dvd-chapters")
     def on_import_dvd_chapters1_activate (self, button=None, data=None):
         # FIXME: loosy test
         if (self.controller.get_default_media() is None
@@ -4026,10 +4041,12 @@ class AdveneApplication(Gtk.Application):
                                   icon=Gtk.MessageType.ERROR)
         return True
 
+    @named_action(name="app.import-file")
     def on_import_file1_activate (self, button=None, data=None):
         self.open_adhoc_view('importerview')
         return False
 
+    @named_action(name="app.process-video")
     def on_process_video_activate(self, button=None, data=None):
         fname = self.controller.get_default_media()
         # Convert media path to local filename if possible
@@ -4042,26 +4059,12 @@ class AdveneApplication(Gtk.Application):
                                   icon=Gtk.MessageType.ERROR)
         return False
 
+    @named_action(name="app.find")
     def on_find1_activate (self, button=None, data=None):
         self.open_adhoc_view('interactivequery', destination='east')
         return True
 
-    def on_cut1_activate (self, button=None, data=None):
-        logger.error("Cut: Not implemented yet.")
-        return False
-
-    def on_copy1_activate (self, button=None, data=None):
-        logger.error("Copy: Not implemented yet.")
-        return False
-
-    def on_paste1_activate (self, button=None, data=None):
-        logger.error("Paste: Not implemented yet.")
-        return False
-
-    def on_delete1_activate (self, button=None, data=None):
-        logger.error("Delete: Not implemented yet (cf popup menu).")
-        return False
-
+    @named_action(name="app.edit-ruleset")
     def on_edit_ruleset1_activate (self, button=None, data=None):
         """Default ruleset editing."""
         w=Gtk.Window(Gtk.WindowType.TOPLEVEL)
@@ -4119,52 +4122,7 @@ class AdveneApplication(Gtk.Application):
         w.show()
         return True
 
-    def on_adhoc_treeview_activate (self, button=None, data=None):
-        self.open_adhoc_view('tree')
-        return True
-
-    def on_adhoc_timeline_activate (self, button=None, data=None):
-        self.open_adhoc_view('timeline')
-        return True
-
-    def on_view_urlstack_activate (self, button=None, data=None):
-        """Open the URL stack view plugin.
-
-        Useless now, the urlstack is always here. This code will be
-        removed sometime...
-        """
-        return True
-
-    def on_adhoc_transcription_activate (self, button=None, data=None):
-        self.open_adhoc_view('transcription')
-        return True
-
-    def on_adhoc_transcribe_activate (self, button=None, data=None):
-        self.open_adhoc_view('transcribe')
-        return True
-
-    def on_adhoc_transcription_package_activate (self, button=None, data=None):
-        self.open_adhoc_view('transcription', source="here/annotations/sorted")
-        return True
-
-    def on_adhoc_browser_activate (self, button=None, data=None):
-        self.open_adhoc_view('browser')
-        return True
-
-    def on_adhoc_web_browser_activate (self, button=None, data=None):
-        self.open_adhoc_view('webbrowser')
-        return True
-
-    def on_evaluator2_activate (self, button=None, data=None):
-        self.popup_evaluator()
-        return True
-
-    def on_webserver_log1_activate (self, button=None, data=None):
-        self.display_textfile(config.data.advenefile('webserver.log', 'settings'),
-                              title=_("Webserver log"),
-                              viewname='weblogview')
-        return True
-
+    @named_action(name="app.show-media-information")
     def on_view_mediainformation_activate (self, button=None, data=None):
         """View mediainformation.
         """
@@ -4192,6 +4150,7 @@ Image cache information: %(imagecache)s
         logger.info(msg)
         return True
 
+    @named_action(name="app.about")
     def on_about1_activate (self, button=None, data=None):
         """Activate the About window."""
         d=Gtk.AboutDialog()
@@ -4210,26 +4169,9 @@ Image cache information: %(imagecache)s
 
         return True
 
-    def on_b_play_clicked (self, button=None, data=None):
-        p = self.controller.player
-        if not p.get_uri() and not 'record' in p.player_capabilities:
-            # No movie file is defined yet. Propose to choose one.
-            self.on_b_addfile_clicked()
-            return True
-        if p.status == p.PlayingStatus:
-            if 'record' in p.player_capabilities:
-                self.controller.update_status("stop")
-            else:
-                self.controller.update_status("pause")
-        else:
-            if 'record' in p.player_capabilities:
-                self.controller.update_status("start")
-            else:
-                self.controller.update_status("resume")
-        return True
-
+    @named_action(name="app.open-video")
     def on_b_addfile_clicked (self, button=None, data=None):
-        """Open a movie file"""
+        """Open a video file"""
         mp=[ d for d in str(config.data.path['moviepath']).split(os.path.pathsep) if d != '_' ]
         if mp:
             default=mp[0]
@@ -4244,6 +4186,7 @@ Image cache information: %(imagecache)s
             self.controller.set_default_media(filename)
         return True
 
+    @named_action(name="app.open-dvd")
     def on_b_selectdvd_clicked (self, button=None, data=None):
         """Play a DVD."""
         window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
@@ -4288,6 +4231,7 @@ Image cache information: %(imagecache)s
 
         return True
 
+    @named_action(name="app.open-video-stream")
     def on_select_a_video_stream1_activate(self, button=None, data=None):
         stream=dialog.entry_dialog(title=_("Select a video stream"),
                                    text=_("Enter the address of a video stream"))
@@ -4299,16 +4243,19 @@ Image cache information: %(imagecache)s
             self.controller.set_default_media(stream)
         return True
 
+    @named_action(name="app.edit-imports")
     def on_package_imports1_activate (self, button=None, data=None):
         """Edit imported elements from other packages."""
         imp=advene.gui.edit.imports.Importer(controller=self.controller)
         imp.popup()
         return True
 
+    @named_action(name="app.edit-package-properties")
     def on_package_properties1_activate (self, button=None, data=None):
         self.open_adhoc_view('edit', element=self.controller.package)
         return True
 
+    @named_action(name="app.edit-preferences")
     def on_preferences1_activate (self, button=None, data=None):
         # Direct options are directly retrieved/stored from/into config.data.preferences
         direct_options=('history-size-limit', 'scroll-increment', 'second-scroll-increment',
@@ -4567,6 +4514,7 @@ Image cache information: %(imagecache)s
 
         return True
 
+    @named_action(name="app.save-imagecache")
     def on_save_imagecache1_activate (self, button=None, data=None):
         media=self.controller.get_default_media()
         id_ = helper.mediafile2id (media)
@@ -4577,6 +4525,7 @@ Image cache information: %(imagecache)s
             logger.error(_("Cannot save imagecache for %s"), media, exc_info=True)
         return True
 
+    @named_action(name="app.reset-imagecache")
     def on_reset_imagecache_activate (self, button=None, data=None):
         valid = self.controller.package.imagecache.valid_snapshots()
         self.controller.package.imagecache.reset()
@@ -4584,6 +4533,7 @@ Image cache information: %(imagecache)s
             self.controller.notify('SnapshotUpdate', position=t, media=self.controller.package.media)
         return True
 
+    @named_action(name="app.player-restart")
     def on_restart_player1_activate (self, button=None, data=None):
         self.log (_("Restarting player..."))
         self.controller.restart_player ()
@@ -4621,14 +4571,17 @@ Image cache information: %(imagecache)s
             self.player_create_bookmark(event)
         return False
 
+    @named_action(name="app.help")
     def on_help1_activate (self, button=None, data=None):
         self.controller.open_url ('https://www.advene.org/wiki/AdveneUserGuide')
         return True
 
+    @named_action(name="app.help-support")
     def on_support1_activate (self, button=None, data=None):
         self.controller.open_url ('https://github.com/oaubert/advene/')
         return True
 
+    @named_action(name="app.help-shorcuts")
     def on_helpshortcuts_activate (self, button=None, data=None):
         helpfile = Path(config.data.advenefile('shortcuts.html', 'web'))
         if helpfile.is_file():
@@ -4637,14 +4590,24 @@ Image cache information: %(imagecache)s
             self.controller.open_url('https://www.advene.org/wiki/AdveneShortcuts')
         return True
 
+    @named_action(name="app.show-webserver-log")
+    def on_webserver_log1_activate (self, button=None, data=None):
+        self.display_textfile(config.data.advenefile('webserver.log', 'settings'),
+                              title=_("Webserver log"),
+                              viewname='weblogview')
+        return True
+
+    @named_action(name="app.show-log")
     def on_advene_log_display(self, button=None, data=None):
         self.open_adhoc_view('logmessages', destination='south')
         return True
 
+    @named_action(name="app.show-logfile")
     def on_advene_log_folder_display(self, button=None, data=None):
         open_in_filebrowser(config.data.advenefile('', 'settings'))
         return True
 
+    @named_action(name="app.create-view")
     def on_create_view_activate (self, button=None, data=None):
         cr = CreateElementPopup(type_ = View,
                                 parent=self.controller.package,
@@ -4652,6 +4615,7 @@ Image cache information: %(imagecache)s
         cr.popup()
         return True
 
+    @named_action(name="app.create-query")
     def on_create_query_activate (self, button=None, data=None):
         cr = CreateElementPopup(type_ = Query,
                                 parent=self.controller.package,
@@ -4659,6 +4623,7 @@ Image cache information: %(imagecache)s
         cr.popup()
         return True
 
+    @named_action(name="app.create-schema")
     def on_create_schema_activate (self, button=None, data=None):
         cr = CreateElementPopup(type_ = Schema,
                                 parent=self.controller.package,
@@ -4666,6 +4631,7 @@ Image cache information: %(imagecache)s
         sc=cr.popup()
         return sc
 
+    @named_action(name="app.create-annotation-type")
     def on_create_annotation_type_activate (self, button=None, data=None):
         at=self.ask_for_annotation_type(text=_("Creation of a new annotation type"),
                                         create=True,
@@ -4674,6 +4640,7 @@ Image cache information: %(imagecache)s
             return None
         return at
 
+    @named_action(name="app.create-relation-type")
     def on_create_relation_type_activate (self, button=None, data=None):
         sc=self.ask_for_schema(text=_("Select the schema where you want to\ncreate the new relation type."), create=True)
         if sc is None:
@@ -4684,6 +4651,7 @@ Image cache information: %(imagecache)s
         rt=cr.popup()
         return rt
 
+    @named_action(name="app.merge-package")
     def on_merge_package_activate(self, button=None, data=None):
         if config.data.path['data']:
             d=str(config.data.path['data'])
@@ -4734,6 +4702,7 @@ Image cache information: %(imagecache)s
                                    controller=self.controller)
             return True
 
+    @named_action(name="app.import-package")
     def on_import_package_activate(self, button=None, data=None):
         if config.data.path['data']:
             d=str(config.data.path['data'])
@@ -4756,6 +4725,7 @@ Image cache information: %(imagecache)s
         self.open_adhoc_view('packageimporter', sourcepackage=source, destpackage=self.controller.package)
         return True
 
+    @named_action(name="app.merge-template-package")
     def on_merge_template_package_activate(self, button=None, data=None):
         counter = self.controller.update_admin_views_from_template()
         message = _("Template package update - created %(new)d view(s), updated %(update_content)d view(s)") % counter
@@ -4763,6 +4733,7 @@ Image cache information: %(imagecache)s
         dialog.message_dialog(message)
         return True
 
+    @named_action(name="app.save-workspace-as-view")
     def on_save_workspace_as_package_view1_activate (self, button=None, data=None):
         name=self.controller.package._idgenerator.get_id(View)+'_'+'workspace'
 
@@ -4829,6 +4800,7 @@ Image cache information: %(imagecache)s
             self.controller.notify("ViewEditEnd", view=v)
         return True
 
+    @named_action(name="app.save-workspace-as-default")
     def on_save_workspace_as_default1_activate (self, button=None, data=None):
         d=config.data.advenefile('defaults', 'settings')
         if not os.path.isdir(d):
@@ -4849,16 +4821,19 @@ Image cache information: %(imagecache)s
         self.controller.log(_("Standard workspace has been saved"))
         return True
 
+    @named_action(name="app.export-website")
     def on_website_export_activate(self, button=None, data=None):
         self.export_element(self.controller.package, filter_id='WebsiteExporter')
         return True
 
+    @named_action(name="app.export")
     def on_export_activate (self, button=None, data=None):
         """Export a whole package.
         """
         self.export_element(self.controller.package)
         return True
 
+    @named_action(name="app.update-screenshots")
     def update_annotation_screenshots(self, *p):
         """Update screenshot for annotations
 
@@ -4881,6 +4856,8 @@ Image cache information: %(imagecache)s
             dialog.message_dialog(_("No snapshot to update"), modal=False)
         return True
 
+    # FIXME: this should be a stateful action
+    @named_action(name="app.simplify-interface")
     def on_simplify_interface_activate(self, *p):
         if self.viewbook['east'].widget.get_visible():
             # Full state -> go into simplified state

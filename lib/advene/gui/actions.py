@@ -18,6 +18,8 @@
 #
 """Gio.Action related helpers
 """
+import logging
+logger = logging.getLogger(__name__)
 
 #
 # Note: this code is adapted from
@@ -95,3 +97,93 @@ def menuitem_new(label, action_name=None, parameter=None):
     if parameter is not None:
         item.set_attribute_value("target", to_variant(parameter))
     return item
+
+REGISTERED_ACTIONS = {}
+class named_action:
+    """Decorator. Turns a regular function (/method) into a full blown Action
+    class.
+
+    >>> class A:
+    ...     @action(name="my_action", label="my action")
+    ...     def myaction(self):
+    ...         print("action called")
+    >>> a = A()
+    >>> a.myaction()
+    action called
+    >>> is_action(a.myaction)
+    True
+    >>> for method in dir(A):
+    ...     if is_action(getattr(A, method, None)):
+    ...         print(method)
+    myaction
+    >>> A.myaction.__action__.name
+    'my_action'
+    >>> A.myaction.__action__.label
+    'my action'
+    """
+
+    def __init__(
+        self, name, label=None, tooltip=None, icon_name=None, shortcut=None, state=None
+    ):
+        self.scope, self.name = name.split(".", 2) if "." in name else ("win", name)
+        self.label = label
+        self.tooltip = tooltip
+        self.icon_name = icon_name
+        self.shortcut = shortcut
+        self.state = state
+        self.arg_type = None
+        self.function = None
+        REGISTERED_ACTIONS[self.detailed_name] = self
+
+    @property
+    def detailed_name(self):
+        return f"{self.scope}.{self.name}"
+
+    def __call__(self, func):
+        type_hints = get_type_hints(func)
+        if "return" in type_hints:
+            del type_hints["return"]
+        if len(type_hints) >= 1:
+            # assume the first argument (exclusing self) is our parameter
+            self.arg_type = next(iter(type_hints.values()))
+        func.__action__ = self
+        self.function = func
+        return func
+
+
+def is_action(func):
+    return hasattr(func, "__action__")
+
+def _action_activate(action, param, obj, name):
+    na = REGISTERED_ACTIONS.get(name, None)
+    if na is None:
+        logger.error(f"Cannot find named action: {name}")
+        return
+    method = na.function
+    if param is not None:
+        method(obj, from_variant(param))
+        if action.get_state_type():
+            action.set_state(param)
+    else:
+        method(obj)
+
+def create_gio_action(action, provider, attrname):
+    if action.state is not None:
+        state = action.state(provider) if callable(action.state) else action.state
+        a = Gio.SimpleAction.new_stateful(
+            action.name, as_variant_type(action.arg_type), to_variant(state)
+        )
+        a.connect("change-state", _action_activate, provider, attrname)
+    else:
+        a = Gio.SimpleAction.new(action.name, as_variant_type(action.arg_type))
+        a.connect("activate", _action_activate, provider, attrname)
+    return a
+
+def register_named_actions(app):
+    """Register application actions
+    """
+    for attrname, action in REGISTERED_ACTIONS.items():
+        a = create_gio_action(action, app, attrname)
+        app.add_action(a)
+        if action.shortcut:
+            app.set_accels_for_action(f"{action.scope}.{action.name}", [action.shortcut])

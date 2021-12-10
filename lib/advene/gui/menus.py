@@ -37,7 +37,7 @@ class RecentFilesMenu(Gio.Menu):
         for item in recent_manager.get_items():
             if APPNAME in item.get_applications():
                 menu_item = menuitem_new(item.get_uri_display(),
-                                         "app.file-open-recent",
+                                         "app.open",
                                          item.get_uri())
                 self.append_item(menu_item)
                 if self.get_n_items() > 7:
@@ -76,8 +76,8 @@ def update_package_list (menu, controller):
             label = '  ' + ident
         if p._modified:
             label += _(' (modified)')
-        i = Gio.MenuItem.new(label, 'app.activate-package')
-        i.set_attribute_value("target", to_variant(ident))
-        menu.append_item(i)
+        menu.append_item(menuitem_new(label,
+                                      'app.activate-package',
+                                      ident))
     return True
 
