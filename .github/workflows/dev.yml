@@ -33,5 +33,4 @@ jobs:
       - name: "Upload binary as artifact"
         uses: actions/upload-artifact@v2
         with:
-          name: advene-dev
           path: dev/win_installer/advene-*-installer.exe
