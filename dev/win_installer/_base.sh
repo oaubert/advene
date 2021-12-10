@@ -142,12 +142,12 @@ function install_advene {
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
-    local GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
+    local GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
     ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
 
     echo "build='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
     echo "build_date='$(date -Is)'">> lib/advene/core/version.py
-    git describe > "${MINGW_ROOT}/share/buildinfo.log"
+    git describe --always > "${MINGW_ROOT}/share/buildinfo.log"
     git status --long --verbose >> "${MINGW_ROOT}/share/buildinfo.log"
     cd ..
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
@@ -321,7 +321,7 @@ function build_installer {
     # is not correctly set here, for some rease. Fetch the info again from git-describe.
     (
         cd "${REPO_CLONE}"
-        GIT_DESCRIBE=$(git describe | sed -e 's/release\///')
+        GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
         ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
     )
 
