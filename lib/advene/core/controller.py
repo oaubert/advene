@@ -1489,8 +1489,9 @@ class AdveneController:
                                            ident=ident,
                                            fragment=annotation.fragment.clone())
         if position is not None:
-            an.fragment.begin=position
-            an.fragment.end=position+annotation.fragment.duration
+            duration = annotation.fragment.duration
+            an.fragment.begin = position
+            an.fragment.end = position + duration
         self.package.annotations.append(an)
         an.author=config.data.userid
         # Check if types are compatible.
