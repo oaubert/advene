@@ -64,6 +64,8 @@ class TranscriptionView(AdhocView):
         self.options = {
             'display-bounds': False,
             'display-time': False,
+            # If display-time, then should we display both begin and end?
+            'display-end-time': True,
             'separator': '\n',
             # Use the default representation parameter for annotations
             'default-representation': True,
@@ -107,11 +109,13 @@ class TranscriptionView(AdhocView):
         self.modified=False
 
         self.quick_options=helper.CircularList( (
-            # (separator, display_time)
-            ("\n", False),
-            (" ", False),
-            (" ", True),
-            ("\n", True),
+            # (separator, display_time, display_end_time)
+            ("\n", False, False),
+            (" ", False, False),
+            (" ", True, True),
+            ("\n", True, True),
+            (" ", True, False),
+            ("\n", True, False),
             ) )
 
         # Try to determine a default representation
@@ -168,7 +172,8 @@ class TranscriptionView(AdhocView):
                         _('User defined'): user_defined,
                         })
         ew.add_entry(_("User-defined separator"), "user-separator", _("Separator used if user-defined is selected.Use \\n for a newline and \\t for a tabulation."))
-        ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestsamp values"))
+        ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestamp values"))
+        ew.add_checkbox(_("Display end timestamps"), "display-end-time", _("Display end timestamp (if Display timestamps is active)"))
         ew.add_checkbox(_("Display annotation bounds"), 'display-bounds', _("Display annotation bounds"))
         res=ew.popup()
 
@@ -255,7 +260,7 @@ class TranscriptionView(AdhocView):
     def quick_options_toggle(self, *p):
         """Quickly toggle between different presentation options.
         """
-        self.options['separator'], self.options['display-time']=next(self.quick_options)
+        self.options['separator'], self.options['display-time'], self.options['display-end-time'] = next(self.quick_options)
         self.refresh()
         return True
 
@@ -405,7 +410,7 @@ class TranscriptionView(AdhocView):
                                  left_gravity=True)
             mark.set_visible(self.options['display-bounds'])
 
-            if self.options['display-time']:
+            if self.options['display-time'] and self.options['display-end-time']:
                 insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.end), "bound")
 
             insert_at_cursor_with_tags_by_name(self.options['separator'], "bound")
