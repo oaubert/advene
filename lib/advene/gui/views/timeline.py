@@ -1352,28 +1352,23 @@ class TimeLine(AdhocView):
                                                                             position=position)
             return self.transmuted_annotation
 
-        def copy_annotation(i, an, typ, position=None, relationtype=None):
-            self.transmuted_annotation=self.controller.transmute_annotation(an,
-                                                                            typ,
-                                                                            delete=False,
-                                                                            position=position)
-            # Widget creation is done by the event notification,
-            # which cannot (except by chance) have executed yet.
-            # So store the annotation ref in self.transmuted_annotation,
-            # and handle this code in update_annotation()
-            # b=self.get_widget_for_annotation(an)
-            # b.grab_focus()
-            if relationtype is not None:
-                # Directly create a relation
-                self.create_relation(an, self.transmuted_annotation, relationtype)
-            return self.transmuted_annotation
-
-        def copy_selection(i, sel, typ, delete=False):
+        def copy_selection(i, sel, typ, delete=False, position=None, relationtype=None):
+            # If position is specified, then consider it as the
+            # position of the first annotation of the selection
+            if position is not None:
+                offset = position - min(a.fragment.begin for a in sel)
             for an in sel:
-                # FIXME: if sel.typ == an.typ
+                new_position = None
+                if position:
+                    new_position = offset + an.fragment.begin
                 self.transmuted_annotation=self.controller.transmute_annotation(an,
                                                                                 typ,
-                                                                                delete=delete)
+                                                                                delete=delete,
+                                                                                position=new_position)
+                if relationtype is not None and not delete:
+                    # Create a relation
+                    self.create_relation(an, self.transmuted_annotation, relationtype)
+
             self.unselect_all()
             return self.transmuted_annotation
 
@@ -1384,41 +1379,33 @@ class TimeLine(AdhocView):
 
         if action & Gdk.DragAction.COPY:
             # Direct copy
-            if len(sources) > 1:
-                if source.type == dest:
-                    return True
-                copy_selection(None, sources, dest)
-            else:
-                if source.type != dest:
-                    position=None
-                copy_annotation(None, source, dest, position=position)
+            # Use position to copy annotations with new timecodes only in same type copy
+            if source.type != dest:
+                position = None
+            copy_selection(None, sources, dest, position=position)
             return True
         elif action & Gdk.DragAction.MOVE:
-            if len(sources) > 1:
-                if source.type == dest:
-                    return True
-                copy_selection(None, sources, dest, delete=True)
-            else:
-                if source.type != dest:
-                    position=None
-                move_annotation(None, source, dest, position=position)
+            if source.type != dest:
+                position = None
+            copy_selection(None, sources, dest, delete=True, position=position)
             return True
         elif action & Gdk.DragAction.LINK:
-            # Copy and create a relation. Ignore the selection (?)
+            # Copy and create relations
             if len(relationtypes) == 1:
-                copy_annotation(None, source, dest, relationtype=relationtypes[0])
+                # There is only 1 relation type, use it
+                copy_selection(None, sources, dest, relationtype=relationtypes[0])
             elif not relationtypes:
                 # Create a new relationtype
                 self.log("FIXME: no valid relation type is defined")
             else:
-                # Multiple valid relationtypes.
-                menu=Gtk.Menu()
-                item=Gtk.MenuItem(_("Select the appropriate relation type"))
+                # Multiple valid relationtypes, select one.
+                menu = Gtk.Menu()
+                item = Gtk.MenuItem(_("Select the appropriate relation type"))
                 menu.append(item)
                 item.set_sensitive(False)
                 for rt in relationtypes:
-                    sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
-                    sitem.connect('activate', copy_annotation, source, dest, None, rt)
+                    sitem = Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
+                    sitem.connect('activate', copy_selection, sources, dest, None, None, rt)
                     menu.append(sitem)
                 menu.show_all()
                 menu.popup_at_pointer(None)
@@ -1445,7 +1432,7 @@ class TimeLine(AdhocView):
 
         if source.type != dest:
             item=Gtk.MenuItem(_("Duplicate annotation to type %s") % dest_title, use_underline=False)
-            item.connect('activate', copy_annotation, source, dest)
+            item.connect('activate', copy_selection, sources, dest)
             menu.append(item)
 
             item=Gtk.MenuItem(_("Move annotation to type %s") % dest_title, use_underline=False)
@@ -1458,7 +1445,7 @@ class TimeLine(AdhocView):
             item=Gtk.MenuItem(_("Duplicate to type %(type)s at %(position)s") % {
                 'type': dest_title,
                 'position': helper.format_time(position) }, use_underline=False)
-            item.connect('activate', copy_annotation, source, dest, position)
+            item.connect('activate', copy_selection, sources, dest, False, position)
             menu.append(item)
 
             item=Gtk.MenuItem(_("Move to type %(type)s at %(position)s") % {
@@ -1476,7 +1463,7 @@ class TimeLine(AdhocView):
                 sm=Gtk.Menu()
                 for rt in relationtypes:
                     sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
-                    sitem.connect('activate', copy_annotation, source, dest, None, rt)
+                    sitem.connect('activate', copy_selection, sources, dest, False, None, rt)
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
@@ -1487,7 +1474,7 @@ class TimeLine(AdhocView):
                 sm=Gtk.Menu()
                 for rt in relationtypes:
                     sitem=Gtk.MenuItem(self.controller.get_title(rt), use_underline=False)
-                    sitem.connect('activate', copy_annotation, source, dest, position, rt)
+                    sitem.connect('activate', copy_selection, sources, dest, False, position, rt)
                     sm.append(sitem)
                 menu.append(item)
                 item.set_submenu(sm)
@@ -3358,6 +3345,7 @@ class TimeLine(AdhocView):
                     (_('Merge annotations'), self.selection_merge),
                     (_('Display statistics'), display_stats),
                     (_('Extract video'), extract_video),
+                    # FIXME: search and replace?
             ):
                 i=Gtk.MenuItem(label)
                 i.connect('activate', action, l)
