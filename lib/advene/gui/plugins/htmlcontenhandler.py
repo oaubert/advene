@@ -259,9 +259,9 @@ class AnnotationTypePlaceholder:
         return True
 
     def parse_html(self, tag, attr):
-        if attr['class'] == 'advene:annotationtype':
-            self.presentation=attr['advene:presentation'].split(':')
-            aid=attr['advene:annotationtype']
+        if attr.get('class') == 'advene:annotationtype':
+            self.presentation = attr.get('advene:presentation', "").split(':')
+            aid = attr.get('advene:annotationtype')
             self.annotationtype = self.controller.package.get_element_by_id(aid)
             if self.annotationtype is None:
                 logger.warning("Problem: non-existent annotation type %s", aid)
