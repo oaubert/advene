@@ -566,7 +566,7 @@ xmlns=&quot;http://advene.org/ns/linked-data/&quot;
        tal attributes=&quot;rdf:resource l/content/parsed/url&quot; /&gt;
        --&gt;
   &lt;/Annotation&gt;
-&lt;/rdf:RDF&gt;</content></view><view dc:creator="oaubert" dc:date="2010-02-26" id="TimedText" viewable-class="*"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">tt</extension><title xmlns="http://purl.org/dc/elements/1.1/">TimedText</title></meta><content mime-type="application/xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;/rdf:RDF&gt;</content></view><view dc:creator="oaubert" dc:date="2010-02-26" id="TimedText" viewable-class="*"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">tt</extension><title xmlns="http://purl.org/dc/elements/1.1/">TimedText</title></meta><content mime-type="application/xml" encoding="utf-8">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;tt xml:lang=&quot;en&quot; xmlns=&quot;http://www.w3.org/2006/10/ttaf1&quot; xmlns:tts=&quot;http://www.w3.org/2006/04/ttaf1#styling&quot;&gt; 
 &lt;head&gt;
   &lt;metadata xmlns:ttm=&quot;http://www.w3.org/2006/10/ttaf1#metadata&quot;&gt; 
@@ -776,7 +776,32 @@ ktbs:hasSubject &quot;&lt;span tal:replace=&quot;package/author&quot;&gt;&lt;/sp
      ]
   }
 }
-</content></view><view viewable-class="package" id="audacity" dc:date="2021-03-17T17:50:59" dc:creator="oaubert"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"></extension><title xmlns="http://purl.org/dc/elements/1.1/">audacity</title></meta><content mime-type="text/plain" encoding="utf-8">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
-&lt;span tal:replace=&quot;python:a.fragment.begin / 1000&quot; &gt;Begin&lt;/span&gt;	 &lt;span tal:replace=&quot;python:a.fragment.end / 1000&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;&lt;/span&gt;</content></view>
+</content></view><view viewable-class="package" id="audacity" dc:date="2021-03-17T17:50:59" dc:creator="oaubert"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool"/><title xmlns="http://purl.org/dc/elements/1.1/">audacity</title></meta><content mime-type="text/plain" encoding="utf-8">&lt;span tal:omit-tag=&quot;&quot; tal:repeat=&quot;a here/annotations/sorted&quot;&gt;
+&lt;span tal:replace=&quot;python:a.fragment.begin / 1000&quot; &gt;Begin&lt;/span&gt;	 &lt;span tal:replace=&quot;python:a.fragment.end / 1000&quot; &gt;End&lt;/span&gt;	&lt;span tal:replace=&quot;a/content/data&quot;&gt;Content&lt;/span&gt;&lt;/span&gt;</content></view><view viewable-class="*" id="transcription" dc:creator="oaubert" dc:date="2021-09-26T18:59:17"><meta><extension xmlns="http://experience.univ-lyon1.fr/advene/ns/advenetool">html</extension><title xmlns="http://purl.org/dc/elements/1.1/">Text transcription</title></meta><content mime-type="text/html" encoding="utf-8">&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Transcription for &lt;span tal:replace=&quot;here/title&quot;&gt;titre&lt;/span&gt;&lt;/title&gt;
+&lt;style&gt;
+.timestamp {
+   font-weight: bold;
+}
+.transcription_text {
+  text-decoration: none;
+  color: black;
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+&lt;h1&gt;Transcription for &lt;em tal:content=&quot;here/title&quot;&gt;élément&lt;/em&gt;&lt;/h1&gt;
+  &lt;div class=&quot;transcription&quot;&gt;
+    &lt;p class=&quot;transcript&quot; tal:repeat=&quot;a here/annotations/sorted&quot; tal:attributes=&quot;annotation-id a/id&quot;&gt;
+        &lt;span tal:attributes=&quot;data-begin a/fragment/begin ; data-end a/fragment/end ; data-type a/type ; data-id a/id&quot; class=&quot;timestamp&quot; &gt;[&lt;span tal:content=&quot;a/fragment/formatted/begin&quot;&gt;&lt;/span&gt;]&lt;/span&gt;
+        &lt;a class=&quot;transcription_text&quot; title=&quot;Click to play the movie&quot; tal:attributes=&quot;href a/player_url&quot; tal:content=&quot;a/content/data&quot;&gt;&lt;/a&gt;
+     &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</content></view>
   </views>
 </package>
