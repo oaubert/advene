@@ -98,7 +98,7 @@ class ProcessLauncher:
         @param args: parameters (overriding default ones)
         @type args: list of strings
         """
-        if self.thread is not None and self.thread.isAlive():
+        if self.thread is not None and self.thread.is_alive():
             return True
         if args is not None:
             self.args=args
@@ -122,7 +122,7 @@ class ProcessLauncher:
         if self.thread is None:
             return False
         else:
-            return self.thread.isAlive()
+            return self.thread.is_alive()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
