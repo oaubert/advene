@@ -226,7 +226,10 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         """
         if value is not None:
             self.setMetaData(config.data.namespace, 'is_template', value)
-        return self.getMetaData(config.data.namespace, 'is_template') or False
+        val = self.getMetaData(config.data.namespace, 'is_template')
+        if val == 'false':
+            val = False
+        return val or False
 
     def getImports (self):
         """Return a collection of this package's imports"""
