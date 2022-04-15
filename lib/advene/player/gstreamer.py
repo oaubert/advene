@@ -104,6 +104,7 @@ class Player:
         # fullscreen Gtk.Window
         self.fullscreen_window = None
         self.fullscreen_drawable = None
+        self.container = None
 
         # Fullscreen timestamp display - cache data
         self.last_timestamp = 0
@@ -590,6 +591,7 @@ class Player:
 
     def set_widget(self, widget, container):
         handle = None
+        self.container = container
 
         if config.data.player['vout'] == 'gtk':
             # Special case: we use a gtk sink, so we get a Gtk widget
@@ -717,16 +719,19 @@ class Player:
             self.fullscreen_window.connect('key-press-event', keypress)
             self.fullscreen_window.connect('button-press-event', buttonpress)
             self.fullscreen_window.connect('destroy', self.unfullscreen)
-            self.fullscreen_drawable = get_drawable()
+            if config.data.player['vout'] == 'gtk':
+                self.fullscreen_drawable = self.imagesink.props.widget
+            else:
+                self.fullscreen_drawable = get_drawable()
+                self.fullscreen_window.add(self.fullscreen_drawable)
             self.fullscreen_drawable.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
                                                 Gdk.EventMask.BUTTON_RELEASE_MASK |
                                                 Gdk.EventMask.KEY_PRESS_MASK |
                                                 Gdk.EventMask.KEY_RELEASE_MASK |
                                                 Gdk.EventMask.SCROLL_MASK)
-            self.fullscreen_window.add(self.fullscreen_drawable)
-            self.fullscreen_window.show_all()
             if connect is not None:
                 connect(self.fullscreen_drawable)
+            self.fullscreen_window.show_all()
 
             # Use black background
             css_provider = Gtk.CssProvider()
@@ -740,10 +745,21 @@ class Player:
 
         # Do not use set_visual/set_widget so that the player does not
         # update self.xid and keep it as a reference
-        self.reparent(self.fullscreen_drawable.get_id())
+        if config.data.player['vout'] == 'gtk':
+            # Remove from main GUI
+            self.fullscreen_drawable.get_parent().remove(self.fullscreen_drawable)
+            # Add to fullscreen_window
+            self.fullscreen_window.add(self.fullscreen_drawable)
+        else:
+            self.reparent(self.fullscreen_drawable.get_id())
 
     def unfullscreen(self, *p):
-        self.reparent(self.xid)
+        if config.data.player['vout'] == 'gtk':
+            widget = self.imagesink.props.widget
+            widget.get_parent().remove(widget)
+            self.container.pack_start(widget, True, True, 0)
+        else:
+            self.reparent(self.xid)
         if not self.overlay.data and self.imageoverlay:
             # Reset imageoverlay data in any case
             self.imageoverlay.props.data = None
