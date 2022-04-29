@@ -203,6 +203,8 @@ def parse_time(s):
     # See https://bugs.python.org/issue13391
     if isinstance(s, str):
         s = s.strip().strip(u'\u200B\ufeff')
+    if s is None:
+        return 0
     try:
         val = int(s)
     except ValueError:
