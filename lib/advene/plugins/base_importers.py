@@ -515,8 +515,8 @@ class SubtitleImporter(GenericImporter):
             return 0
 
     def srt_iterator(self, f):
-        base=r'\d+:\d+:\d+[,\.:]\d+'
-        pattern=re.compile('(' + base + ').+(' + base + ')')
+        base=r'\d+:\d+:\d+(?:[,\.:]\d+)?'
+        pattern=re.compile(f'({base})\s\S+\s({base})')
         tc=None
         content=[]
         # 10000 lines should be a reasonable max.
@@ -527,7 +527,7 @@ class SubtitleImporter(GenericImporter):
             line=line.rstrip()
             match=pattern.search(line)
             if match is not None:
-                tc=(match.group(1), match.group(2))
+                tc = (match.group(1), match.group(2))
             elif len(line) == 0:
                 # Empty line: end of subtitle
                 # Convert it and reset the data
