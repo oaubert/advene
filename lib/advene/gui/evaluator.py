@@ -22,19 +22,20 @@
 import logging
 logger = logging.getLogger(__name__)
 
-import os
-import time
+import builtins
+import inspect
 import io
+import os
+import re
+import time
 import traceback
+
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk
 from gi.repository import Gtk
 from gi.repository import GLib
-import re
-import builtins
-import inspect
 
 class Evaluator:
     """Evaluator window. Shortcuts:
