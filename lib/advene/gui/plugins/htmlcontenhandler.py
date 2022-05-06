@@ -302,7 +302,7 @@ class AnnotationTypePlaceholder:
             data.append("""
 <table border="1">
 
-<tr><td>Vignette</td><td>Contenu</td><td>D&eacute;but</td><td>Dur&eacute;</td></tr>
+<tr><td>Vignette</td><td>Contenu</td><td>Début</td><td>Durée</td></tr>
 
 <tr tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
 <td><a title="Play this annotation" tal:attributes="href a/player_url">
