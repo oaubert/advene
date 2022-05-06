@@ -82,7 +82,7 @@ class AnnotationPlaceholder:
 
     def as_html(self):
         if self.annotation is None:
-            return """<span advene:error="Non-existent annotation"></span>"""
+            return """<div advene:error="Non-existent annotation"></div>"""
 
         ctx=self.controller.build_context(self.annotation)
         d={
@@ -110,6 +110,7 @@ class AnnotationPlaceholder:
             data.append("""<em tal:content="package/annotations/%(id)s/fragment/formatted/begin">%(timestamp)s</em><br/>""" % d)
         elif 'content' in self.presentation:
             data.append("""<span tal:content="package/annotations/%(id)s/representation">%(content)s</span>""" % d)
+
         if 'link' in self.presentation:
             data.append('</a>')
 
@@ -271,7 +272,7 @@ class AnnotationTypePlaceholder:
 
     def as_html(self):
         if self.annotationtype is None:
-            return """<span advene:error="Non-existent annotation type"></span>"""
+            return """<div advene:error="Non-existent annotation type"></div>"""
 
         ctx=self.controller.build_context(self.annotationtype)
         d={
@@ -284,13 +285,13 @@ class AnnotationTypePlaceholder:
 
         if 'list' in self.presentation:
             data.append("<ul>")
-            data.append("""<li tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted"><a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a>""" % d)
-            data.append("""</li></ul>""")
+            data.append("""<li tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted"><a title="Click to play the movie" tal:attributes="href a/player_url" tal:content="a/content/data"></a></li>""" % d)
+            data.append("""</ul>""")
         elif 'grid' in self.presentation:
             data.append("""
 <div class="screenshot_container" style="text-align: center; float: left; width: 200; height: 170; font-size: 0.8em;" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
 <a title="Play this annotation" tal:attributes="href a/player_url">
-        <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url" />
+        <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url"></img>
 	<br />
 	<strong tal:content="a/representation">Nom</strong>
 </a><br />
