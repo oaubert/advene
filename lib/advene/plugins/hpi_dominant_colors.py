@@ -30,6 +30,7 @@ try:
 except:
     missing_modules = True
 
+import advene.core.config as config
 from advene.util.gstimporter import GstImporter
 
 name = "Dominant color extraction"
@@ -131,7 +132,6 @@ class DomColExtractor(GstImporter):
             # preferences now since we will use this info to update
             # the filter options.
             self.get_preferences().update({'source_type_id': self.source_type_id})
-
         ##################################
         self.frame_width = 240
         self.offset = 40     # the segment offset - added/subtracted from segment boundaries
@@ -192,6 +192,7 @@ class DomColExtractor(GstImporter):
         """
         unmet_requirements = []
 
+        self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
         if self.source_type is None or not self.source_type.annotations:
             unmet_requirements.append(_("Cannot find any annotation"))
 
@@ -244,7 +245,7 @@ class DomColExtractor(GstImporter):
             self.annotations.append({
                 'begin': self.cur_ann_begin,
                 'end': self.cur_ann_end,
-                'content': ",".join(cnames)
+                'content': cnames['representation']
             })
 
         self.convert(f for f in self.annotations)
@@ -266,9 +267,20 @@ class DomColExtractor(GstImporter):
         for col in dom_cols:
             logger.debug("{0} ({1})".format(self.dc.map_color_name(col[0])[0], col[1]))
             if col[1] >= self.rel_cluster_size:
-                cnames.append("{col} ({si})".format(col=self.dc.map_color_name(col[0])[0], si=col[1]))
+                name = str(self.dc.map_color_name(col[0])[0])
+                cnames.append({ "name": name,
+                                "value": col[1] })
 
-        return cnames
+        main = ''
+        if cnames:
+            main = cnames[0]['name']
+        colors = ','.join(c['name'] for c in cnames)
+        values =  ','.join(str(c['value']) for c in cnames)
+        return  {
+            "representation": f"""main={main}\ncolors={colors}\nvalues={values}""",
+            "colors": [ c['name'] for c in cnames ],
+            "values": [ c['value'] for c in cnames ],
+        }
 
     def process_frame(self, frame):
         cur_ts = int(frame['date'])
@@ -282,7 +294,7 @@ class DomColExtractor(GstImporter):
                         self.annotations.append({
                             'begin': self.cur_ann_begin,
                             'end': self.cur_ann_end,
-                            'content': ",".join(cnames)
+                            'content': cnames['representation']
                         })
                         self.cur_ann_pixbufs = list()
 
@@ -312,10 +324,12 @@ class DomColExtractor(GstImporter):
 
     def setup_importer(self, filename):
         self.source_type = self.controller.package.get_element_by_id(self.source_type_id)
-        self.ensure_new_type('domcols',
+        at = self.ensure_new_type('domcols',
                              title=_("Dominant Color Extractor"),
-                             mimetype='text/plain',
+                             mimetype='application/x-advene-structured',
                              description=_("Quantizes pixel RGB values into list of named colors."))
+        at.setMetaData(config.data.namespace, 'item_color', 'here/content/parsed/main')
+        at.setMetaData(config.data.namespace, 'representation', 'here/content/parsed/main')
 
         return "videoconvert ! videoscale ! video/x-raw,width={frame_width},pixel-aspect-ratio=(fraction)1/1," \
                "format=RGB".format(frame_width=self.frame_width)
