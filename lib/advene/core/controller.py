@@ -2754,20 +2754,22 @@ class AdveneController:
             # only in the HTML widget. Maybe add a new attribut
             # advene:rendering="TODO" to indicate to the editor that
             # it should insert the template?
-            v.content.data="""<div tal:define="at package/annotationTypes/%(id)s">
-                  <h1>List of <em tal:content="at/representation">%(title)s</em> annotations</h1>
-                  <span class="advene:annotationtype" advene:annotationtype="%(id)s" advene:presentation="grid">
-<div class="screenshot_container" style="text-align: center; float: left; width: 200; height: 170; font-size: 0.8em;" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
-<a title="Play this annotation" tal:attributes="href a/player_url">
-        <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url" />
-	<br />
-	<strong tal:content="a/content/data">Nom</strong>
-</a><br />
-<span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
-<br />
-</div></span></div>""" % { 'id': elements[0].id,
-                     'title': at_title,
-                     }
+            v.content.data = """<div tal:define="at package/annotationTypes/%(id)s">
+            <h1>List of <em tal:content="at/representation">%(title)s</em> annotations</h1>
+            <div class="advene:annotationtype" advene:annotationtype="%(id)s" advene:presentation="grid">
+            <div class="screenshot_container" style="text-align: center; float: left; width: 200; height: 170; font-size: 0.8em;" tal:repeat="a package/annotationTypes/%(id)s/annotations/sorted">
+            <a title="Play this annotation" tal:attributes="href a/player_url">
+            <img class="screenshot" style="border:1px solid #FFCCCC; height:100px; width:160px;" alt="" tal:attributes="src a/snapshot_url"></img>
+	    <br />
+	    <strong tal:content="a/content/data">Nom</strong>
+            </a>
+            <br />
+            <span>(<span tal:content="a/fragment/formatted/begin">Debut</span> - <span tal:content="a/fragment/formatted/end">Fin</span>)</span>
+            </div>
+            </div>
+            </div>""" % { 'id': elements[0].id,
+                                  'title': at_title,
+                                 }
         self.notify('ViewCreate', view=v, immediate=True)
         return v
 
