@@ -680,6 +680,9 @@ class HTMLEditor(textview_class, HTMLParser):
             for m in i.get_marks():
                 if hasattr(m, '_endtag'):
                     logger.debug("_endtag %s", m._endtag)
+                    if i.get_offset() == 0:
+                        # Bug with 0 position endtags - horrible hack but bail out for now
+                        continue
                     if m._endtag in self.__standalone:
                         continue
                     output_text(textstart, i, m._endtag)
@@ -745,9 +748,18 @@ class HTMLEditor(textview_class, HTMLParser):
         """
         s = io.StringIO()
         self.dump_html(s)
-        res = s.getvalue()
+        res = s.getvalue().strip()
         s.close()
-        return f'<div>{res}</div>'
+        # Horrible hack again - interim hopefully, but the whole editor code should be rewritten
+        if res.endswith('</div>'):
+            # Strip last </div> which is wrongfully set
+            res = res[:-6]
+        MARK = '<div class="wysiswyg_container">'
+        if not res.startswith(MARK):
+            # Mark not yet present - add it
+            logger.debug(f"ADD MARK {res}")
+            res = f'<div class="wysiswyg_container">{res}</div>'
+        return res
 
     def _find_enclosing_marks(self, tagname, begin, end):
         """Return the iterators and marks corresponding to tagname in the begin-end selection.
