@@ -676,7 +676,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     if m._endtag in self.__standalone:
                         continue
                     output_text(textstart, i, m._endtag)
-                    fd.write("</%s>" % m._endtag)
+                    fd.write(f"</{m._endtag}>")
                     if m._endtag in self.__block:
                         fd.write('\n')
                     textstart=i.copy()
@@ -684,15 +684,14 @@ class HTMLEditor(textview_class, HTMLParser):
                 elif hasattr(m, '_tag'):
                     output_text(textstart, i, m._tag)
                     if m._tag in self.__standalone:
-                        closing='></%s>' % m._tag
+                        closing = f'></{m._tag}>'
                     else:
                         closing='>'
                     if m._attr:
-                        fd.write("<%s %s%s" % (m._tag,
-                                               " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr ),
-                                               closing))
+                        attrs = " ".join( '%s="%s"' % (k, v) for (k, v) in m._attr )
+                        fd.write(f"<{m._tag} {attrs}{closing}")
                     else:
-                        fd.write("<%s%s" % (m._tag, closing))
+                        fd.write(f"<{m._tag}{closing}")
 
                     if m._tag in self.__block or m._tag == 'br':
                         fd.write('\n')
