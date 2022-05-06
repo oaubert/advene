@@ -631,12 +631,12 @@ class HTMLEditor(textview_class, HTMLParser):
         """Dump html.
         """
         if fd is None:
-            fd=sys.stdout
-        b=self.__tb
-        i=b.get_start_iter()
-        textstart=i.copy()
+            fd = sys.stdout
+        b = self.__tb
+        i = b.get_start_iter()
+        textstart = i.copy()
 
-        self._last_endtag=None
+        self._last_endtag = None
 
         def output_text(fr, to, tag):
             """Output text data.
@@ -644,11 +644,11 @@ class HTMLEditor(textview_class, HTMLParser):
             Appropriately strip starting newline if it was inserted
             after a block endtag.
             """
-            txt=fr.get_visible_text(to)
+            txt = fr.get_visible_text(to)
             if self._last_endtag in self.__block:
-                txt=txt.lstrip()
+                txt = txt.lstrip()
             if tag in self.__block:
-                txt=txt.rstrip()
+                txt = txt.rstrip()
             txt=txt.replace('\n', '<br/>\n')
             self._last_endtag=None
             fd.write(txt)
@@ -667,7 +667,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 else:
                     continue
 
-            p=i.get_child_anchor()
+            p = i.get_child_anchor()
             if p is not None:
                 fd.write(p.get_widgets()[0].as_html())
 
@@ -735,9 +735,9 @@ class HTMLEditor(textview_class, HTMLParser):
     def get_html(self):
         """Return the buffer contents as html.
         """
-        s=io.StringIO()
+        s = io.StringIO()
         self.dump_html(s)
-        res=s.getvalue()
+        res = s.getvalue()
         s.close()
         return f'<div>{res}</div>'
 
