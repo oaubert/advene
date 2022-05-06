@@ -877,6 +877,7 @@ class ContextDisplay(Gtk.TreeView):
                 model.append(tagligne, ( m, k, v ) )
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     try:
         source=sys.argv[1]
     except IndexError:
