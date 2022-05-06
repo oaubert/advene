@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 # - Insert bullets in list items
 # - Handle list item insertion
 
+import gi
+gi.require_version('Gdk', '3.0')
+gi.require_version('Gtk', '3.0')
 from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
@@ -42,6 +45,7 @@ import io
 import re
 from html.parser import HTMLParser
 try:
+    gi.require_version('GtkSource', '3.0')
     from gi.repository import GtkSource
 except ImportError:
     GtkSource=None
@@ -882,7 +886,7 @@ if __name__ == "__main__":
     if source is not None:
         t.set_text(open(source, encoding='utf-8').read())
     t.show()
-    sb = Gtk.ScrolledWindow()
+    sb = Gtk.ScrolledWindow.new()
     sb.add(t)
     sb.show()
 
@@ -903,7 +907,7 @@ if __name__ == "__main__":
     context_data.show()
 
     p = Gtk.Paned.new(Gtk.Orientation.HORIZONTAL)
-    sw = Gtk.ScrolledWindow()
+    sw = Gtk.ScrolledWindow.new()
     sw.add(context_data)
     p.add1(sw)
     p.add2(sb)
@@ -917,13 +921,13 @@ if __name__ == "__main__":
             (Gtk.STOCK_BOLD, lambda i: t.apply_html_tag('b')),
             (Gtk.STOCK_ITALIC, lambda i: t.apply_html_tag('i')),
     ):
-        b=Gtk.ToolButton(icon)
+        b=Gtk.ToolButton(stock_id=icon)
         b.connect('clicked', action)
         ev.toolbar.insert(b, -1)
         b.show()
 
     if GtkSource is not None:
-        b=Gtk.ToolButton(Gtk.STOCK_UNDO)
+        b=Gtk.ToolButton(stock_id=Gtk.STOCK_UNDO)
         b.connect('clicked', lambda i: t.undo())
         ev.toolbar.insert(b, -1)
         b.show()
