@@ -442,6 +442,7 @@ class HTMLEditor(textview_class, HTMLParser):
         registered its position so that the format is applied later,
         when closing it.
         """
+        logger.debug("starttag <%s %s>", tag, attr)
         dattr=dict(attr)
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('start', tag, dattr):
@@ -456,6 +457,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     if isinstance(widget, GdkPixbuf.Pixbuf):
                         self.insert_pixbuf(widget)
                     elif isinstance(widget, Gtk.Widget):
+                        # FIXME: update tags?
                         self.insert_widget(widget)
                     else:
                         self.log("Unknown element type")
@@ -502,6 +504,7 @@ class HTMLEditor(textview_class, HTMLParser):
         characters of tabulation and fall as a simple page of blank
         space. In the first line we do this service.
         """
+        logger.debug("data %s", data)
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('data', data):
                 self.enclosed_processor=None
@@ -522,6 +525,8 @@ class HTMLEditor(textview_class, HTMLParser):
         labels and apply the formatting. The process is extremely
         simple.
         """
+        logger.debug("endtag </%s>", tag)
+        logger.debug("   tags before closing %s", self.__tags)
         if self.enclosed_processor is not None:
             if not self.enclosed_processor('end', tag):
                 self.enclosed_processor=None
@@ -576,6 +581,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 txt=txt.rstrip()
             txt=txt.replace('\n', '<n>')
             self._last_endtag=None
+            logger.debug("text", txt)
             res.append((fr.get_offset(), "%s : %d" % (txt, to.get_offset())))
 
         while True:
@@ -673,6 +679,7 @@ class HTMLEditor(textview_class, HTMLParser):
 
             for m in i.get_marks():
                 if hasattr(m, '_endtag'):
+                    logger.debug("_endtag %s", m._endtag)
                     if m._endtag in self.__standalone:
                         continue
                     output_text(textstart, i, m._endtag)
@@ -682,6 +689,7 @@ class HTMLEditor(textview_class, HTMLParser):
                     textstart=i.copy()
                     self._last_endtag=m._endtag
                 elif hasattr(m, '_tag'):
+                    logger.debug("_tag %s", m._tag)
                     output_text(textstart, i, m._tag)
                     if m._tag in self.__standalone:
                         closing = f'></{m._tag}>'
@@ -701,6 +709,7 @@ class HTMLEditor(textview_class, HTMLParser):
                 break
         # Write the remaining text
         output_text(textstart, b.get_end_iter(), 'end')
+        # FIXME Close remaining tags?
         if fd == sys.stdout:
             # fd.flush() + newline
             fd.write('\n')
@@ -796,6 +805,10 @@ class HTMLEditor(textview_class, HTMLParser):
                     smark.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
                     endmark._startmark=smark
                     smark._endmark=endmark
+                    # FIXME: we should add to __tags but we would have
+                    # to insert it in the appropriate position, which
+                    # is not the last one
+                    # self.__tags.setdefault(tagname, []).append(smark)
             else:
                 if tagname in self.__formats:
                     self.__tb.apply_tag(tag, *bounds)
@@ -804,6 +817,10 @@ class HTMLEditor(textview_class, HTMLParser):
                 mark._tag=tagname
                 mark._attr=attr
                 mark.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
+                # FIXME: we should add to __tags but we would have
+                # to insert it in the appropriate position, which
+                # is not the last one
+                # self.__tags.setdefault(tagname, []).append(mark)
 
                 endmark = self.__tb.create_mark(None, bounds[1], True)
                 endmark._endtag=tagname
@@ -817,6 +834,10 @@ class HTMLEditor(textview_class, HTMLParser):
             mark._tag=tagname
             mark._attr=attr
             mark.has_tal = [ (k, v) for (k, v) in attr if k.startswith('tal:') ]
+            # FIXME: we should add to __tags but we would have
+            # to insert it in the appropriate position, which
+            # is not the last one
+            # self.__tags.setdefault(tagname, []).append(mark)
 
             end=self._get_iter_for_creating_mark()
             if tag in self.__formats:
