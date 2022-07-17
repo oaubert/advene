@@ -25,13 +25,18 @@ from gettext import gettext as _
 
 import json
 
-from vosk import Model, KaldiRecognizer, SetLogLevel
-SetLogLevel(0)
+try:
+    from vosk import Model, KaldiRecognizer
+except ImportError:
+    KaldiRecognizer = None
 
 from advene.util.gstimporter import GstImporter
 
 def register(controller=None):
-    controller.register_importer(VoskImporter)
+    if KaldiRecognizer is not None:
+        controller.register_importer(VoskImporter)
+    else:
+        logger.warning("Cannot import VOSK module - speech recognition disabled")
     return True
 
 class VoskImporter(GstImporter):
