@@ -42,12 +42,17 @@ class VoskImporter(GstImporter):
 
         ## Setup attributes
         self.sample_rate = 16000
-        # Get full list from MODEL_LIST_URL
         self.model_name = "vosk-model-small-en-gb-0.15"
+        self.recognize_words = True
 
         ## Corresponding optionparser object definition
         self.optionparser.add_option("-m", "--model",
-                                     action="store", type="choice", dest="model_name", choices=(
+                                     action="store",
+                                     type="choice",
+                                     dest="model_name",
+                                     # FIXME: Get full list from MODEL_LIST_URL
+                                     # or just specify a language
+                                     choices=(
                                          "vosk-model-small-cn-0.22",
                                          "vosk-model-small-de-0.15",
                                          "vosk-model-small-en-gb-0.15",
@@ -60,6 +65,9 @@ class VoskImporter(GstImporter):
         self.optionparser.add_option("-r", "--rate",
                                      action="store", type="int", dest="sample_rate", default=self.sample_rate,
                                      help=_("Sampling rate (in Hz)"))
+        self.optionparser.add_option("-w", "--words",
+                                     action="store_true", dest="recognize_words", default=self.recognize_words,
+                                     help=_("Add timing for single words"))
 
         ## Internal data structures
         self.buffer = []
@@ -81,23 +89,24 @@ class VoskImporter(GstImporter):
         elif self.recognizer.AcceptWaveform(data):
             res = json.loads(self.recognizer.Result())
             if res.get('result'):
-                for r in res.get('result'):
-                    self.buffer.append( (r['start'], r['end'], 'word', r['word'], r['conf']) )
                 self.buffer.append( (res['result'][0]['start'],
                                      res['result'][-1]['end'],
                                      'sentence',
                                      res['text'],
                                      sum(r['conf'] for r in res['result']) / len(res['result'])) )
-
+                if self.recognize_words:
+                    for r in res.get('result'):
+                        self.buffer.append( (r['start'], r['end'], 'word', r['word'], r['conf']) )
         else:
             pass
             # logger.warning("partial %s", self.recognizer.PartialResult())
         return True
 
     def setup_importer(self, filename):
-        self.ensure_new_type('word',
-                             title=_("Word"),
-                             description=_("Recognized word"))
+        if self.recognize_words:
+            self.ensure_new_type('word',
+                                 title=_("Word"),
+                                 description=_("Recognized word"))
         self.ensure_new_type('sentence',
                              title=_("Sentence"),
                              description=_("Recognized sentence"))
