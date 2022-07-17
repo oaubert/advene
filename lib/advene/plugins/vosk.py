@@ -78,9 +78,21 @@ class VoskImporter(GstImporter):
         self.buffer = []
         self.last_above = None
 
-    def do_finalize(self):
-        logger.debug("final %s", self.recognizer.FinalResult())
+    def add_result(self, result_json):
+        res = json.loads(result_json)
+        if res.get('result'):
+            self.buffer.append( (res['result'][0]['start'],
+                                 res['result'][-1]['end'],
+                                 'sentence',
+                                 res['text'],
+                                 sum(r['conf'] for r in res['result']) / len(res['result'])) )
+            if self.recognize_words:
+                for r in res.get('result'):
+                    self.buffer.append( (r['start'], r['end'], 'word', r['word'], r['conf']) )
 
+
+    def do_finalize(self):
+        self.add_result(self.recognizer.FinalResult())
         self.convert( { 'begin': begin * 1000,
                         'end': end * 1000,
                         'type': type_,
@@ -92,16 +104,7 @@ class VoskImporter(GstImporter):
         if len(data) == 0:
             logger.debug("0 length data")
         elif self.recognizer.AcceptWaveform(data):
-            res = json.loads(self.recognizer.Result())
-            if res.get('result'):
-                self.buffer.append( (res['result'][0]['start'],
-                                     res['result'][-1]['end'],
-                                     'sentence',
-                                     res['text'],
-                                     sum(r['conf'] for r in res['result']) / len(res['result'])) )
-                if self.recognize_words:
-                    for r in res.get('result'):
-                        self.buffer.append( (r['start'], r['end'], 'word', r['word'], r['conf']) )
+            self.add_result(self.recognizer.Result())
         else:
             pass
             # logger.warning("partial %s", self.recognizer.PartialResult())
