@@ -2,7 +2,7 @@
 Name=Advene Video annotation
 Comment=Annotate Digital Video, Exchange on the NEt
 Comment[fr]=Annotations de vidéo numérique échangées sur le NEt
-Exec=advene %F
+Exec=env GDK_BACKEND=x11 advene %F
 Terminal=false
 Type=Application
 Icon=/usr/share/advene/pixmaps/icon_advene32.png
