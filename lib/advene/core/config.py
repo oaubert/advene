@@ -454,7 +454,7 @@ class Config:
             '.avi',
             '.dv',
             '.flv',
-            '.m4v',
+            '.m4v', '.m4a',
             '.mjpg', '.mjpg',
             '.mkv',
             '.mov',
