@@ -484,7 +484,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         if renderer is None:
             # Set default renderer
             if self.annotation.content.mimetype == 'application/x-advene-values':
-                if self.annotation.type.id.startswith('sound') or self.annotation.type.id == 'Volume':
+                if self.annotation.type.id.lower().startswith('sound') or self.annotation.type.id.lower().startswith('Volume'):
                     renderer = 'wave'
                 else:
                     renderer = 'bar'
