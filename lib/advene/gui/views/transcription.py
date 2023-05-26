@@ -59,7 +59,7 @@ class TranscriptionView(AdhocView):
         self.contextual_actions = (
             (_("Save view"), self.save_view),
             (_("Save default options"), self.save_default_options),
-            )
+        )
         self.controller=controller
         self.options = {
             'display-bounds': False,
@@ -74,19 +74,19 @@ class TranscriptionView(AdhocView):
             # transcripted annotation. Useful with structured annotations
             'representation': '',
             'autoscroll': True,
-            }
+        }
 
-        self.package=controller.package
+        self.package = controller.package
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        a=dict(arg)
+        a = dict(arg)
         if source is None and 'source' in a:
-            source=a['source']
+            source = a['source']
 
         if not source and not elements is None:
             # Use whole package
-            source="here/annotations"
+            source = "here/annotations"
 
         # source is a TALES expression, which is evaluated in the
         # package context. It must return a list of annotations.
@@ -96,7 +96,7 @@ class TranscriptionView(AdhocView):
         # source is None
         self.elements = elements
 
-        self.model=[]
+        self.model = []
         self.regenerate_model()
 
         # Annotation where the cursor is set
@@ -106,9 +106,9 @@ class TranscriptionView(AdhocView):
         # the window
         self.ignore_updates = False
 
-        self.modified=False
+        self.modified = False
 
-        self.quick_options=helper.CircularList( (
+        self.quick_options = helper.CircularList( (
             # (separator, display_time, display_end_time)
             ("\n", False, False),
             (" ", False, False),
@@ -116,25 +116,25 @@ class TranscriptionView(AdhocView):
             ("\n", True, True),
             (" ", True, False),
             ("\n", True, False),
-            ) )
+        ) )
 
         # Try to determine a default representation
         try:
-            t=set(an.type for an in self.model)
+            t = set(an.type for an in self.model)
         except:
-            t=[]
+            t = []
         if len(t) == 1:
             # Unique type, the model is homogeneous. Use the
             # annotation-type representation
-            at=self.model[0].type
-            rep=at.getMetaData(config.data.namespace, 'representation')
+            at = self.model[0].type
+            rep = at.getMetaData(config.data.namespace, 'representation')
             if rep is not None and not re.match(r'^\s*$', rep):
                 # There is a standard representation for the type.
                 # But if the current value is != '', then it has been
                 # updated by the parameters, so keep it.
                 if self.options['representation'] == '':
                     self.options['representation'] = rep
-        self.widget=self.build_widget()
+                    self.widget = self.build_widget()
 
     def get_save_arguments(self):
         if self.source is not None:
@@ -145,21 +145,21 @@ class TranscriptionView(AdhocView):
 
     def regenerate_model(self):
         if not self.source:
-            self.model=self.elements[:]
+            self.model = self.elements[:]
         else:
             self.model = self.get_elements_from_source(self.source)
 
     def edit_options(self, button):
-        user_defined=object()
-        cache=dict(self.options)
+        user_defined = object()
+        cache = dict(self.options)
         for c in ('representation', 'separator'):
             cache[c] = cache[c].replace('\n', '\\n').replace('\t', '\\t')
-        old_representation=cache['representation']
-        cache['user-separator']=cache['separator']
+            old_representation = cache['representation']
+            cache['user-separator'] = cache['separator']
         if cache['separator'] not in (' ', '\\n', '\\t', ' - '):
-            cache['separator']=user_defined
+            cache['separator'] = user_defined
 
-        ew=EditWidget(cache.__setitem__, cache.get)
+        ew = EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_("Transcription options"))
         ew.add_checkbox(_("Default representation"), "default-representation", _("Use the default representation for annotations"))
         ew.add_entry(_("Representation"), "representation", _("If default representation is unchecked,\nthis TALES expression that will be used to format the annotations."))
@@ -170,12 +170,12 @@ class TranscriptionView(AdhocView):
                         _('Tabulation'): "\\t",
                         _('Dash'): " - ",
                         _('User defined'): user_defined,
-                        })
+                       })
         ew.add_entry(_("User-defined separator"), "user-separator", _("Separator used if user-defined is selected.Use \\n for a newline and \\t for a tabulation."))
         ew.add_checkbox(_("Display timestamps"), "display-time", _("Insert timestamp values"))
         ew.add_checkbox(_("Display end timestamps"), "display-end-time", _("Display end timestamp (if Display timestamps is active)"))
         ew.add_checkbox(_("Display annotation bounds"), 'display-bounds', _("Display annotation bounds"))
-        res=ew.popup()
+        res = ew.popup()
 
         if res:
             if old_representation != cache['representation']:
@@ -183,26 +183,26 @@ class TranscriptionView(AdhocView):
                 # cases, this means that the user wants to use it
                 # instead of the default representation, so force
                 # default-representation to False
-                cache['default-representation']=False
+                cache['default-representation'] = False
             if cache['separator'] == user_defined:
                 # User-defined has been selected. Use the user-separator value
-                cache['separator']=cache['user-separator']
-            self.options.update(cache)
-            # Process special characters
+                cache['separator'] = cache['user-separator']
+                self.options.update(cache)
+                # Process special characters
             for c in ('representation', 'separator'):
-                self.options[c]=unescape_string(self.options[c])
-            self.generate_buffer_content()
+                self.options[c] = unescape_string(self.options[c])
+                self.generate_buffer_content()
         return True
 
     def check_modified(self):
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
         modified = []
         # Update the model to be sure.
         self.regenerate_model()
         for a in self.model:
             try:
-                beginiter=b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
-                enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+                beginiter = b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
+                enditer   = b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
                 if b.get_text(beginiter, enditer, False).strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
                     modified.append(a)
             except TypeError:
@@ -211,9 +211,9 @@ class TranscriptionView(AdhocView):
         return modified
 
     def update_modified(self, l):
-        b=self.textview.get_buffer()
-        impossible=[]
-        batch_id=object()
+        b = self.textview.get_buffer()
+        impossible = []
+        batch_id = object()
         for a in l:
             m = b.get_mark("b_%s" % a.id)
             if not m:
@@ -242,7 +242,7 @@ class TranscriptionView(AdhocView):
         return True
 
     def validate(self, *p):
-        l=self.check_modified()
+        l = self.check_modified()
         if l:
             if self.options['representation'] and not helper.parsed_representation.match(self.options['representation']):
                 dialog.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
@@ -267,7 +267,7 @@ class TranscriptionView(AdhocView):
     def build_widget(self):
         mainbox = Gtk.VBox()
 
-        tb=Gtk.Toolbar()
+        tb = Gtk.Toolbar()
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
         for icon, action, tip in (
@@ -277,12 +277,12 @@ class TranscriptionView(AdhocView):
                 (Gtk.STOCK_REDO, self.quick_options_toggle, _("Quickly switch display options")),
                 (Gtk.STOCK_REFRESH, self.refresh, _("Refresh the transcription")),
                 (Gtk.STOCK_PREFERENCES, self.edit_options, _("Edit preferences")),
-            ):
-            b=Gtk.ToolButton(stock_id=icon)
+        ):
+            b = Gtk.ToolButton(stock_id=icon)
             b.set_tooltip_text(tip)
             b.connect('clicked', action)
             tb.insert(b, -1)
-        mainbox.pack_start(tb, False, True, 0)
+            mainbox.pack_start(tb, False, True, 0)
 
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
@@ -293,7 +293,7 @@ class TranscriptionView(AdhocView):
         # We could make it editable and modify the annotation
         self.textview.set_editable(True)
         self.textview.set_wrap_mode (Gtk.WrapMode.WORD)
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
 
         # Create useful tags
         b.create_tag("activated", weight=Pango.Weight.BOLD)
@@ -311,16 +311,16 @@ class TranscriptionView(AdhocView):
 
         sw.add(self.textview)
 
-        self.searchbox=Gtk.HBox()
+        self.searchbox = Gtk.HBox()
 
         def hide_searchbox(*p):
             # Clear the searched_string tags
-            b=self.textview.get_buffer()
+            b = self.textview.get_buffer()
             b.remove_tag_by_name("searched_string", *b.get_bounds())
             self.searchbox.hide()
             return True
 
-        close_button=get_pixmap_button('small_close.png', hide_searchbox)
+        close_button = get_pixmap_button('small_close.png', hide_searchbox)
         close_button.set_relief(Gtk.ReliefStyle.NONE)
         self.searchbox.pack_start(close_button, False, False, 0)
 
@@ -334,7 +334,7 @@ class TranscriptionView(AdhocView):
                 return True
             return False
 
-        self.searchbox.entry=Gtk.Entry()
+        self.searchbox.entry = Gtk.Entry()
         self.searchbox.entry.connect('activate', search_entry_cb)
         self.searchbox.pack_start(self.searchbox.entry, False, False, 0)
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
@@ -348,12 +348,12 @@ class TranscriptionView(AdhocView):
 #        b.set_tooltip_text(_("Find next occurrence"))
 #        self.searchbox.pack_start(b, False, False, 0)
 
-        fill=Gtk.HBox()
+        fill = Gtk.HBox()
         self.searchbox.pack_start(fill, True, True, 0)
 
         mainbox.pack_start(self.searchbox, False, True, 0)
 
-        self.statusbar=Gtk.Statusbar()
+        self.statusbar = Gtk.Statusbar()
         mainbox.pack_start(self.statusbar, False, True, 0)
 
         mainbox.show_all()
@@ -371,16 +371,16 @@ class TranscriptionView(AdhocView):
 
     def representation(self, a):
         if self.options['default-representation']:
-            rep=self.controller.get_title(a)
+            rep = self.controller.get_title(a)
         elif self.options['representation']:
-            rep=self.controller.get_title(a,
-                                          representation=self.options['representation'])
+            rep = self.controller.get_title(a,
+                                            representation=self.options['representation'])
         else:
-            rep=a.content.data
+            rep = a.content.data
         return rep
 
     def generate_buffer_content(self):
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
         # Clear the buffer
         begin, end = b.get_bounds()
         b.delete(begin, end)
@@ -389,7 +389,7 @@ class TranscriptionView(AdhocView):
             b.insert_with_tags_by_name(b.get_iter_at_mark(b.get_insert()),
                                        text, *tags)
 
-        l=list(self.model)
+        l = list(self.model)
         l.sort(key=lambda a: a.fragment.begin)
         for a in l:
             if self.options['display-time']:
@@ -419,25 +419,25 @@ class TranscriptionView(AdhocView):
     def highlight_search_forward(self, searched):
         """Highlight with the searched_string tag the given string.
         """
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
         begin, end=b.get_bounds()
         # Remove searched_string tag occurences that may be left from
         # a previous invocation
         b.remove_tag_by_name("searched_string", begin, end)
 
-        finished=False
+        finished = False
 
         while not finished:
-            res=begin.forward_search(searched, Gtk.TextSearchFlags.TEXT_ONLY)
+            res = begin.forward_search(searched, Gtk.TextSearchFlags.TEXT_ONLY)
             if not res:
-                finished=True
+                finished = True
             else:
                 matchStart, matchEnd = res
                 b.apply_tag_by_name("searched_string", matchStart, matchEnd)
-                begin=matchEnd
+                begin = matchEnd
 
     def play_annotation(self, a):
-        c=self.controller
+        c = self.controller
         c.update_status("seek", a.fragment.begin)
         c.gui.set_current_annotation(a)
         return True
@@ -447,13 +447,13 @@ class TranscriptionView(AdhocView):
             return False
         menu.foreach(menu.remove)
 
-        item=Gtk.SeparatorMenuItem()
+        item = Gtk.SeparatorMenuItem()
         item.show()
         menu.append(item)
 
         item = Gtk.MenuItem(_("Annotation %s") % self.currentannotation.id, use_underline=False)
-        menuc=advene.gui.popup.Menu(self.currentannotation,
-                                    controller=self.controller)
+        menuc = advene.gui.popup.Menu(self.currentannotation,
+                                      controller=self.controller)
         item.set_submenu(menuc.menu)
         item.show()
         menu.append(item)
@@ -483,14 +483,14 @@ class TranscriptionView(AdhocView):
     def button_press_event_cb(self, textview, event):
         if event.button != 1:
             return False
-        textwin=textview.get_window(Gtk.TextWindowType.TEXT)
+        textwin = textview.get_window(Gtk.TextWindowType.TEXT)
         if event.get_window() != textwin:
             return False
 
         (x, y) = textview.window_to_buffer_coords(Gtk.TextWindowType.TEXT,
                                                   int(event.x),
                                                   int(event.y))
-        it=textview.get_iter_at_location(x, y)
+        it = textview.get_iter_at_location(x, y)
         if it is None:
             logger.error("Error in get_iter_at_location")
             return False
@@ -512,33 +512,33 @@ class TranscriptionView(AdhocView):
         return True
 
     def update_current_annotation(self, *p, **kw):
-        b=self.textview.get_buffer()
-        i=b.get_iter_at_mark(b.get_insert())
+        b = self.textview.get_buffer()
+        i = b.get_iter_at_mark(b.get_insert())
 
-        annotationid=None
+        annotationid = None
 
         # Are we on an annotation bound ?
         marknames = [ m.get_name()
                       for m in i.get_marks() ]
-        beginmarks= [ n
+        beginmarks = [ n
                       for n in marknames
                       if n and n.startswith('b_') ]
-        endmarks= [ n
+        endmarks = [ n
                     for n in marknames
                     if n and n.startswith('e_') ]
         if beginmarks or endmarks:
             # Do not activate on annotation boundary
             # (it causes problems when editing)
-            annotationid=None
+            annotationid = None
         else:
             # Look backwards for the first mark that we find
             while i.backward_char():
                 marknames = [ m.get_name()
                               for m in i.get_marks() ]
-                beginmarks= [ n
+                beginmarks = [ n
                               for n in marknames
                               if n and n.startswith('b_') ]
-                endmarks= [ n
+                endmarks = [ n
                             for n in marknames
                             if n and n.startswith('e_') ]
                 if beginmarks:
@@ -547,25 +547,25 @@ class TranscriptionView(AdhocView):
                     break
 
             if beginmarks:
-                annotationid=beginmarks[0].replace('b_', '')
+                annotationid = beginmarks[0].replace('b_', '')
 
         if annotationid is not None:
-            a=self.package.annotations['#'.join( (self.package.uri,
-                                                  annotationid) )]
+            a = self.package.annotations['#'.join( (self.package.uri,
+                                                    annotationid) )]
             if a != self.currentannotation:
                 if self.currentannotation is not None:
                     self.untag_annotation(self.currentannotation, "current")
-                self.currentannotation=a
-                self.tag_annotation(a, "current")
+                    self.currentannotation = a
+                    self.tag_annotation(a, "current")
         else:
             if self.currentannotation is not None:
                 self.untag_annotation(self.currentannotation, "current")
-                self.currentannotation=None
+                self.currentannotation = None
         return False
 
     def position_reset(self):
         # The position was reset. Deactivate active annotations.
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
         b.remove_tag_by_name('activated', *b.get_bounds())
         return True
 
@@ -593,12 +593,12 @@ class TranscriptionView(AdhocView):
         if event == 'AnnotationEditEnd':
             if not annotation in self.model:
                 return True
-            b=self.textview.get_buffer()
-            beginmark=b.get_mark("b_%s" % annotation.id)
-            endmark=b.get_mark("e_%s" % annotation.id)
+            b = self.textview.get_buffer()
+            beginmark = b.get_mark("b_%s" % annotation.id)
+            endmark = b.get_mark("e_%s" % annotation.id)
 
-            beginiter=b.get_iter_at_mark(beginmark)
-            enditer  =b.get_iter_at_mark(endmark)
+            beginiter = b.get_iter_at_mark(beginmark)
+            enditer   = b.get_iter_at_mark(endmark)
 
             b.delete(beginiter, enditer)
             b.insert_with_tags_by_name(beginiter, ZERO_WIDTH_NOBREAK_SPACE, "bound")
@@ -608,13 +608,13 @@ class TranscriptionView(AdhocView):
             # of the invalidated text.
             b.move_mark(endmark, beginiter)
         elif event == 'AnnotationDelete':
-            b=self.textview.get_buffer()
-            beginmark=b.get_mark("b_%s" % annotation.id)
-            endmark=b.get_mark("e_%s" % annotation.id)
+            b = self.textview.get_buffer()
+            beginmark = b.get_mark("b_%s" % annotation.id)
+            endmark = b.get_mark("e_%s" % annotation.id)
             if beginmark is None or endmark is None:
                 return True
-            beginiter=b.get_iter_at_mark(beginmark)
-            enditer  =b.get_iter_at_mark(endmark)
+            beginiter = b.get_iter_at_mark(beginmark)
+            enditer   = b.get_iter_at_mark(endmark)
             b.delete(beginiter, enditer)
             b.delete_mark(beginmark)
             b.delete_mark(endmark)
@@ -623,21 +623,21 @@ class TranscriptionView(AdhocView):
         return True
 
     def tag_annotation(self, a, tagname):
-        b=self.textview.get_buffer()
-        m = b.get_mark("b_%s" % a.id)
+        b = self.textview.get_buffer()
+        m  =  b.get_mark("b_%s" % a.id)
         if m:
-            beginiter=b.get_iter_at_mark(m)
-            enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+            beginiter = b.get_iter_at_mark(m)
+            enditer   = b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             b.apply_tag_by_name(tagname, beginiter, enditer)
         else:
             logger.warning("No mark for annotation %s", a.id)
 
     def untag_annotation(self, a, tagname):
-        b=self.textview.get_buffer()
-        m = b.get_mark("b_%s" % a.id)
+        b = self.textview.get_buffer()
+        m  =  b.get_mark("b_%s" % a.id)
         if m:
-            beginiter=b.get_iter_at_mark(m)
-            enditer  =b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+            beginiter = b.get_iter_at_mark(m)
+            enditer   = b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
             b.remove_tag_by_name(tagname, beginiter, enditer)
         else:
             logger.warning("No mark for annotation %s", a.id)
@@ -645,7 +645,7 @@ class TranscriptionView(AdhocView):
     def activate_annotation(self, a):
         if self.options['autoscroll']:
             # Make sure that the annotation is visible
-            m=self.textview.get_buffer().get_mark("b_%s" % a.id)
+            m = self.textview.get_buffer().get_mark("b_%s" % a.id)
             if m:
                 self.textview.scroll_to_mark(m, 0.2, False, 0, 0)
 
@@ -658,42 +658,42 @@ class TranscriptionView(AdhocView):
 
     def register_callback (self, controller=None):
         """Add the activate handler for annotations."""
-        self.beginrule=controller.event_handler.internal_rule (event="AnnotationBegin",
-                                                               method=self.activate_annotation_handler)
-        self.endrule=controller.event_handler.internal_rule (event="AnnotationEnd",
-                                                             method=self.desactivate_annotation_handler)
+        self.beginrule = controller.event_handler.internal_rule (event="AnnotationBegin",
+                                                                 method=self.activate_annotation_handler)
+        self.endrule = controller.event_handler.internal_rule (event="AnnotationEnd",
+                                                               method=self.desactivate_annotation_handler)
 
     def unregister_callback (self, controller=None):
         controller.event_handler.remove_rule(self.beginrule, type_="internal")
         controller.event_handler.remove_rule(self.endrule, type_="internal")
 
     def activate_annotation_handler (self, context, parameters):
-        annotation=context.evaluateValue('annotation')
+        annotation = context.evaluateValue('annotation')
         if annotation is not None and annotation in self.model:
             self.activate_annotation (annotation)
         return True
 
     def desactivate_annotation_handler (self, context, parameters):
-        annotation=context.evaluateValue('annotation')
+        annotation = context.evaluateValue('annotation')
         if annotation is not None and annotation in self.model:
             self.desactivate_annotation (annotation)
         return True
 
     def save_transcription(self, button=None):
-        fname=dialog.get_filename(title= ("Save transcription to..."),
-                                  action=Gtk.FileChooserAction.SAVE,
-                                  button=Gtk.STOCK_SAVE)
+        fname = dialog.get_filename(title= ("Save transcription to..."),
+                                    action=Gtk.FileChooserAction.SAVE,
+                                    button=Gtk.STOCK_SAVE)
         if fname is not None:
             self.save_output(filename=fname)
             return True
         return True
 
     def save_output(self, filename=None):
-        b=self.textview.get_buffer()
-        begin, end=b.get_bounds()
-        out=b.get_text(begin, end, False).replace(ZERO_WIDTH_NOBREAK_SPACE, '')
+        b = self.textview.get_buffer()
+        begin, end = b.get_bounds()
+        out = b.get_text(begin, end, False).replace(ZERO_WIDTH_NOBREAK_SPACE, '')
         try:
-            f=open(filename, "w", encoding='utf-8')
+            f = open(filename, "w", encoding='utf-8')
         except Exception as e:
             self.message(_("Cannot write to %(filename)s: %(error)s:") %
                          {'filename': filename,
