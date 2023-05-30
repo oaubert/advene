@@ -462,6 +462,7 @@ class Config:
             '.mpg', '.mpeg',  '.mp4', '.mp4v',
             '.mts',
             '.ogg', '.ogm', '.ogv', '.ogx',
+            '.opus',
             '.ps',
             '.qt', '.qtm',
             '.rm', '.rmd', '.rmvb', '.rv',
