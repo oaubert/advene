@@ -103,7 +103,7 @@ class OverlappingChecker(FeatureChecker):
                 end = "#ff6666"
             return (begin, end)
         self.table.set_elements(overlap, custom_data)
-        self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_TYPE, Gtk.SortType.ASCENDING)
+        self.table.model.set_sort_column_id(advene.gui.views.table.COLUMN_BEGIN, Gtk.SortType.ASCENDING)
 
 @register_checker
 class CompletionChecker(FeatureChecker):
