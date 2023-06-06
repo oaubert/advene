@@ -134,7 +134,7 @@ class TranscriptionView(AdhocView):
                 # updated by the parameters, so keep it.
                 if self.options['representation'] == '':
                     self.options['representation'] = rep
-                    self.widget = self.build_widget()
+        self.widget = self.build_widget()
 
     def get_save_arguments(self):
         if self.source is not None:
