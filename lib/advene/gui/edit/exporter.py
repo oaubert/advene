@@ -163,11 +163,15 @@ class AnnotationExporter(AdhocView):
         line.pack_start(Gtk.Label(_("Export to") + " "), False, False, 0)
 
         def filename_chooser(button):
-            name = dialog.get_filename(title=_("Select destination"),
-                                       action=Gtk.FileChooserAction.SAVE,
-                                       button=Gtk.STOCK_SAVE,
-                                       default_dir=str(config.data.path['data']),
-                                       default_file=self.get_filename())
+            if self.exporter is not None and self.exporter.mimetype == "inode/directory":
+                name = dialog.get_dirname(title=_("Select destination"),
+                                          default_dir=self.get_filename())
+            else:
+                name = dialog.get_filename(title=_("Select destination"),
+                                           action=Gtk.FileChooserAction.SAVE,
+                                           button=Gtk.STOCK_SAVE,
+                                           default_dir=str(config.data.path['data']),
+                                           default_file=self.get_filename())
             if name is not None:
                 self.fname_label.set_label(name)
             return True
