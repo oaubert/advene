@@ -336,8 +336,15 @@ class TranscriptionView(AdhocView):
         close_button.set_relief(Gtk.ReliefStyle.NONE)
         self.searchbox.pack_start(close_button, False, False, 0)
 
+        label_widget = Gtk.Label("")
+
         def search_entry_cb(e):
-            self.highlight_search_forward(e.get_text())
+            match_count = self.highlight_search_forward(e.get_text())
+            if match_count == 0:
+                label = _("Not found")
+            else:
+                label = _(f"Found {match_count} items")
+            label_widget.set_markup(label)
             return True
 
         def search_entry_key_press_cb(e, event):
@@ -350,6 +357,7 @@ class TranscriptionView(AdhocView):
         self.searchbox.entry.connect('activate', search_entry_cb)
         self.searchbox.pack_start(self.searchbox.entry, False, False, 0)
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
+        self.searchbox.pack_start(label_widget, False, False, 0)
 
 #        def find_next(b):
 #            # FIXME
@@ -432,13 +440,13 @@ class TranscriptionView(AdhocView):
         """Highlight with the searched_string tag the given string.
         """
         b = self.textview.get_buffer()
-        begin, end=b.get_bounds()
+        begin, end = b.get_bounds()
         # Remove searched_string tag occurences that may be left from
         # a previous invocation
         b.remove_tag_by_name("searched_string", begin, end)
 
         finished = False
-
+        search_count = 0
         while not finished:
             res = begin.forward_search(searched, Gtk.TextSearchFlags.TEXT_ONLY)
             if not res:
@@ -447,6 +455,8 @@ class TranscriptionView(AdhocView):
                 matchStart, matchEnd = res
                 b.apply_tag_by_name("searched_string", matchStart, matchEnd)
                 begin = matchEnd
+                search_count += 1
+        return search_count
 
     def play_annotation(self, a):
         c = self.controller
