@@ -38,7 +38,7 @@ from advene.util.tools import unescape_string
 from gettext import gettext as _
 
 from advene.gui.views import AdhocView
-from advene.gui.util import dialog, get_pixmap_button
+from advene.gui.util import dialog, get_pixmap_button, get_small_stock_button
 import advene.gui.popup
 
 name="Transcription view plugin"
@@ -339,12 +339,15 @@ class TranscriptionView(AdhocView):
         label_widget = Gtk.Label("")
 
         def search_entry_cb(e):
-            match_count = self.highlight_search_forward(e.get_text())
+            match_offsets = self.highlight_search_forward(e.get_text())
+            match_count = len(match_offsets)
             if match_count == 0:
                 label = _("Not found")
             else:
                 label = _(f"Found {match_count} items")
             label_widget.set_markup(label)
+            self.searchbox.match_offsets = match_offsets
+            self.searchbox.match_index = None
             return True
 
         def search_entry_key_press_cb(e, event):
@@ -357,16 +360,35 @@ class TranscriptionView(AdhocView):
         self.searchbox.entry.connect('activate', search_entry_cb)
         self.searchbox.pack_start(self.searchbox.entry, False, False, 0)
         self.searchbox.entry.connect('key-press-event', search_entry_key_press_cb)
-        self.searchbox.pack_start(label_widget, False, False, 0)
 
-#        def find_next(b):
-#            # FIXME
-#            return True
-#
-#        b=get_small_stock_button(Gtk.STOCK_GO_FORWARD, find_next)
-#        b.set_relief(Gtk.ReliefStyle.NONE)
-#        b.set_tooltip_text(_("Find next occurrence"))
-#        self.searchbox.pack_start(b, False, False, 0)
+        def find_generic(direction):
+            if self.searchbox.match_index is None:
+                self.searchbox.match_index = 0 if direction > 0 else -1
+            else:
+                self.searchbox.match_index = self.searchbox.match_index + direction
+            self.searchbox.match_index = self.searchbox.match_index % len(self.searchbox.match_offsets)
+            offset = self.searchbox.match_offsets[self.searchbox.match_index]
+            self.textview.scroll_to_iter(self.textview.get_buffer().get_iter_at_offset(offset),
+                                         0, False, 0, 0)
+            return True
+
+        def find_prev(b):
+            return find_generic(-1)
+
+        def find_next(b):
+            return find_generic(+1)
+
+        b = get_small_stock_button(Gtk.STOCK_GO_BACK, find_prev)
+        b.set_relief(Gtk.ReliefStyle.NONE)
+        b.set_tooltip_text(_("Find previous occurrence"))
+        self.searchbox.pack_start(b, False, False, 0)
+
+        b = get_small_stock_button(Gtk.STOCK_GO_FORWARD, find_next)
+        b.set_relief(Gtk.ReliefStyle.NONE)
+        b.set_tooltip_text(_("Find next occurrence"))
+        self.searchbox.pack_start(b, False, False, 0)
+
+        self.searchbox.pack_start(label_widget, False, False, 0)
 
         fill = Gtk.HBox()
         self.searchbox.pack_start(fill, True, True, 0)
@@ -446,7 +468,7 @@ class TranscriptionView(AdhocView):
         b.remove_tag_by_name("searched_string", begin, end)
 
         finished = False
-        search_count = 0
+        match_offsets = []
         while not finished:
             res = begin.forward_search(searched, Gtk.TextSearchFlags.TEXT_ONLY)
             if not res:
@@ -454,9 +476,9 @@ class TranscriptionView(AdhocView):
             else:
                 matchStart, matchEnd = res
                 b.apply_tag_by_name("searched_string", matchStart, matchEnd)
+                match_offsets.append(matchStart.get_offset())
                 begin = matchEnd
-                search_count += 1
-        return search_count
+        return match_offsets
 
     def play_annotation(self, a):
         c = self.controller
