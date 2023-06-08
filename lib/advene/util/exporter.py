@@ -282,7 +282,7 @@ class TemplateExporter(GenericExporter):
                 stream = open(filename, 'wb')
             except Exception:
                 logger.error(_("Cannot export to %(filename)s"), exc_info=True)
-                return True
+                raise
 
         if self.templateview.content.mimetype is None or self.templateview.content.mimetype.startswith('text/'):
             compiler = simpleTAL.HTMLTemplateCompiler ()
@@ -296,6 +296,7 @@ class TemplateExporter(GenericExporter):
                 compiler.getTemplate().expand(context=ctx, outputFile=output, outputEncoding='utf-8')
             except simpleTALES.ContextContentException:
                 logger.error(_("Error when exporting text template"), exc_info=True)
+                raise
             if self.templateview.content.mimetype == 'text/plain':
                 stream.write(output.getvalue().replace(b'&lt;', b'<').replace(b'&gt;', b'>').replace(b'&amp;', b'&'))
         else:
