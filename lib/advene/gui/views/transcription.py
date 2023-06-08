@@ -194,6 +194,18 @@ class TranscriptionView(AdhocView):
                 self.generate_buffer_content()
         return True
 
+    def close(self, *p):
+        if self.check_modified():
+            # FIXME: preference to auto-validate on close?
+            response=dialog.yes_no_cancel_popup(title=_("Transcript %s modified") % self._label,
+                                                text=_("The transcript %s has been modified but not validated.\nValidate modifications before closing?") % self._label)
+            if response == Gtk.ResponseType.CANCEL:
+                return False
+            if response == Gtk.ResponseType.YES:
+                self.validate()
+        AdhocView.close(self)
+        return True
+
     def check_modified(self):
         b = self.textview.get_buffer()
         modified = []
