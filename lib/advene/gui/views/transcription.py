@@ -500,6 +500,7 @@ class TranscriptionView(AdhocView):
         if self.currentannotation is not None and event.type == Gdk.EventType._2BUTTON_PRESS:
             # Double click -> goto annotation
             self.play_annotation(self.currentannotation)
+            return True
         return False
 
     def move_cursor_cb(self, textview, step_size, count, extend_selection):
@@ -550,13 +551,12 @@ class TranscriptionView(AdhocView):
                 annotationid = beginmarks[0].replace('b_', '')
 
         if annotationid is not None:
-            a = self.package.annotations['#'.join( (self.package.uri,
-                                                    annotationid) )]
+            a = self.package.get_element_by_id(annotationid)
             if a != self.currentannotation:
                 if self.currentannotation is not None:
                     self.untag_annotation(self.currentannotation, "current")
-                    self.currentannotation = a
-                    self.tag_annotation(a, "current")
+                self.currentannotation = a
+                self.tag_annotation(a, "current")
         else:
             if self.currentannotation is not None:
                 self.untag_annotation(self.currentannotation, "current")
