@@ -73,10 +73,6 @@ $.widget("ui.video", {
 
         $.each( videoOptions , function( key, value) {
             if( value !== null ) {
-                // webkit bug
-                if( key == 'autoplay' && $.browser.webkit ) {
-                    value = false;
-                }
                 self._oldVideooptions[key] = self.element.attr( key );
                 self.element.attr( key, value );
             }
@@ -151,10 +147,6 @@ $.widget("ui.video", {
         self.element[0].volume = 0.25;
         self._volumeSlider.slider('value',parseInt(self.element[0].volume * 100));
 
-        // webkit bug
-        if( self.options.autoPlay && $.browser.webkit ) {
-            self.play();
-        }
     },
     //  Controls creation
     _createControls: function() {
