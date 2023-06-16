@@ -708,6 +708,8 @@ A base template package can be specified using the "-o
 template_package=path.azp" option. The given package will be loaded
 before the import takes place.
 
+A package title can be specified using "-o package_title='New title'
+
 If no output file is specified, then data will be dumped to stdout in a JSON format.
 
 Available filters:
@@ -729,14 +731,18 @@ Available filters:
     # specific template_package option to specify initial template
     # packages
     template_package = config.data.options.options.get('template_package')
+    package_title = config.data.options.options.get('package_title')
     # Rebuild filter option string from config.data.options.options dict
     option_list = [ (f"--{k}={v}" if v else f"--{k}")
                     for (k, v) in config.data.options.options.items()
-                    if k != 'template_package' ]
+                    if k != 'template_package' and k != 'package_title' ]
 
     # If template_package is None, then the controller will use the
     # standard template package
     c.load_package(template_package)
+
+    if package_title is not None:
+        c.package.title = package_title
 
     # If we are importing a video file, then set it as default media
     # for the package. This will also initialize the imagecache.
