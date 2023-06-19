@@ -6,6 +6,8 @@
   - transcriptFollow -> have the video follow .transcript elements(i.e. when the end of a .transcript element is reached, go to the begin time of the following (DOM-wise) .transcript element)
  */
 
+const PLAYER_TOP_POS = '40px';
+
 _formatTime = function( seconds ) {
     var h = parseInt(seconds / 3660);
     var m = parseInt((seconds / 60)-(h*60));
@@ -791,6 +793,7 @@ $.widget("ui.video", {
         uiPlayer=self.uiDialog;
         // Default behaviour: fixed position
         uiPlayer.css('position', 'fixed');
+        uiPlayer.css('top', PLAYER_TOP_POS);
 
         /* Minimized icon */
         self.minplayer=$('<img/>',
@@ -876,7 +879,7 @@ $.widget("ui.video", {
                 if (uiPlayer.find('.ui-dialog-titlebar-fixonscreen', this).is(':hidden')) {
                     var pos = uiPlayer.position();
                     uiPlayer.css('position', 'fixed');
-                    uiPlayer.css('top', pos.top - $(window).scrollTop());
+                    uiPlayer.css('top', PLAYER_TOP_POS);
                 }
             });
 
@@ -935,7 +938,7 @@ $.widget("ui.video", {
                 $(this).hide();
                 var pos = uiPlayer.position();
                 uiPlayer.css('position', 'fixed');
-                uiPlayer.css('top',pos.top - $(window).scrollTop());
+                uiPlayer.css('top', PLAYER_TOP_POS);
                 uiPlayer.find('.ui-dialog-titlebar-nofixonscreen ',this).show();
                 return false;
             })
