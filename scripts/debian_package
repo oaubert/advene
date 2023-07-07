@@ -4,7 +4,7 @@ ADVENEDIR=$(realpath -e $(dirname "$0")/..)
 DEBDIR=$(realpath -e ${ADVENEDIR}/../advene.debian)
 
 cd $ADVENEDIR
-VER=$(git describe --tags | sed -e 's!/!-!g; s!-!_!g; s!release_!!')
+VER=$(git describe --tags | sed -e 's!/!-!g; s!-!.!g; s!release.!!')
 
 TMPDIR=/tmp/advene-${VER}
 TMPDEBDIR=/tmp/advene.debian
