@@ -350,7 +350,7 @@ class FlatJsonExporter(GenericExporter):
         package = self.source.ownerPackage
         media_uri = package.getMetaData(config.data.namespace, "media_uri") or self.controller.get_default_media()
 
-        def flat_json(a):
+        def flat_json_annotation(a):
             return {
                 "id": a.id,
                 "title": self.controller.get_title(a),
@@ -367,8 +367,30 @@ class FlatJsonExporter(GenericExporter):
                 "parsed": a.content.parsed()
             }
 
-        data = { "annotations": [ flat_json(a)
-                                  for a in self.source.annotations ] }
+        def flat_json_relation(r):
+            return {
+                "id": r.id,
+                "title": self.controller.get_title(r),
+                "creator": r.author,
+                "type": r.type.id,
+                "type_title": self.controller.get_title(r.type),
+                "type_color": self.controller.get_element_color(r.type),
+                "media": media_uri,
+                "color": self.controller.get_element_color(r),
+                "content_type": r.content.mimetype,
+                "content": r.content.data,
+                "parsed": r.content.parsed(),
+                # Dump the whole annotation, it is more verbose but
+                # avoids to have to do the id lookup when interpreting
+                # the file
+                "members":  [ flat_json_annotation(a)
+                              for a in r.members ]
+            }
+
+        data = { "annotations": [ flat_json_annotation(a)
+                                  for a in self.source.annotations ],
+                 "relations": [ flat_json_relation(r)
+                                for r in self.source.relations ] }
 
         return self.output(data, filename)
 
@@ -386,7 +408,7 @@ def init_templateexporters():
         register_exporter(klass)
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
 
     import advene.core.controller as controller
