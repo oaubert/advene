@@ -624,6 +624,9 @@ class Menu:
             return
         add_item(_('Edit package properties...'), self.controller.gui.on_package_properties1_activate)
         add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element)
+        add_item(_('Offset all annotations'), self.offset_element, element)
+        add_item(_("Search/replace content in all annotations"), self.search_replace_content, element)
+        add_item(_("Display all annotations as a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotations'))
         add_item('')
         add_item(_('Create a new static view...'), self.create_element, 'staticview', element)
         add_item(_('Create a new dynamic view...'), self.create_element, 'dynamicview', element)
@@ -858,4 +861,10 @@ class Menu:
             add_item(_('Create a new dynamic view...'), self.create_element, 'dynamicview', element.rootPackage)
         elif element.viewableType == 'schema-list':
             add_item(_('Create a new schema...'), self.create_element, Schema, element.rootPackage)
+            # Global actions on all annotations
+            add_item(_('Offset all annotations'), self.offset_element, element.rootPackage)
+            add_item(_("Search/replace content in all annotations"), self.search_replace_content, element.rootPackage)
+            add_item(_("Display all annotations as a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.rootPackage.annotations, source='here/annotations'))
+            add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element.rootPackage)
+
         return
