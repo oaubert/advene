@@ -800,6 +800,7 @@ class Menu:
         add_item(_('Delete all relations...'), self.delete_elements, element, element.relations)
         add_item(_('Create montage from related annotations'), self.create_montage, element)
         add_item(_('Create dynamic view following relations'), lambda i, e: self.create_follow_dynamic_view(e), element)
+        add_item(_("Display all related annotations as a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='here/annotations'))
         return
 
     def make_query_menu(self, element, menu):
