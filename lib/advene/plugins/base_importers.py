@@ -34,6 +34,7 @@ import xml.dom
 import xml.etree.ElementTree as ET
 
 import advene.core.config as config
+from advene.model.schema import AnnotationType
 import advene.util.handyxml as handyxml
 from advene.util.importer import GenericImporter
 import advene.util.helper as helper
@@ -502,7 +503,11 @@ class SubtitleImporter(GenericImporter):
 
     def __init__(self, encoding=None, **kw):
         super(SubtitleImporter, self).__init__(**kw)
-        self.encoding=encoding
+        self.encoding = encoding
+        self.annotation_type = None
+        self.optionparser.add_option("-t", "--annotation-type",
+                                     action="store", type="string", dest="annotation_type", default=self.annotation_type,
+                                     help=_("Output annotation type (either existing or created)"))
         self.optionparser.add_option("-e", "--encoding",
                                      action="store", type="string", dest="encoding", default=self.encoding,
                                      help=_("Specify the encoding of the input file (latin1, utf8...)"))
@@ -555,8 +560,24 @@ class SubtitleImporter(GenericImporter):
 
     def process_file(self, filename):
         f = open(filename, 'r', encoding=self.encoding or 'utf-8')
-        p, at = self.init_package(filename=filename, annotationtypeid='subtitle')
-        at.title = _("Subtitles from %s") % os.path.basename(filename)
+        if self.package is not None and self.package.get_element_by_id(self.annotation_type) is not None:
+            at = self.package.get_element_by_id(self.annotation_type)
+            if isinstance(at, AnnotationType):
+                # Existing annotation type - use i
+                at = self.defaulttype =  self.package.get_element_by_id(self.annotation_type)
+                p = self.package
+            else:
+                raise Exception("{self.annotation_type} exists but is not an annotation type")
+        else:
+            at_id = self.annotation_type
+            # Not yet existing type (or no type at all) - create it
+            if at_id is None:
+                at_id = 'subtitle'
+            at_id = str(at_id).strip()
+            if not at_id:
+                at_id = 'subtitle'
+            p, at = self.init_package(filename=filename, annotationtypeid=at_id)
+            at.title = _("Subtitles from %s") % os.path.basename(filename)
         # FIXME: implement subtitle type detection
         try:
             self.convert(self.srt_iterator(f))
