@@ -127,6 +127,7 @@ import advene.gui.edit.properties
 import advene.gui.edit.montage
 from advene.gui.edit.timeadjustment import TimeAdjustment
 from advene.gui.edit.frameselector import FrameSelector
+import advene.gui.popup
 from advene.gui.views.viewbook import ViewBook
 from advene.gui.views.html import HTMLView
 from advene.gui.views.scroller import ScrollerView
@@ -326,6 +327,7 @@ class AdveneApplication(Gtk.Application):
                     ( _("Annotation Type"), 'app.create-annotation-type', "", "create_annotation_type"),
                     ( _("Relation Type"), 'app.create-relation-type', "", "create_relation_type"),
                 ), "", "" ),
+                ( _("_Global actions"), 'app.global_actions', "", "global_actions" ),
                 ( _("P_ackage properties"), 'app.edit-package-properties', _("Edit package properties"), "package_properties" ),
                 ( _("P_references"), 'app.edit-preferences', _("Interface preferences"), "preferences" ),
             ), "", "" ),
@@ -4033,6 +4035,12 @@ class AdveneApplication(Gtk.Application):
     @named_action(name="app.find")
     def on_find1_activate (self, button=None, data=None):
         self.open_adhoc_view('interactivequery', destination='east')
+        return True
+
+    @named_action(name="app.global_actions")
+    def on_global_actions_activate (self, button=None, data=None):
+        menu = advene.gui.popup.Menu(self.controller.package, controller=self.controller)
+        menu.popup()
         return True
 
     @named_action(name="app.edit-ruleset")
