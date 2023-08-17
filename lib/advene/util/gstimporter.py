@@ -197,15 +197,17 @@ class GstImporter(GenericImporter):
         # Required elements:
         # - decoder -> uridecodebin
         # - report -> if present, it is expected to be a progressreport element
-        self.pipeline = Gst.parse_launch(" ! ".join(['uridecodebin name=decoder',
-                                                     pipeline_elements,
-                                                     'progressreport silent=true update-freq=1 name=report',
-                                                     sink]))
+        pipe = " ! ".join(['uridecodebin name=decoder',
+                           pipeline_elements,
+                           'progressreport silent=true update-freq=1 name=report',
+                           sink])
+        logger.warning("Using pipeline %s", pipe)
+        self.pipeline = Gst.parse_launch(pipe)
         self.decoder = self.pipeline.get_by_name('decoder')
         self.report = self.pipeline.get_by_name('report')
         self.sink = self.pipeline.get_by_name('sink')
         if hasattr(self, 'process_frame'):
-            print("Connecting signal handler")
+            logger.warning("Connecting signal handler")
             self.sink.connect("new-sample", self.frame_handler)
 
         bus = self.pipeline.get_bus()
