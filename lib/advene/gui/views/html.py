@@ -28,9 +28,16 @@ import urllib.request, urllib.parse, urllib.error
 import re
 
 engine=None
+import gi
 try:
-    import gi
     gi.require_version('WebKit2', '4.0')
+except ValueError:
+    try:
+        gi.require_version('WebKit2', '4.1')
+    except ValueError:
+        pass
+
+try:
     from gi.repository import WebKit2
     engine='webkit'
 except ImportError:
