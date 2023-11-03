@@ -161,6 +161,7 @@ class TimeLine(AdhocView):
             'autoscroll': AUTOSCROLL_DISCRETE,
             'display-relations': True,
             'display-all-relations': False,
+            'display-same-type-relations': False,
             'display-relation-type': True,
             'display-relation-content': True,
             }
@@ -2020,18 +2021,26 @@ class TimeLine(AdhocView):
         def focus_in(button, event):
             self.set_annotation(button.annotation)
             if self.options['display-relations'] and not self.options['display-all-relations']:
-                a=button.annotation
-                for r in button.annotation.relations:
-                    # FIXME: handle more-than-binary relations
-                    if r.members[0] != a:
-                        b=self.get_widget_for_annotation(r.members[0])
-                        if b:
-                            # b may be None, if the related annotation is not displayed
-                            self.relations_to_draw.append( (b, button, r) )
-                    elif r.members[1] != a:
-                        b=self.get_widget_for_annotation(r.members[1])
-                        if b:
-                            self.relations_to_draw.append( (button, b, r) )
+                a = button.annotation
+                if self.options['display-same-type-relations']:
+                    self.relations_to_draw = [ (self.get_widget_for_annotation(r.members[0]),
+                                                self.get_widget_for_annotation(r.members[1]),
+                                                r)
+                                               for rt in set(r.type for r in button.annotation.relations)
+                                               for r in rt.relations
+                                              ]
+                else:
+                    for r in button.annotation.relations:
+                        # FIXME: handle more-than-binary relations
+                        if r.members[0] != a:
+                            b=self.get_widget_for_annotation(r.members[0])
+                            if b:
+                                # b may be None, if the related annotation is not displayed
+                                self.relations_to_draw.append( (b, button, r) )
+                        elif r.members[1] != a:
+                            b=self.get_widget_for_annotation(r.members[1])
+                            if b:
+                                self.relations_to_draw.append( (button, b, r) )
                 self.update_relation_lines()
 
             if (self.options['autoscroll'] == AUTOSCROLL_ANNOTATION
@@ -3871,8 +3880,9 @@ class TimeLine(AdhocView):
 
         ew=advene.gui.edit.properties.EditWidget(cache.__setitem__, cache.get)
         ew.set_name(_('Preferences'))
-        ew.add_checkbox(_('Relation type'), 'display-relation-type', _('Display relation types'))
+        ew.add_checkbox(_('Relation type'), 'display-relation-type', _('Display relation type'))
         ew.add_checkbox(_('Relation content'), 'display-relation-content', _('Display relation content'))
+        ew.add_checkbox(_('All relations of the same type'), 'display-same-type-relations', _('Display all relations of the same type upon mouseover'))
         ew.add_checkbox(_('Highlight'), 'highlight', _('Highlight active annotations'))
 
         res=ew.popup()
