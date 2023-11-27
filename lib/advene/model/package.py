@@ -225,7 +225,7 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         case, return the value.
         """
         if value is not None:
-            self.setMetaData(config.data.namespace, 'is_template', value)
+            self.setMetaData(config.data.namespace, 'is_template', 'true' if value else 'false')
         val = self.getMetaData(config.data.namespace, 'is_template')
         if val == 'false':
             val = False
