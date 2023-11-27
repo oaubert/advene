@@ -740,6 +740,8 @@ Available filters:
     # If template_package is None, then the controller will use the
     # standard template package
     c.load_package(template_package)
+    # Disable the template option if it was present
+    c.package.isTemplate(False)
 
     if package_title is not None:
         c.package.title = package_title
