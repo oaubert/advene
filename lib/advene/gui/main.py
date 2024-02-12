@@ -4398,7 +4398,7 @@ Image cache information: %(imagecache)s
             ('SS.sss', '%.S'),
             ('SS', '%S'),
         )) )
-        fps = [ 10, 12, 24, 25, 40, 50, 60, 72 ]
+        fps = [ 10, 12, 24, 25, 30, 40, 50, 60, 72 ]
         d = config.data.preferences['default-fps']
         if not d in fps:
             fps.append(d)
