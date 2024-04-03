@@ -221,7 +221,7 @@ class Player:
             for src, dst in zip(elements, elements[1:]):
                 src.link(dst)
 
-        self.log("using " + sink)
+        logger.debug("Using %s", sink)
 
         # Note: it is crucial to make ghostpad an attribute, so that
         # it is not garbage-collected at the end of the build_pipeline
@@ -533,7 +533,7 @@ class Player:
         return s.status == self.PlayingStatus or s.status == self.PauseStatus
 
     def check_player(self):
-        self.log("check player")
+        logger.debug("check player")
         return True
 
     def position_update(self):
