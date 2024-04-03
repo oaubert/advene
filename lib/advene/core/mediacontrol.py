@@ -32,24 +32,15 @@ class PlayerFactory:
         """
         if p is None:
             p=config.data.player['plugin']
-        logger.warning("mediacontrol: using %s", p)
-        # vlcnative is deprecated and has been removed.
-        if p == 'vlcnative':
-            p = 'vlcctypes'
+        logger.info("mediacontrol: using %s", p)
 
         try:
-            if p == 'vlcctypes':
-                import advene.player.vlcctypes as playermodule
-            elif p == 'dummy':
+            if p == 'dummy':
                 import advene.player.dummy as playermodule
-            elif p == 'mplayer':
-                import advene.player.mplayer as playermodule
             elif p == 'gstreamer':
                 import advene.player.gstreamer as playermodule
             elif p == 'gstrecorder':
                 import advene.player.gstrecorder as playermodule
-            elif p == 'quicktime':
-                import advene.player.quicktime as playermodule
             else:
                 logger.warning("Fallback to dummy module")
                 import advene.player.dummy as playermodule

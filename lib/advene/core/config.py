@@ -595,7 +595,7 @@ class Config:
                             # FIXME: we should register player plugins
                             # and use introspection, but plugin loading
                             # happens later.
-                            choices=("dummy", "vlcctypes", "gstreamer", "gstrecorder"),
+                            choices=("dummy", "gstreamer", "gstrecorder"),
                             default=None,
                             help="Video player selection")
 
