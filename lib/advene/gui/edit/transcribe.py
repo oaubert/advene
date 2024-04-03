@@ -46,7 +46,7 @@ from advene.model.schema import AnnotationType
 import advene.util.importer
 
 import advene.util.helper as helper
-from advene.util.tools import unescape_string, is_uri
+from advene.util.tools import unescape_string, is_uri, detect_by_bom
 
 from gettext import gettext as _
 
@@ -892,7 +892,8 @@ class TranscriptionEdit(AdhocView):
                 if is_uri(filename):
                     f = urllib.request.urlopen(filename)
                 else:
-                    f = open(filename)
+                    # On windows some file are encoded in utf-16 - try to handle this with BOM
+                    f = open(filename, encoding=detect_by_bom(path=filename, default='utf-8'))
             except IOError as e:
                 self.message(_("Cannot open %(filename)s: %(error)s") % {'filename': filename,
                                                                          'error': str(e) })
@@ -903,7 +904,8 @@ class TranscriptionEdit(AdhocView):
             data=buffer
 
         if isinstance(data, bytes):
-            data = data.decode('utf-8')
+            # On windows some file are encoded in utf-16 - try to handle this with BOM
+            data = data.decode(detect_by_bom(raw=data, default='utf-8'))
 
         b=self.textview.get_buffer()
         begin,end=b.get_bounds()

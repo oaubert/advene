@@ -91,7 +91,7 @@ import advene.model.tal.context
 
 import advene.core.mediacontrol
 import advene.util.helper as helper
-from advene.util.tools import unescape_string, open_in_filebrowser
+from advene.util.tools import unescape_string, open_in_filebrowser, detect_by_bom
 import xml.etree.ElementTree as ET
 
 import advene.util.importer
@@ -3620,7 +3620,7 @@ class AdveneApplication(Gtk.Application):
             b=t.get_buffer()
             b.delete(*b.get_bounds ())
             try:
-                f=open(path, 'r', encoding='utf-8')
+                f=open(path, 'r', encoding=detect_by_bom(path=path, default='utf-8'))
                 b.set_text("".join(f.readlines()))
                 f.close()
             except (IOError, OSError) as e:

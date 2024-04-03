@@ -22,6 +22,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import codecs
 import datetime
 import functools
 import json
@@ -511,3 +512,21 @@ def open_in_filebrowser(path):
                 args.append(path)
                 subprocess.Popen(args)
                 break
+
+# BOM detection - CC-BY-SA from
+# https://stackoverflow.com/questions/13590749/reading-unicode-file-data-with-bom-chars-in-python#--stacks-s-tooltip-813rseh2
+def detect_by_bom(path: str = None, raw: bytes = None, default = None):
+    assert not(raw is None and path is None)
+    if raw is None:
+        with open(path, 'rb') as f:
+            raw = f.read(4)    # will read less if the file is smaller
+    else:
+        raw = raw[:4]
+    # BOM_UTF32_LE's start is equal to BOM_UTF16_LE so need to try the former first
+    for enc, boms in ( ('utf-8-sig', (codecs.BOM_UTF8,)),
+                       ('utf-32', (codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)),
+                       ('utf-16', (codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)) ):
+        if any(raw.startswith(bom) for bom in boms):
+            return enc
+    return default
+

@@ -38,6 +38,7 @@ from advene.model.schema import AnnotationType
 import advene.util.handyxml as handyxml
 from advene.util.importer import GenericImporter
 import advene.util.helper as helper
+from advene.util.tools import detect_by_bom
 
 def register(controller=None):
     controller.register_importer(TextImporter)
@@ -304,7 +305,7 @@ class TextImporter(GenericImporter):
         elif filename.startswith('http'):
             f = urllib.request.urlopen(filename)
         else:
-            f = open(filename, 'r', encoding='utf-8')
+            f = open(filename, 'r', encoding=detect_by_bom(path=filename, default='utf-8'))
         if self.package is None:
             self.init_package(filename=filename)
         self.ensure_new_type()
