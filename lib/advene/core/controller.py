@@ -369,7 +369,7 @@ class AdveneController:
                 if p.register(controller=self) is False:
                     logger.error("Could not register %s", p.name)
                 else:
-                    logger.info("Registering %s", p.name)
+                    logger.debug("Registering %s", p.name)
             except AttributeError:
                 logger.error("AttributeError in %s/%s", directory, p.name, exc_info=True)
                 pass
