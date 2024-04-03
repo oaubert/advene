@@ -5,7 +5,7 @@
 # PGP key ID and fingerprint (P), description (D), and snail-mail address (S).
 
 N: Olivier Aubert
-E: olivier.aubert at liris dot cnrs dot fr
+E: contact at olivieraubert dot net
 D: Design
 D: Overall development and coordination
 D: Debian packaging
