@@ -96,9 +96,14 @@ Timeline
 -   `c` : center the timeline on the current player position
 -   draw a rectangle on the background: if the area covers at least one
     annotation, select covered annotations. Else, propose to either
-    create an annotation or to zoom on the selected area.
+create an annotation or to zoom on the selected area.
+
+-   control-Return: create an annotation using the current player time,
+    in the annotation type/line where the cursor is
 
 ### Annotation widget
+
+These apply when the cursor is over an annotation widget:
 
 -   simple click: player the annotation and lock the inspector on this
     annotation
@@ -115,8 +120,8 @@ Timeline
     cursor position) to the current movie time
 -   control+scroll : update the annotation begin or end (depending on
     the cursor position) time. Holding Shift uses a larger increment
--   control+return : split the annotation at the current player position
-    (if the position is in the annotation's bounds)
+-   control+t : split the annotation at the current player position
+    (if the position is in the annotation’s bounds)
 -   `Delete` or `Backspace` : delete the annotation
 -   Drag-and-drop of an annotation on another one: popup a menu to
     propose to create a relation, merge annotations or align bounds.
