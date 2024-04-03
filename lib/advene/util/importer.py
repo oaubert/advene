@@ -236,8 +236,9 @@ class GenericImporter:
                 else:
                     logger.info("Unknown option %s", k)
         else:
+            # It may be a optparse.Values instance.
             for k in (n
-                      for n in dir(options)
+                      for n in vars(options)
                       if not n.startswith('_')):
                 k = k.replace('-', '_')
                 if hasattr(self, k):
