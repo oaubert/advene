@@ -1908,8 +1908,11 @@ class TimeLine(AdhocView):
         if widget.keypress(widget, event, annotation):
             return True
 
-        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK & Gdk.ModifierType.SHIFT_MASK:
-            # Control-return: split at current player position
+        if event.keyval == Gdk.KEY_t:
+            # t for spliT at current player position/Timecode
+            # It was previously Control-Shift-Return but this has many
+            # problems like being overridden by Control-Return and
+            # being hard to handle correctly anyway
             pos = self.controller.player.current_position_value
             if pos in annotation.fragment:
                 self.controller.split_annotation(annotation, pos)
@@ -2362,7 +2365,10 @@ class TimeLine(AdhocView):
             self.fraction_adj.set_value(1.0/pow(2, event.keyval-49))
             self.set_middle_position(pos)
             return True
-        if event.keyval == Gdk.KEY_Return and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+        if (event.keyval == Gdk.KEY_Return
+            and event.get_state() & Gdk.ModifierType.CONTROL_MASK
+            # Make sure not to override Control-Shift-Return (split annotation) on annotation_key_press
+            and not event.get_state() & Gdk.ModifierType.SHIFT_MASK):
             # Control-return: create an annotation in the current line
             # Create a new annotation
             # Determine type line
@@ -2373,7 +2379,6 @@ class TimeLine(AdhocView):
             sel_types=[ at
                         for (at, p) in self.layer_position.items()
                         if p <= y <= p + self.get_element_height(at) + config.data.preferences['timeline']['interline-height'] ]
-            logger.warning(sel_types)
             if sel_types:
                 el = self.controller.create_annotation(position=int(self.controller.player.current_position_value),
                                                        type=sel_types[0])
