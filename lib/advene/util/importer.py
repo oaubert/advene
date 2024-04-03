@@ -709,7 +709,9 @@ A base template package can be specified using the "-o
 template_package=path.azp" option. The given package will be loaded
 before the import takes place.
 
-A package title can be specified using "-o package_title='New title'
+A package title can be specified using "-o package_title='New title'"
+
+A media file name can be specified using "-o media_file=path_to_video.mp4"
 
 If no output file is specified, then data will be dumped to stdout in a JSON format.
 
@@ -733,10 +735,11 @@ Available filters:
     # packages
     template_package = config.data.options.options.get('template_package')
     package_title = config.data.options.options.get('package_title')
+    media_file = config.data.options.options.get('media_file')
     # Rebuild filter option string from config.data.options.options dict
     option_list = [ (f"--{k}={v}" if v else f"--{k}")
                     for (k, v) in config.data.options.options.items()
-                    if k != 'template_package' and k != 'package_title' ]
+                    if k not in ('template_package', 'package_title', 'media_file') ]
 
     # If template_package is None, then the controller will use the
     # standard template package
@@ -751,6 +754,9 @@ Available filters:
     # for the package. This will also initialize the imagecache.
     if helper.is_video_file(inputfile):
         c.set_default_media(inputfile)
+    # Else the media file may have been specified
+    elif media_file is not None:
+        c.set_default_media(media_file)
 
     def progress(value, label=""):
         sys.stderr.write('\rProgress %02d%% - %s' % (int(100 * value), label))
