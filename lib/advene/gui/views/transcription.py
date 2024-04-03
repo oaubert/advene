@@ -324,6 +324,8 @@ class TranscriptionView(AdhocView):
         sw.add(self.textview)
 
         self.searchbox = Gtk.HBox()
+        self.searchbox.match_index = None
+        self.searchbox.match_offsets = []
 
         def hide_searchbox(*p):
             # Clear the searched_string tags
