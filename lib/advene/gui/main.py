@@ -3906,7 +3906,7 @@ class AdveneApplication(Gtk.Application):
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package (alias=alias)
-            except (OSError, IOError) as e:
+o            except (OSError, IOError, PermissionError) as e:
                 dialog.message_dialog(_("Could not save the package: %s") % str(e),
                                       Gtk.MessageType.ERROR)
         return True
@@ -3963,7 +3963,7 @@ class AdveneApplication(Gtk.Application):
                     p.apply_cb()
             try:
                 self.controller.save_package(name=filename, alias=alias)
-            except (OSError, IOError) as e:
+            except (OSError, IOError, PermissionError) as e:
                 dialog.message_dialog(_("Could not save the package: %s") % str(e),
                                       Gtk.MessageType.ERROR)
         return True
