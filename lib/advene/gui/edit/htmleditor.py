@@ -47,7 +47,7 @@ from html.parser import HTMLParser
 try:
     gi.require_version('GtkSource', '3.0')
     from gi.repository import GtkSource
-except ImportError:
+except (ImportError, ValueError):
     GtkSource=None
 
 if GtkSource is None:
