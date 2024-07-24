@@ -522,7 +522,7 @@ def get_drawable():
         # Do not kill the widget if the application exits
         return True
 
-    if hasattr(Gtk, 'Socket'):
+    if hasattr(Gtk, 'Socket') and not is_wayland():
         drawable = Gtk.Socket()
         drawable.connect('plug-removed', handle_remove)
     else:
@@ -584,3 +584,7 @@ def window_to_png(widget, output="/tmp/win.png"):
 
     temp.show_all()
     temp.queue_draw()
+
+def is_wayland(self):
+    return Gdk.Display.get_default().get_name().startswith('wayland')
+
