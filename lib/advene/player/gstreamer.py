@@ -788,19 +788,23 @@ class Player:
         return "../" * p1.count(sep) + p2
 
     def dump_bin(self, gbin, depth=0, recurse=-1, showcaps=True):
-        return [ l  for e in reversed(list(gbin.iterate_elements())) for l in self.dump_element(e, depth, recurse - 1) ]
+        return [ description
+                 for element in reversed(list(gbin.iterate_elements()))
+                 for description in self.dump_element(element, depth, recurse - 1) ]
 
     def dump_element(self, e, depth=0, recurse=-1, showcaps=True):
-        ret=[]
+        """Return a list of strings describing the element.
+        """
+        descriptions = []
         indentstr = depth * 8 * ' '
 
         # print element path and factory
         path = e.get_path_string() + (isinstance(e, Gst.Bin) and '/' or '')
         factory = e.get_factory()
         if factory is not None:
-            ret.append( '%s%s (%s)' % (indentstr, path, factory.get_name()) )
+            descriptions.append( '%s%s (%s)' % (indentstr, path, factory.get_name()) )
         else:
-            ret.append( '%s%s (No factory)' % (indentstr, path) )
+            descriptions.append( '%s%s (No factory)' % (indentstr, path) )
 
         # print info about each pad
         for p in e.pads:
@@ -853,10 +857,10 @@ class Player:
             line.append( "%s %s" % (direc, peerpath) )
 
             #if peerpath and peerpath.find('proxy')!=-1: print peer
-            ret.append( ''.join(line) )
+            descriptions.append( ''.join(line) )
         if recurse and isinstance(e, Gst.Bin):
-            ret.extend( self.dump_bin(e, depth+1, recurse) )
-        return ret
+            descriptions.extend( self.dump_bin(e, depth+1, recurse) )
+        return descriptions
 
     def str_element(self, element):
         return "\n".join(self.dump_element(element))
