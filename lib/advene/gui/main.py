@@ -825,7 +825,9 @@ class AdveneApplication(Gtk.Application):
     def set_busy_cursor(self, busy=False):
         """Un/Set the busy cursor for the main window.
         """
-        self.gui.win.get_window().set_cursor(self.busy_cursor if busy else None)
+        window = self.gui.win.get_window()
+        if window:
+           window.set_cursor(self.busy_cursor if busy else None)
 
     def update_player_labels(self):
         """Update the representation of player status.
