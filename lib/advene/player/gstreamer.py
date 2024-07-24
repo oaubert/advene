@@ -27,7 +27,7 @@ from gettext import gettext as _
 
 import advene.core.config as config
 from advene.util.helper import format_time, path2uri
-from advene.gui.util import get_drawable
+from advene.gui.util import get_drawable, is_wayland
 
 import ctypes
 import os
@@ -157,6 +157,8 @@ class Player:
             sink='xvimagesink'
         elif config.data.player['vout'] == 'gtk':
             sink='gtksink'
+            if is_wayland():
+                sink = 'gtkwaylandsink'
         elif config.data.player['vout'] == 'd3d':
             sink='d3dvideosink'
         elif config.data.player['vout'] == 'gl':
