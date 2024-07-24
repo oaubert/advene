@@ -585,6 +585,6 @@ def window_to_png(widget, output="/tmp/win.png"):
     temp.show_all()
     temp.queue_draw()
 
-def is_wayland(self):
+def is_wayland():
     return Gdk.Display.get_default().get_name().startswith('wayland')
 
