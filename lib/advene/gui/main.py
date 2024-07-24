@@ -2250,7 +2250,8 @@ class AdveneApplication(Gtk.Application):
             screen_width = screen.get_width() or config.data.preferences['fallback-screen-width']
             screen_height = screen.get_height() or config.data.preferences['fallback-screen-height']
             stored_resolution = config.data.preferences['windowsize'].setdefault(name, (640,480))
-            stored_resolution = (min(s[0], w), min(s[1], h))
+            stored_resolution = (min(stored_resolution[0], screen_width),
+                                 min(stored_resolution[1], screen_height))
             window.resize(*stored_resolution)
             position = config.data.preferences['windowposition'].get(name, None)
             if position:
@@ -3910,7 +3911,7 @@ class AdveneApplication(Gtk.Application):
             alias=self.controller.aliases[package]
             try:
                 self.controller.save_package (alias=alias)
-o            except (OSError, IOError, PermissionError) as e:
+            except (OSError, IOError, PermissionError) as e:
                 dialog.message_dialog(_("Could not save the package: %s") % str(e),
                                       Gtk.MessageType.ERROR)
         return True
