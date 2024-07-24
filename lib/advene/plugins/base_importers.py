@@ -54,7 +54,7 @@ def register(controller=None):
     return True
 
 class TextImporter(GenericImporter):
-    """Text importer.
+    r"""Text importer.
 
     The text importer handles input files with 1 annotation per
     line. Each line consists in whitespace-separated data items
@@ -327,8 +327,8 @@ class LsDVDImporter(GenericImporter):
         self.command=self.lsdvd + " -c"
         # FIXME: handle Title- lines
         #Chapter: 01, Length: 00:01:16, Start Cell: 01
-        self.regexp="^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
-        self.encoding=encoding
+        self.regexp = r"^\s*Chapter:\s*(?P<chapter>\d+),\s*Length:\s*(?P<duration>[0-9:]+)"
+        self.encoding = encoding
 
     @staticmethod
     def can_handle(fname):
@@ -383,7 +383,7 @@ class ChaplinImporter(GenericImporter):
 
         self.command="/usr/bin/chaplin -c"
         #   chapter 03  begin:    200.200 005005 00:03:20.05
-        self.regexp="^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
+        self.regexp = r"^\s*chapter\s*(?P<chapter>\d+)\s*begin:\s*.+(?P<begin>[0-9:])\s*$"
         self.encoding='latin1'
 
     @staticmethod
@@ -521,8 +521,8 @@ class SubtitleImporter(GenericImporter):
             return 0
 
     def srt_iterator(self, f):
-        base=r'\d+:\d+:\d+(?:[,\.:]\d+)?'
-        pattern=re.compile(f'({base})\s\S+\s({base})')
+        base = r'\d+:\d+:\d+(?:[,\.:]\d+)?'
+        pattern = re.compile(fr'({base})\s\S+\s({base})')
         tc=None
         content=[]
         # 10000 lines should be a reasonable max.
