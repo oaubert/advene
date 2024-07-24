@@ -194,6 +194,9 @@ class AnnotationDisplay(AdhocView):
             self.label['image'].show()
         return False
 
+    def is_modified(self):
+        return self.label['contents'].get_buffer().get_modified()
+
     def build_widget(self):
         v=Gtk.VBox()
 
