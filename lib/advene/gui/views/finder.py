@@ -997,7 +997,6 @@ class Finder(AdhocView):
                 val = a.get_upper() - a.get_page_size()
             if val != a.get_value():
                 a.set_value(val)
-                a.value_changed ()
             return True
         elif ((event.direction == Gdk.ScrollDirection.UP and event.get_state() & Gdk.ModifierType.SHIFT_MASK)
               or event.direction == Gdk.ScrollDirection.LEFT):
@@ -1006,7 +1005,6 @@ class Finder(AdhocView):
                 val = a.get_lower()
             if val != a.get_value():
                 a.set_value(val)
-                a.value_changed ()
             return True
         return False
 

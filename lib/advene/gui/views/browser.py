@@ -320,7 +320,6 @@ class Browser(AdhocView):
                                    a.get_upper() - a.get_page_size())
                 if val != a.get_value():
                     a.set_value(val)
-                    a.value_changed ()
                 return True
             elif event.direction == Gdk.ScrollDirection.UP or event.direction == Gdk.ScrollDirection.LEFT:
                 val = helper.clamp(a.get_value() - a.get_step_increment(),
@@ -328,7 +327,6 @@ class Browser(AdhocView):
                                    a.get_upper() - a.get_page_size())
                 if val != a.get_value():
                     a.set_value(val)
-                    a.value_changed ()
                 return True
         return False
 

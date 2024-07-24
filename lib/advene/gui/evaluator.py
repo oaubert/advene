@@ -191,7 +191,6 @@ class Evaluator:
             new = 0
         if new < a.get_property("upper"):
             a.set_property("value", new)
-        a.value_changed ()
         return True
 
     def save_output_cb(self, *p, **kw):
