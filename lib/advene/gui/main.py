@@ -1517,6 +1517,10 @@ class AdveneApplication(Gtk.Application):
         # south, fareast)
         self.pane={}
 
+        # self.drawable is used to embed the video player. It was
+        # necessary as a generic way of embedding widgets, but now Gst
+        # implements a Gtk widget so it could probably be removed, but
+        # we need to test this cross-platform
         self.drawable = get_drawable()
         black=Gdk.Color(0, 0, 0)
         for state in (Gtk.StateType.ACTIVE, Gtk.StateType.NORMAL,
@@ -2243,16 +2247,16 @@ class AdveneApplication(Gtk.Application):
             return True
         if config.data.preferences['remember-window-size']:
             screen = window.get_screen()
-            w = screen.get_width()
-            h = screen.get_height()
-            s=config.data.preferences['windowsize'].setdefault(name, (640,480))
-            s = (min(s[0], w), min(s[1], h))
-            window.resize(*s)
-            pos=config.data.preferences['windowposition'].get(name, None)
-            if pos:
-                if pos[0] < w and pos[1] < h:
+            screen_width = screen.get_width() or config.data.preferences['fallback-screen-width']
+            screen_height = screen.get_height() or config.data.preferences['fallback-screen-height']
+            stored_resolution = config.data.preferences['windowsize'].setdefault(name, (640,480))
+            stored_resolution = (min(s[0], w), min(s[1], h))
+            window.resize(*stored_resolution)
+            position = config.data.preferences['windowposition'].get(name, None)
+            if position:
+                if position[0] < screen_width and position[1] < screen_height:
                     # Do not use if it would display the window out of the screen
-                    window.move(*pos)
+                    window.move(*position)
             if name != 'main':
                 # The main GUI is regularly reallocated (at each update_display), so
                 # do not update continuously. Just do it on application exit.

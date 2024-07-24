@@ -72,7 +72,9 @@ class Montage(AdhocView):
         # How many units does a pixel represent ?
         # self.scale.get_value() = unit by pixel
         # Unit = ms
-        self.scale = Gtk.Adjustment.new(int((self.controller.package.cached_duration or 60*60*1000) / Gdk.get_default_root_window().get_width()),
+        # On Wayland, get_default_root_window.get_width returns 0 and we do not know yet the current window. Use the defined fallback width
+        window_width = Gdk.get_default_root_window().get_width() or config.data.preferences['fallback-screen-width']
+        self.scale = Gtk.Adjustment.new(int((self.controller.package.cached_duration or 60*60*1000) / window_width),
                                         5,
                                         36000,
                                         5,

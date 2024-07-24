@@ -239,6 +239,11 @@ class Config:
                             'weblogview': (800, 600),
                             },
             'windowposition': {},
+            # Fallback screen dimensions - we need a fallback on
+            # Gtk3/wayland, hopefully it will not be needed in
+            # Gtk4/wayland
+            'fallback-screen-width': 1920,
+            'fallback-screen-height': 1600,
             'remember-window-size': True,
             'gui': { 'popup-textwidth': 40,
                      # Enforce this min-pane-size when opening views
