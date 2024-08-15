@@ -15,7 +15,6 @@ packages.
 import sys
 import xml.etree.ElementTree as etree
 from multiprocessing.pool import ThreadPool
-from xmlrpc.client import ServerProxy
 
 import requests
 
@@ -54,7 +53,7 @@ def fix_name(name):
     if name == "freetype":
         name = "freetype2"
     if name == "openssl":
-        name = "openssl-1.0"
+        name = "openssl-1.1"
     if name == "libxml2-python2":
         name = "libxml2"
     return name
@@ -106,11 +105,10 @@ def _fetch_version(name):
     else:
         pypi_name = arch_name
 
-    client = ServerProxy('https://pypi.python.org/pypi')
-    releases = client.package_releases(pypi_name)
-    if releases:
+    r = requests.get(f"https://pypi.org/pypi/{pypi_name}/json")
+    if r.status_code == 200:
         return {arch_name: (
-            releases[0], "https://pypi.python.org/pypi/%s" % pypi_name)}
+            r.json()["info"]["version"], "https://pypi.python.org/pypi/%s" % pypi_name)}
 
     r = requests.get(
         "http://ftp.gnome.org/pub/GNOME/sources/%s/cache.json" % arch_name)
