@@ -407,13 +407,16 @@
     </dependencies>
   </autotools>
 
-  <!-- INSTALL_PREFIX because it doesn't use DESTDIR and LIBS="" to skip installing static libs -->
-  <autotools id="openssl" autogen-sh="Configure" autogenargs="shared zlib-dynamic"
+   <autotools id="openssl"
+             autogen-sh="Configure"
              autogen-template="%(srcdir)s/%(autogen-sh)s --prefix=%(prefix)s --openssldir=%(prefix)s/etc/ssl %(autogenargs)s"
-             makeinstallargs="INSTALL_PREFIX=$JHBUILD_PREFIX/_jhbuild/root-openssl LIBS= install_sw"
+             autogenargs="shared"
+             makeinstallargs="install_sw"
              supports-non-srcdir-builds="no">
-    <branch module="openssl-1.1.1t.tar.gz" version="1.1.1.t" repo="openssl"
-            hash="sha256:8dee9b24bdb1dcbf0c3d1e9b02fb8f6bf22165e807f45adeb7c9677536859d3b"/>
+    <branch module="openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"
+            version="3.3.1"
+            hash="sha256:777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e"
+            repo="github-tar" />
   </autotools>
 
   <autotools id="python" autogenargs="--enable-shared --without-ensurepip"
@@ -559,19 +562,23 @@
     </branch>
   </meson>
 
- <meson id="pango">
-    <branch version="1.50.14"
-            module="pango/1.50/pango-${version}.tar.xz"
-            hash="sha256:1d67f205bfc318c27a29cfdfb6828568df566795df0cb51d2189cde7f2d581e8">
+  <meson id="pango"
+         mesonargs="-Dfontconfig=enabled">
+    <branch module="pango/1.52/pango-1.52.2.tar.xz"
+            version="1.52.2"
+            hash="sha256:d0076afe01082814b853deec99f9349ece5f2ce83908b8e58ff736b41f78a96b">
+      <patch file="patches/pango-ct-font-fallback.patch"
+             strip="1" />
     </branch>
     <dependencies>
-      <dep package="glib2"/>
-      <dep package="cairo"/>
-      <dep package="gobject-introspection"/>
-      <dep package="freetype"/>
-      <dep package="fribidi"/>
-      <dep package="harfbuzz"/>
-     </dependencies>
+      <dep package="glib" />
+      <dep package="cairo" />
+      <dep package="harfbuzz" />
+      <dep package="fribidi" />
+    </dependencies>
+    <after>
+      <dep package="gobject-introspection" />
+    </after>
   </meson>
 
   <meson id="gdk-pixbuf2" mesonargs="-Dman=false">
@@ -1080,6 +1087,7 @@
     <dependencies>
       <dep package="python-setuptools"/>
     </dependencies>
+    <patch file="patches/setuptools_scm.static_version.patch" strip="1"/>
   </distutils>
 
   <distutils id="CherryPy" python3="1">

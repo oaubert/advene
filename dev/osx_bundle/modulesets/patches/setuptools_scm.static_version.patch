@@ -1,0 +1,32 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index 11f927c..9bd6293 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -13,6 +13,7 @@ backend-path = [
+ 
+ [project]
+ name = "setuptools-scm"
++version = "8.1.0"
+ description = "the blessed package to manage your versions by scm tags"
+ readme = "README.md"
+ license.file = "LICENSE"
+@@ -37,7 +38,6 @@ classifiers = [
+   "Topic :: Utilities",
+ ]
+ dynamic = [
+-  "version",
+ ]
+ dependencies = [
+   "packaging>=20",
+diff --git a/setup.py b/setup.py
+new file mode 100644
+index 0000000..b908cbe
+--- /dev/null
++++ b/setup.py
+@@ -0,0 +1,3 @@
++import setuptools
++
++setuptools.setup()
+-- 
+2.43.0
+
