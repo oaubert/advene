@@ -15,7 +15,7 @@ set -e
 source env.sh
 
 function main {
-    local GIT_TAG=${1:-"main"}
+    local GIT_TAG=${1:-"master"}
 
     rm -rf "$QL_OSXBUNDLE_BUNDLE_DEST"
 
@@ -69,7 +69,7 @@ function main {
      ## FIXME check quodlibet backport
      ## # This is is a bit hackish. More proper investigation would be needed to determine why setup.py install does not find its own install dir
      ## export PYTHONPATH="$APP_PREFIX/lib/$PYTHONID/site-packages:$PYTHONPATH"
-     ## cd "$CLONE"
+     cd "$CLONE"
      jhbuild run "$PYTHON" "$CLONE"/setup.py install \
         --prefix="$APP_PREFIX" --root="/" \
         --record="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt
