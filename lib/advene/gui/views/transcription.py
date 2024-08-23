@@ -212,14 +212,13 @@ class TranscriptionView(AdhocView):
         # Update the model to be sure.
         self.regenerate_model()
         for a in self.model:
-            try:
-                beginiter = b.get_iter_at_mark(b.get_mark("b_%s" % a.id))
-                enditer   = b.get_iter_at_mark(b.get_mark("e_%s" % a.id))
+            beginmark = b.get_mark("b_%s" % a.id)
+            endmark = b.get_mark("e_%s" % a.id)
+            if beginmark is not None and endmark is not None:
+                beginiter = b.get_iter_at_mark(beginmark)
+                enditer   = b.get_iter_at_mark(endmark)
                 if b.get_text(beginiter, enditer, False).strip(ZERO_WIDTH_NOBREAK_SPACE) != self.representation(a):
                     modified.append(a)
-            except TypeError:
-                # Some missing annotations
-                modified.append(a)
         return modified
 
     def update_modified(self, l):
