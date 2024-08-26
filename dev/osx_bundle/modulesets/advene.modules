@@ -814,6 +814,7 @@
       <dep package="mpg123"/>
       <dep package="pulseaudio"/>
       <dep package="libidn2"/>
+      <dep package="gtk3"/>
     </dependencies>
   </meson>
 
