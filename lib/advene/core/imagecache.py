@@ -96,8 +96,8 @@ class ImageCache:
     not_yet_available_image.contenttype = 'image/png'
     not_yet_available_image.timestamp = -1
     not_yet_available_image.is_default = True
-    # Try at most 20 times to re-fetch images
-    MAX_IMAGECACHE_REFETCH_COUNT = 20
+    # Try at most 10 times to re-fetch images
+    MAX_IMAGECACHE_REFETCH_COUNT = 10
 
     def __init__ (self, uri=None, name=None, precision=20, framerate=None):
         """Initialize the Imagecache
