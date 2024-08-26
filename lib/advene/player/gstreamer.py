@@ -39,6 +39,7 @@ try:
     gi.require_version('GstVideo', '1.0')
     gi.require_version('GstPbutils', '1.0')
     from gi.repository import GObject, Gst
+    from gi.repository import GLib
     from gi.repository import GstVideo
     from gi.repository import GstPbutils
     if config.data.os == 'linux':
@@ -187,7 +188,12 @@ class Player:
             except:
                 logger.error("Gstreamer SVG overlay element is not available", exc_info=True)
 
-        self.imagesink = Gst.parse_launch(f"{sink} name=sink")
+        try:
+            self.imagesink = Gst.parse_launch(f"{sink} name=sink")
+        except GLib.GError as err:
+            logger.error(f"Player: {err.message} - cannot render video")
+            self.imagesink = Gst.parse_launch("fakesink name=sink")
+
         try:
             self.imagesink.set_property('force-aspect-ratio', True)
         except TypeError:
