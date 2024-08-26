@@ -162,23 +162,24 @@ class Config:
                 }
         elif self.os == 'darwin':
             advenedir = Path('/Applications/Advene.app')
+            resourcesdir = advenedir / 'Contents' / 'Resources'
             self.path = {
                 # Advene modules path
                 'advene': advenedir,
-                # Advene resources (template, ...) path FIXME
-                'resources': advenedir / 'share',
+                # Advene resources (template, ...) path
+                'resources': resourcesdir / 'share',
                 # Advene data files default path
                 'data': Path.home() / "Documents",
                 # Imagecache save directory
                 'imagecache': Path('/tmp'),
-                # Web data files FIXME
-                'web': advenedir / 'share' / 'web',
+                # Web data files
+                'web': resourcesdir / 'share' / 'web',
                 # Movie files search path. _ is the
                 # current package path
                 'moviepath': '_:%s' % (Path.home() / 'Movies'),
-                # Locale dir FIXME
-                'locale': advenedir / 'locale',
-                'shotdetect': advenedir / 'Contents' / 'Resources' / 'share' / 'shotdetect',
+                # Locale dir
+                'locale': resourcesdir / 'locale',
+                'shotdetect': ""
                 }
         else:
             imagecache = os.environ.get('XDG_CACHE_HOME', None)
@@ -528,9 +529,6 @@ class Config:
         if not self.path['resources'].exists() or not self.path['web'].exists():
             logger.error("Cannot determine paths.")
 
-        if len(sys.argv) > 1 and sys.argv[1] == '--debug-startup':
-            import pdb; pdb.set_trace()
-
         if self.os == 'win32':
             self.win32_specific_config()
         elif self.os == 'darwin':
@@ -539,17 +537,23 @@ class Config:
     def autodetect_paths(self):
         package_dir = Path(__file__).resolve().parent.parent.parent
         app_dir = package_dir.parent
+
         # 1st hypothesis: module is loaded from sources
         if (app_dir / "setup.py").exists():
             # Chances are that we are using a development tree
             logger.warning("You seem to use a development tree at:\n%s." % app_dir)
             self.fix_paths(app_dir)
             return
+
         # 2nd hypothesis: we are running from an egg dir
         if (package_dir / "EGG-INFO").exists():
             # egg-info install. The locale/share/doc files are in the same dir.
             self.fix_paths(str(package_dir))
             return
+
+        # 3rd hypothesis (Mac OS app): we are running from a packaged MacOS app,
+        # and we can infer the installation directory from GTK_DATA_PREFIX
+        # (XDG_DATA_DIRS would also be possible, but it would require splitting)
 
     def check_settings_directory(self):
         """Check if the settings directory is present, and create it if necessary.
