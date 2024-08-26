@@ -107,6 +107,7 @@
       <dep package="python-mutagen"/>
       <dep package="python-pyobjc"/>
       <dep package="python-pip"/>
+      <dep package="python-requests"/>
       <dep package="CherryPy"/>
     </dependencies>
   </metamodule>
@@ -1099,6 +1100,18 @@
             />
     <dependencies>
       <dep package="python-setuptools-scm"/>
+      <dep package="python-setuptools"/>
+    </dependencies>
+  </distutils>
+
+  <distutils id="python-requests" python3="1">
+    <branch repo="pypi.org"
+            checkoutdir="requests-${version}"
+            module="/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
+            version="2.32.3"
+            hash="sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+            />
+    <dependencies>
       <dep package="python-setuptools"/>
     </dependencies>
   </distutils>
