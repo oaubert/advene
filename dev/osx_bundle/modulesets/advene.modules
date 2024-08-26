@@ -1076,6 +1076,7 @@
       <dep package="gst-plugins-base" />
       <dep package="faad2" />
       <dep package="openssl" />
+      <dep package="librsvg" />
     </dependencies>
   </meson>
 
