@@ -114,6 +114,9 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-python-setuptools \
         "${MINGW_PACKAGE_PREFIX}"-python-pillow \
 
+    # Update PIP
+    build_pip install --upgrade pip
+
     PIP_REQUIREMENTS="\
 rdflib
 requests
