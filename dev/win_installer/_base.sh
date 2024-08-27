@@ -115,7 +115,7 @@ function install_deps {
 
     build_pacman --noconfirm -Rdds mingw-w64-"${ARCH}"-python2 || true
 
-    PIP_REQUIREMENTS="rdflib requests"
+    PIP_REQUIREMENTS="rdflib requests CherryPy"
 
     build_pip install --no-deps --no-binary ":all:" --upgrade \
         --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr ["\\n"] [" "])
@@ -131,7 +131,7 @@ function install_advene {
     cd "${REPO_CLONE}" && git checkout "$1" || exit 1
 
     # Download/extract the cherrypy lib (missing in mingw64)
-    (cd lib && wget http://advene.org/download/src/cherrypy-8.9.1.tgz && tar xvfz cherrypy-8.9.1.tgz)
+    # (cd lib && wget http://advene.org/download/src/cherrypy-8.9.1.tgz && tar xvfz cherrypy-8.9.1.tgz)
 
     build_python setup.py install
 
