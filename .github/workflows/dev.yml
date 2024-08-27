@@ -76,19 +76,19 @@ jobs:
 
       - name: Install JHBuild
         run: |
-          cd dev/osx_installer
+          cd dev/osx_bundle
           ./bootstrap.sh
 
       - name: Build dependencies
         run: |
-          cd dev/osx_installer
+          cd dev/osx_bundle
           ./build.sh
 
       - name: Create bundle
         run: |
-          cd dev/osx_installer
+          cd dev/osx_bundle
           ./bundle.sh
-          ARTIFACT_PATHNAME=$(ls dev/osx_installer/_build/*.dmg | head -n 1)
+          ARTIFACT_PATHNAME=$(ls dev/osx_bundle/_build/*.dmg | head -n 1)
           ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
           echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
@@ -96,7 +96,7 @@ jobs:
       - name: "Upload binary as artifact"
         uses: actions/upload-artifact@v3
         with:
-          path: dev/osx_installer/_build/*.dmg
+          path: dev/osx_bundle/_build/*.dmg
 
       - name: "Create Release"
         id: create_release
