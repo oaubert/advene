@@ -117,13 +117,12 @@ function install_deps {
     PIP_REQUIREMENTS="\
 rdflib
 requests
-CherryPy
 "
 
     # Try to install autocommand's wheel because it has a bug that prevents source building:
     # https://github.com/Lucretiel/autocommand/issues/28
     # https://github.com/Lucretiel/autocommand/issues/32
-    build_pip install --only-binary ":all:" autocommand
+    build_pip install --only-binary ":all:" autocommand CherryPy
 
     # shellcheck disable=SC2046
     build_pip install --no-binary ":all:" \
