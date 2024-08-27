@@ -67,3 +67,63 @@ jobs:
         with:
           name: installer
           path: dev-utils/win_installer/*.exe
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install JHBuild
+        run: |
+          cd dev/osx_installer
+          ./bootstrap.sh
+
+      - name: Build dependencies
+        run: |
+          cd dev/osx_installer
+          ./build.sh
+
+      - name: Create bundle
+        run: |
+          cd dev/osx_installer
+          ./bundle.sh
+          ARTIFACT_PATHNAME=$(ls dev/osx_installer/_build/*.dmg | head -n 1)
+          ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
+          echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
+
+      - name: "Upload binary as artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          path: dev/osx_installer/_build/*.dmg
+
+      - name: "Create Release"
+        id: create_release
+        uses: actions/create-release@v1
+        # Do not execute step if we do not have a tag.
+        # If we invoke by event trigger, then it
+        # will create a refs/heads/master tag which will make a
+        # mess. See
+        # https://github.com/actions/create-release/issues/13#issuecomment-629741295
+        # for more details.
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: "Upload Release Asset"
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.2
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ${{ env.ARTIFACT_PATHNAME }}
+          asset_name: ${{ env.ARTIFACT_NAME }}
+          asset_content_type: application/octet-stream
