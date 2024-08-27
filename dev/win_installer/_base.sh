@@ -147,8 +147,8 @@ function install_advene {
 
     (cd "${REPO_CLONE}" && git checkout "$1") || exit 1
 
-    build_python "${REPO_CLONE}"/setup.py install --old-and-unmanageable
-    
+    build_pip install "${REPO_CLONE}"
+
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
 
