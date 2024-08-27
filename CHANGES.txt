@@ -1,3 +1,46 @@
+advene (3.14) unstable; urgency=medium
+
+  * or should we say the 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482 release?
+
+  * MacOS X Sonoma fix - thanks to Quodlibet for their install scripts.
+
+  * Win32: the integrated web server works again on Windows (inclusion of
+    CherryPy in the installer)
+
+  * Linux: Wayland fixes - Advene works directly in Wayland sessions,
+    which is the default on Ubuntu.
+
+  * Timeline view:
+    - there is a view option that display all relations of the same type on mouse over.
+    - the shortcut for splitting an annotation is Control-T
+
+  * Transcription view:
+    - allow to toggle end timestamp display
+    - add match count and prev/next navigation in search
+
+  * The popup menu on schema/types now offers to Search/Replace and Offset annotations.
+
+  * The Edit/Global menu item displays a popup menu operating on all
+    package's annotations, such as Search/Replace and Offset.
+
+  * Corpus actions - a new menu item, that will offer various displays and
+    actions on all loaded packages. More to come...
+
+  * New plugins:
+    - VOSK speech recognition (requires a VOSK install)
+    - DTMF Tone Detection
+
+  * New export filters:
+    - Text transcription
+    - OTranscribe JSON (.otr)
+
+  * Import filter: allow to specify annotation type in subtitle import.
+
+  * Advene is now a GtkApplication, which means that most of its actions
+    can be triggered through DBus.
+
+ -- Olivier Aubert <contact@olivieraubert.net>  Tue, 27 Aug 2024 16:00:28 +0200
+
 advene (3.13) unstable; urgency=medium
 
   * MacOS X installer rewrite - Mac OS X versions will now be available,
