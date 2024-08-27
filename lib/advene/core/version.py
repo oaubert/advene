@@ -1,6 +1,6 @@
 #
 # Advene: Annotate Digital Videos, Exchange on the NEt
-# Copyright (C) 2008-2017 Olivier Aubert <contact@olivieraubert.net>
+# Copyright (C) 2008-2024 Olivier Aubert <contact@olivieraubert.net>
 #
 # Advene is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,6 @@
 """Versioning information.
 """
 
-version='3.13'
-date='20210629'
+version='3.14'
+date='20240826'
 major,minor=[ int(s) for s in version.split('.') ]
