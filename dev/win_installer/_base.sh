@@ -120,6 +120,11 @@ requests
 CherryPy
 "
 
+    # Try to install autocommand's wheel because it has a bug that prevents source building:
+    # https://github.com/Lucretiel/autocommand/issues/28
+    # https://github.com/Lucretiel/autocommand/issues/32
+    build_pip install --only-binary ":all:" autocommand
+
     # shellcheck disable=SC2046
     build_pip install --no-binary ":all:" \
         --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr "\\n" " ")
