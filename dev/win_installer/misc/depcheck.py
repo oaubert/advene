@@ -29,10 +29,9 @@ def _get_shared_libraries(q, namespace, version):
         repo.require(namespace, version, 0)
         lib = repo.get_shared_library(namespace)
         q.put(lib)
-        return True
     except Exception as err:
         print(f"Exception for {namespace}:{version}: {err.message}")
-        return False
+        q.put(None)
 
 
 @cache
@@ -40,15 +39,11 @@ def get_shared_libraries(namespace, version):
     # we have to start a new process because multiple versions can't be loaded
     # in the same process
     q = Queue()
-    ret = _get_shared_libraries, args=(q, namespace, version)
-    if ret:
-        p = Process(target=ret)
-        p.start()
-        result = q.get()
-        p.join()
-        return result
-    else:
-        return None
+    p = Process(target=_get_shared_libraries, args=(q, namespace, version))
+    p.start()
+    result = q.get()
+    p.join()
+    return result
 
 
 def get_required_by_typelibs():
