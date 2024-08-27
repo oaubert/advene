@@ -207,7 +207,7 @@ function cleanup_before {
     find "${MINGW_ROOT}"/bin -name "*.pyc" -exec rm -f {} \;
 
     build_compileall_pyconly -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
-    find "${MINGW_ROOT}" -name "*.py" -exec rm -f {} \;
+    # find "${MINGW_ROOT}" -name "*.py" -exec rm -f {} \;
     find "${MINGW_ROOT}" -type d -name "__pycache__" -prune -exec rm -rf {} \;
 }
 
