@@ -163,8 +163,8 @@ function install_advene {
     local GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
     ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
 
-    echo "build='${ADVENE_VERSION_DESC}'" >> lib/advene/core/version.py
-    echo "build_date='$(date -Is)'">> lib/advene/core/version.py
+    echo "build='${ADVENE_VERSION_DESC}'" >> "${REPO_CLONE}/lib/advene/core/version.py"
+    echo "build_date='$(date -Is)'">> "${REPO_CLONE}/lib/advene/core/version.py"
     git describe --always > "${MINGW_ROOT}/share/buildinfo.log"
     git status --long --verbose >> "${MINGW_ROOT}/share/buildinfo.log"
 
