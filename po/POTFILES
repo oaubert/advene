@@ -21,6 +21,7 @@
 ../lib/advene/gui/views/accumulatorpopup.py
 ../lib/advene/gui/views/bookmarks.py
 ../lib/advene/gui/views/viewbook.py
+../lib/advene/gui/views/corpusstatistics.py
 ../lib/advene/gui/views/transcription.py
 ../lib/advene/gui/views/browser.py
 ../lib/advene/gui/views/timeline.py
@@ -35,7 +36,7 @@
 ../lib/advene/gui/views/logwindow.py
 ../lib/advene/gui/views/interactivequery.py
 ../lib/advene/gui/popup.py
-../lib/advene/gui/app.py
+../lib/advene/gui/menus.py
 ../lib/advene/gui/util/initialconfig.py
 ../lib/advene/gui/util/__init__.py
 ../lib/advene/gui/util/dialog.py
@@ -56,9 +57,13 @@
 ../lib/advene/core/webcherry.py
 ../lib/advene/core/controller.py
 ../lib/advene/plugins/featuredetect.py
+../lib/advene/plugins/tobii.py
+../lib/advene/plugins/otr_exporter.py
 ../lib/advene/plugins/webannotation_export.py
+../lib/advene/plugins/xemotion_importer.py
 ../lib/advene/plugins/dominantcolor.py
 ../lib/advene/plugins/ted.py
+../lib/advene/plugins/vosk.py
 ../lib/advene/plugins/cutter.py
 ../lib/advene/plugins/hpi_motion_dynamics.py
 ../lib/advene/plugins/ttl.py
@@ -66,11 +71,13 @@
 ../lib/advene/plugins/iiif_export.py
 ../lib/advene/plugins/elan_importer.py
 ../lib/advene/plugins/pocketsphinx.py
+../lib/advene/plugins/diarization.py
 ../lib/advene/plugins/brltty.py
 ../lib/advene/plugins/transcript.py
 ../lib/advene/plugins/ada_rdf_export.py
 ../lib/advene/plugins/aeidon_import.py
 ../lib/advene/plugins/anvil.py
+../lib/advene/plugins/dtmfdetector.py
 ../lib/advene/plugins/fcp.py
 ../lib/advene/plugins/vian_import.py
 ../lib/advene/plugins/hpi.py
@@ -82,6 +89,7 @@
 ../lib/advene/plugins/soundenveloppe.py
 ../lib/advene/plugins/keywords.py
 ../lib/advene/plugins/motioncells.py
+../lib/advene/plugins/webglimpse_export.py
 ../lib/advene/plugins/scenechange.py
 ../lib/advene/plugins/hpi_dominant_colors.py
 ../lib/advene/plugins/base_importers.py
@@ -92,6 +100,7 @@
 ../lib/advene/plugins/mpeg7.py
 ../lib/advene/plugins/cinelab.py
 ../lib/advene/plugins/owl_import.py
+../lib/advene/plugins/deepgram.py
 ../lib/advene/plugins/ada_rdflib_export.py
 ../lib/advene/plugins/zbar.py
 ../lib/advene/player/gstreamer.py
