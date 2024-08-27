@@ -10,9 +10,6 @@ set -e
 
 function main {
 
-    local MSYS2_ARCH="x86_64"
-    MINGW_PACKAGE_PREFIX="mingw-w64-${ARCH}"
-
     pacman --noconfirm -Suy
 
     pacman --noconfirm -S --needed \
