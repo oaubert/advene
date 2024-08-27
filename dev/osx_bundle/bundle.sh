@@ -70,7 +70,7 @@ function main {
      jhbuild run "$PYTHON" -m pip install \
         --prefix="$APP_PREFIX" --root="/" \
         --log="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt \
-        advene
+        .
     )
     rm -Rf "$CLONE"
 
