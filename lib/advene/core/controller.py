@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 import atexit
 from gi.repository import GObject
 import html
+import inspect
 import itertools
 import json
 import operator
@@ -1210,14 +1211,14 @@ class AdveneController:
 
         # Check if the player has async_snapshot capability.
         if 'async-snapshot' in self.player.player_capabilities:
-            logger.debug("Calling async_snapshot %d", position)
+            logger.debug(f"Calling async_snapshot {position} from {inspect.currentframe().f_back.f_code.co_qualname}")
             self.player.async_snapshot(position, self.snapshot_taken)
             return True
         elif 'snapshot' in self.player.player_capabilities:
             # only 0-relative position for the moment
             try:
                 i = self.player.snapshot(position)
-            except:
+            except Exception:
                 logger.exception("Exception in snapshot", exc_info=True)
                 return True
             if i is not None and i.height != 0:
@@ -1256,6 +1257,7 @@ class AdveneController:
         If position is specified without a media, then the default
         (current) media will be used.
         """
+        logger.debug(f"Calling get_snapshot {position} from {inspect.currentframe().f_back.f_code.co_qualname}")
         # Determine appropriate imagecache:
         # In any case, fallback on current imagecache if nothing is specified
         if media:
