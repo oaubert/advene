@@ -11,36 +11,39 @@ set -e
 function main {
 
     local MSYS2_ARCH="x86_64"
+    MINGW_PACKAGE_PREFIX="mingw-w64-${ARCH}"
 
     pacman --noconfirm -Suy
 
     pacman --noconfirm -S --needed \
         git \
-        base-devel \
-        mingw-w64-$MSYS2_ARCH-gettext \
-        mingw-w64-$MSYS2_ARCH-gdk-pixbuf2 \
-        mingw-w64-$MSYS2_ARCH-librsvg \
-        mingw-w64-$MSYS2_ARCH-gtk3 \
-        mingw-w64-$MSYS2_ARCH-libsoup \
-        mingw-w64-$MSYS2_ARCH-gstreamer \
-        mingw-w64-$MSYS2_ARCH-gst-plugins-base \
-        mingw-w64-$MSYS2_ARCH-gst-plugins-good \
-        mingw-w64-$MSYS2_ARCH-libsrtp \
-        mingw-w64-$MSYS2_ARCH-gst-plugins-bad \
-        mingw-w64-$MSYS2_ARCH-gst-libav \
-        mingw-w64-$MSYS2_ARCH-gst-plugins-ugly \
-        mingw-w64-$MSYS2_ARCH-toolchain
+        "${MINGW_PACKAGE_PREFIX}"-gettext \
+        "${MINGW_PACKAGE_PREFIX}"-gdk-pixbuf2 \
+        "${MINGW_PACKAGE_PREFIX}"-librsvg \
+        "${MINGW_PACKAGE_PREFIX}"-gtk3 \
+        "${MINGW_PACKAGE_PREFIX}"-libsoup3 \
+        "${MINGW_PACKAGE_PREFIX}"-gstreamer \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-base \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-good \
+        "${MINGW_PACKAGE_PREFIX}"-libsrtp \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-bad \
+        "${MINGW_PACKAGE_PREFIX}"-gst-libav \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-ugly \
+        "${MINGW_PACKAGE_PREFIX}"-cc
 
     pacman --noconfirm -S --needed \
-        mingw-w64-$MSYS2_ARCH-python3 \
-        mingw-w64-$MSYS2_ARCH-python3-gobject \
-        mingw-w64-$MSYS2_ARCH-python3-cairo \
-        mingw-w64-$MSYS2_ARCH-python3-pip \
-        mingw-w64-$MSYS2_ARCH-gtksourceview3  \
-        mingw-w64-$MSYS2_ARCH-libsrtp \
-        mingw-w64-$MSYS2_ARCH-python3-pillow
+        "${MINGW_PACKAGE_PREFIX}"-python \
+        "${MINGW_PACKAGE_PREFIX}"-python-gobject \
+        "${MINGW_PACKAGE_PREFIX}"-python-cairo \
+        "${MINGW_PACKAGE_PREFIX}"-python-pip \
+        "${MINGW_PACKAGE_PREFIX}"-python-pytest \
+        "${MINGW_PACKAGE_PREFIX}"-python-certifi \
+        "${MINGW_PACKAGE_PREFIX}"-python-coverage \
+        "${MINGW_PACKAGE_PREFIX}"-python-mutagen \
+        "${MINGW_PACKAGE_PREFIX}"-gtksourceview3 \
+        "${MINGW_PACKAGE_PREFIX}"-libsrtp \
+        "${MINGW_PACKAGE_PREFIX}"-python-pillow
 
-    #pip3 install --user -U feedparser musicbrainzngs mutagen
 }
 
 main;

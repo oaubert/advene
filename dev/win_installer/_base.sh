@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Copyright 2016 Christoph Reiter
+#           2022 Nick Boultbee
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,12 +15,13 @@ cd "${DIR}"
 # CONFIG START
 
 ARCH="x86_64"
+MINGW_PREFIX="mingw64"
+MINGW_PACKAGE_PREFIX="${MINGW_PREFIX}-${ARCH}"
 BUILD_VERSION="0"
 
 # CONFIG END
 
 MISC="${DIR}"/misc
-MINGW="mingw64"
 
 ADVENE_VERSION="0.0.0"
 ADVENE_VERSION_DESC="UNKNOWN"
@@ -27,7 +29,7 @@ ADVENE_VERSION_DESC="UNKNOWN"
 function set_build_root {
     BUILD_ROOT="$1"
     REPO_CLONE="${BUILD_ROOT}"/advene
-    MINGW_ROOT="${BUILD_ROOT}/${MINGW}"
+    MINGW_ROOT="${BUILD_ROOT}${MINGW_PREFIX}"
     export PATH="${MINGW_ROOT}/bin:${PATH}"
 }
 
@@ -38,11 +40,11 @@ function build_pacman {
 }
 
 function build_pip {
-    "${BUILD_ROOT}"/"${MINGW}"/bin/python3.exe -m pip "$@"
+    "${MINGW_ROOT}"/bin/python3.exe -m pip "$@"
 }
 
 function build_python {
-    "${BUILD_ROOT}"/"${MINGW}"/bin/python3.exe "$@"
+    "${MINGW_ROOT}"/bin/python3.exe "$@"
 }
 
 function build_compileall_pyconly {
@@ -54,8 +56,14 @@ function build_compileall {
 }
 
 function install_pre_deps {
-    pacman -S --needed --noconfirm p7zip git dos2unix \
-        mingw-w64-"${ARCH}"-nsis wget mingw-w64-"${ARCH}"-toolchain
+    pacman -S --needed --noconfirm \
+        git \
+        dos2unix \
+        "${MINGW_PACKAGE_PREFIX}"-7zip \
+        "${MINGW_PACKAGE_PREFIX}"-nsis \
+        "${MINGW_PACKAGE_PREFIX}"-curl \
+        "${MINGW_PACKAGE_PREFIX}"-python \
+        "${MINGW_PACKAGE_PREFIX}"-cc
 }
 
 function create_root {
@@ -66,6 +74,7 @@ function create_root {
     mkdir -p "${BUILD_ROOT}"/tmp
 
     build_pacman -Syu
+    build_pacman --noconfirm -S filesystem msys2-runtime
     build_pacman --noconfirm -S base
 }
 
@@ -73,53 +82,57 @@ function extract_installer {
     [ -z "$1" ] && (echo "Missing arg"; exit 1)
 
     mkdir -p "$BUILD_ROOT"
-    7z x -o"$BUILD_ROOT"/"$MINGW" "$1"
-    rm -rf "$MINGW_ROOT"/*.txt "$MINGW_ROOT"/*.nsi
+    7z x -o"$MINGW_ROOT" "$1"
+    rm -rf "${MINGW_ROOT:?}/$PLUGINSDIR" "$MINGW_ROOT"/*.txt "$MINGW_ROOT"/*.nsi
 }
 
 function install_deps {
     build_pacman --noconfirm -S \
+        "${MINGW_PACKAGE_PREFIX}"-gettext \
+        "${MINGW_PACKAGE_PREFIX}"-gdk-pixbuf2 \
+        "${MINGW_PACKAGE_PREFIX}"-librsvg \
+        "${MINGW_PACKAGE_PREFIX}"-gtk3 \
+        "${MINGW_PACKAGE_PREFIX}"-python \
+        "${MINGW_PACKAGE_PREFIX}"-python-gobject \
+        "${MINGW_PACKAGE_PREFIX}"-python-cairo \
+        "${MINGW_PACKAGE_PREFIX}"-python-pip \
+        "${MINGW_PACKAGE_PREFIX}"-libsoup3 \
+        "${MINGW_PACKAGE_PREFIX}"-gstreamer \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-base \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-good \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-bad \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugins-ugly \
+        "${MINGW_PACKAGE_PREFIX}"-gst-libav \
+        "${MINGW_PACKAGE_PREFIX}"-python-certifi \
+        "${MINGW_PACKAGE_PREFIX}"-python-pytest \
+        "${MINGW_PACKAGE_PREFIX}"-python-coverage \
+        "${MINGW_PACKAGE_PREFIX}"-python-mutagen \
         busybox \
-        mingw-w64-"${ARCH}"-gettext \
-        mingw-w64-"${ARCH}"-gdk-pixbuf2 \
-        mingw-w64-"${ARCH}"-librsvg \
-        mingw-w64-"${ARCH}"-gtk3 \
-        mingw-w64-"${ARCH}"-python3 \
-        mingw-w64-"${ARCH}"-python3-gobject \
-        mingw-w64-"${ARCH}"-python3-cairo \
-        mingw-w64-"${ARCH}"-python3-pip \
-        mingw-w64-"${ARCH}"-libsoup \
-        mingw-w64-"${ARCH}"-gstreamer \
-        mingw-w64-"${ARCH}"-gst-plugins-base \
-        mingw-w64-"${ARCH}"-gst-plugins-good \
-        mingw-w64-"${ARCH}"-gst-plugins-bad \
-        mingw-w64-"${ARCH}"-gst-plugins-ugly \
-        mingw-w64-"${ARCH}"-gst-editing-services \
-        mingw-w64-"${ARCH}"-gst-libav \
-        mingw-w64-"${ARCH}"-libsrtp \
-        mingw-w64-"${ARCH}"-gtksourceview3  \
-        mingw-w64-"${ARCH}"-libsrtp \
-        mingw-w64-"${ARCH}"-python3-setuptools \
-        mingw-w64-"${ARCH}"-python3-pillow \
-        mingw-w64-"${ARCH}"-python3-requests \
-        intltool
+        "${MINGW_PACKAGE_PREFIX}"-gst-editing-services \
+        "${MINGW_PACKAGE_PREFIX}"-libsrtp \
+        "${MINGW_PACKAGE_PREFIX}"-gtksourceview3  \
+        "${MINGW_PACKAGE_PREFIX}"-python3-setuptools \
+        "${MINGW_PACKAGE_PREFIX}"-python3-pillow \
 
-    # Packages to remove
+    PIP_REQUIREMENTS="\
+rdflib
+requests
+CherryPy
+"
+
+    # shellcheck disable=SC2046
+    build_pip install --no-binary ":all:" \
+        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr "\\n" " ")
+
+    # transitive dependencies which we don't need
     build_pacman --noconfirm -Rdds \
-        mingw-w64-"${ARCH}"-shared-mime-info \
-        mingw-w64-"${ARCH}"-ncurses \
-        mingw-w64-"${ARCH}"-tk \
-        mingw-w64-"${ARCH}"-tcl \
-        mingw-w64-"${ARCH}"-openexr \
-        mingw-w64-"${ARCH}"-gsl
+        "${MINGW_PACKAGE_PREFIX}"-shared-mime-info \
+        "${MINGW_PACKAGE_PREFIX}"-ncurses \
+        "${MINGW_PACKAGE_PREFIX}"-tk \
+        "${MINGW_PACKAGE_PREFIX}"-tcl
 
-    build_pacman --noconfirm -Rdds mingw-w64-"${ARCH}"-python2 || true
-
-    PIP_REQUIREMENTS="rdflib requests CherryPy"
-
-    build_pip install --no-deps --no-binary ":all:" --upgrade \
-        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr ["\\n"] [" "])
-
+    build_pacman --noconfirm -S \
+        "${MINGW_PACKAGE_PREFIX}"-python-setuptools
 }
 
 function install_advene {
@@ -128,19 +141,17 @@ function install_advene {
     rm -Rf "${REPO_CLONE}"
     git clone "${DIR}"/../.. "${REPO_CLONE}"
 
-    cd "${REPO_CLONE}" && git checkout "$1" || exit 1
+    (cd "${REPO_CLONE}" && git checkout "$1") || exit 1
 
-    # Download/extract the cherrypy lib (missing in mingw64)
-    # (cd lib && wget http://advene.org/download/src/cherrypy-8.9.1.tgz && tar xvfz cherrypy-8.9.1.tgz)
-
-    build_python setup.py install
-
-    # Create launchers
-    python3 "${MISC}"/create-launcher.py \
-        "${ADVENE_VERSION}" "${MINGW_ROOT}"/bin
-
+    build_python "${REPO_CLONE}"/setup.py install
+    
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
+
+    # Create launchers
+    python "${MISC}"/create-launcher.py \
+        "${ADVENE_VERSION}" "${MINGW_ROOT}"/bin
+
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
     local GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
     ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
@@ -149,7 +160,7 @@ function install_advene {
     echo "build_date='$(date -Is)'">> lib/advene/core/version.py
     git describe --always > "${MINGW_ROOT}/share/buildinfo.log"
     git status --long --verbose >> "${MINGW_ROOT}/share/buildinfo.log"
-    cd ..
+
     build_compileall -d "" -f -q "$(cygpath -w "${MINGW_ROOT}")"
 }
 
@@ -208,7 +219,7 @@ function cleanup_after {
     rm -Rf "${MINGW_ROOT}"/libexec
     rm -Rf "${MINGW_ROOT}"/share/gtk-doc
     rm -Rf "${MINGW_ROOT}"/include
-    rm -Rf "${MINGW_ROOT}"/var
+    rm -Rf "${MINGW_ROOT:?}"/var
     rm -Rf "${MINGW_ROOT}"/etc/config.site
     rm -Rf "${MINGW_ROOT}"/etc/pki
     rm -Rf "${MINGW_ROOT}"/etc/pkcs11
@@ -319,11 +330,11 @@ function build_installer {
 
     # Variable should have been initialized in install_advene but it
     # is not correctly set here, for some rease. Fetch the info again from git-describe.
-    (
-        cd "${REPO_CLONE}"
-        GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
-        ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
-    )
+    #(
+    #    cd "${REPO_CLONE}"
+    #    GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
+    #    ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
+    #)
 
     cp "${REPO_CLONE}/dev/win_installer/misc/advene.ico" "${BUILD_ROOT}"
     (cd "${MINGW_ROOT}" && makensis -NOCD -DVERSION="$ADVENE_VERSION_DESC" "${MISC}"/win_installer.nsi)
@@ -340,7 +351,6 @@ function build_portable_installer {
     #build_compileall -d "" -q -f "$BUILDPY"
 
     local PORTABLE="$DIR/advene-$ADVENE_VERSION_DESC-portable"
-    local ZBIN="7z1900.exe"
 
     rm -rf "$PORTABLE"
     mkdir "$PORTABLE"
@@ -350,10 +360,11 @@ function build_portable_installer {
     mkdir "$PORTABLE"/config
     cp -RT "${MINGW_ROOT}" "$PORTABLE"/data
 
-    rm -Rf 7zout 7z1604.exe
+    local SEVENZINST="7z2301-x64.exe"
+    rm -Rf 7zout "$SEVENZINST"
     7z a payload.7z "$PORTABLE"
-    wget -O "${DIR:?}/${ZBIN}" -c http://www.7-zip.org/a/${ZBIN}
-    7z x -o7zout "${DIR:?}/${ZBIN}"
+    curl -L "http://www.7-zip.org/a/$SEVENZINST" -o "$DIR/$SEVENZINST"
+    7z x -o7zout "$SEVENZINST"
     cat 7zout/7z.sfx payload.7z > "$PORTABLE".exe
-    rm -Rf 7zout "${DIR:?}/${ZBIN}" payload.7z "$PORTABLE"
+    rm -Rf 7zout "$SEVENZINST" payload.7z "$PORTABLE"
 }

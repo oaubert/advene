@@ -15,5 +15,5 @@ if __name__ == "__main__":
     exts.extend([ '.azp', '.xml', '.apl' ])
     # these are for showing up in the openwith dialog
     for ext in sorted(exts):
-        print('WriteRegStr HKLM "${QL_ASSOC_KEY}" '
+        print('WriteRegStr HKLM "${ADVENE_ASSOC_KEY}" '
               '"%s" "${ADVENE_ID}.assoc.ANY"' % ext)
