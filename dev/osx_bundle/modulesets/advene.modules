@@ -224,11 +224,12 @@
             hash="sha256:72fba7922703ddfa7a028d513ac15a85c8d54c8d67f55fa5a4802885dc652056"/>
   </autotools>
 
-  <meson id="pixman">
-    <branch version="0.42.2" module="pixman-${version}.tar.gz"
-            repo="cairographics"
-            hash="sha1:7063429f9952fd8c4fcbc887c3210b35adb6a6c7">
-    </branch>
+  <meson id="pixman"
+         mesonargs="-Dgtk=disabled -Dmmx=disabled -Da64-neon=disabled">
+    <branch module="releases/pixman-0.43.4.tar.gz"
+            version="0.43.4"
+            hash="sha512:08802916648bab51fd804fc3fd823ac2c6e3d622578a534052b657491c38165696d5929d03639c52c4f29d8850d676a909f0299d1a4c76a07df18a34a896e43d"
+            repo="cairographics" />
   </meson>
 
   <autotools id="lzo">
