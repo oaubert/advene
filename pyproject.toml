@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "advene"
 dynamic = ["version"]
+dependencies = [ "CherryPy", "requests" ]
 description = "Annotate DVds, Exchange on the NEt"
 keywords = [ "video", "annotation", "caqdas" ]
 authors = [
