@@ -62,8 +62,8 @@ def dialog_keypressed_cb(widget=None, event=None):
 def generate_list_model(elements, active_element=None, custom_fields=None):
     """Create a TreeModel matching the elements list.
 
-    element[0] is the label.
-    element[1] is the element
+    element[0] is the element.
+    element[1] is the label.
 
     The rest of the element tuple are custom data, that will be
     considered as string if custom_fields is not specified. Else
@@ -171,11 +171,67 @@ def list_selector_widget(members=None,
 
     return combobox
 
+def list_multiple_selector_widget(members=None,
+                                  callback=None):
+    """Generate a widget to select elements from a list.
+
+
+    @param members: list of couples (element, label) or tuples (element, label, included: boolean)
+    @type members: list
+    @param preselect: the elements to preselect
+    @type preselect: list
+    """
+    COLUMN_ELEMENT = 1
+    COLUMN_ELEMENT_NAME = 0
+    COLUMN_INCLUDE = 2
+    store, i = generate_list_model(members,
+                                   custom_fields=[ bool ])
+    treeview = Gtk.TreeView(model=store)
+
+    treeview.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
+    treeview.set_headers_clickable(True)
+    treeview.set_enable_search(False)
+
+    renderer = Gtk.CellRendererToggle()
+    renderer.set_property('activatable', True)
+    column = Gtk.TreeViewColumn(_('Include?'), renderer,
+                                active=COLUMN_INCLUDE)
+    column.set_sort_column_id(COLUMN_INCLUDE)
+
+    def toggled_cb(renderer, path, model, column):
+        model[path][column] = not model[path][column]
+        return True
+    renderer.connect('toggled', toggled_cb, store, COLUMN_INCLUDE)
+    treeview.append_column(column)
+
+    renderer = Gtk.CellRendererText()
+    column = Gtk.TreeViewColumn(_('Element'), renderer,
+                                text=COLUMN_ELEMENT_NAME)
+    column.set_resizable(True)
+    column.set_max_width(300)
+    column.set_sort_column_id(COLUMN_ELEMENT_NAME)
+    treeview.append_column(column)
+
+
+    def get_current_element(treeview):
+        selection = [ item[COLUMN_ELEMENT]
+                      for item in store
+                      if item[COLUMN_INCLUDE]
+                     ]
+        return selection
+    treeview.get_current_element = get_current_element.__get__(treeview)
+
+    #if callback is not None:
+    #    combobox.connect('changed', callback)
+
+    return treeview
+
 def list_selector(title=None,
                   text=None,
                   members=None,
                   controller=None,
                   preselect=None,
+                  multiple=False,
                   entry=False):
     """Pick an element from a list.
 
@@ -183,9 +239,12 @@ def list_selector(title=None,
 
     Return None if the action is cancelled.
     """
-    combobox = list_selector_widget(members=members,
-                                    preselect=preselect,
-                                    entry=entry)
+    if multiple:
+        widget = list_multiple_selector_widget(members=members)
+    else:
+        widget = list_selector_widget(members=members,
+                                      preselect=preselect,
+                                      entry=entry)
 
     d = Gtk.Dialog(title=title,
                    parent=DEFAULT_PARENT,
@@ -198,17 +257,24 @@ def list_selector(title=None,
         l.show()
         d.vbox.add(l)
 
-    d.vbox.add(combobox)
-    combobox.show_all()
+    if multiple:
+        scroll_win = Gtk.ScrolledWindow ()
+        scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scroll_win.add(widget)
+        scroll_win.show_all()
+        d.vbox.pack_start(scroll_win, True, True, 0)
+    else:
+        d.vbox.add(widget)
+        widget.show_all()
 
     d.connect('key-press-event', dialog_keypressed_cb)
 
     d.show()
     center_on_mouse(d)
-    res=d.run()
-    retval=None
+    res = d.run()
+    retval = None
     if res == Gtk.ResponseType.OK:
-        retval=combobox.get_current_element()
+        retval = widget.get_current_element()
     d.destroy()
     return retval
 
