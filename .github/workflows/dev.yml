@@ -12,25 +12,45 @@ jobs:
       fail-fast: true
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: msys2/setup-msys2@v2
+      - uses: actions/checkout@v4
         with:
-          msystem: MINGW64
-          update: true
-          install: git
+          # Note: we are using fetch-depth: 0 here to fetch the whole
+          # history and especially tags, since we use git describe
+          # afterwards to generate the installer filename.
+          fetch-depth: 0
 
-      - name: "Build package"
+      - name: setup-msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            dos2unix
+            mingw-w64-ucrt-x86_64-7zip
+            mingw-w64-ucrt-x86_64-nsis
+            mingw-w64-ucrt-x86_64-curl
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-cc
+
+      - name: Build Installer
+        env:
+          BUILD_REF: ${{ github.event.inputs.ref }}
         shell: msys2 {0}
         run: |
+          if [[ -z "$BUILD_REF" ]]; then
+            BUILD_REF="$(git rev-parse --abbrev-ref HEAD)"
+          fi
           cd dev/win_installer
-          ./build.sh
+          ./build.sh "$BUILD_REF"
           cd ../..
           ARTIFACT_PATHNAME=$(ls dev/win_installer/advene-*-installer.exe | head -n 1)
           ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
           echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
 
-      - name: "Upload binary as artifact"
-        uses: actions/upload-artifact@v3
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
         with:
-          path: dev/win_installer/advene-*-installer.exe
+          name: installer
+          path: dev-utils/win_installer/*.exe
