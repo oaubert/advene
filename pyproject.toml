@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "advene"
+dynamic = ["version"]
+description = "Annotate DVds, Exchange on the NEt"
+keywords = [ "video", "annotation", "caqdas" ]
+authors = [
+  {name = "Olivier Aubert", email = "contact@olivieraubert.net"},
+  {name = "Pierre-Antoine Champin", email = "pierre-antoine.champin@liris.cnrs.fr"},
+  {name = "Yannick Prié", email = "contact@yannickprie.net"}
+]
+maintainers = [
+  {name = "Olivier Aubert", email = "contact@olivieraubert.net"}
+]
+readme = "README.txt"
+license = {text = "GPLv2+"}
+classifiers = [
+  "Environment :: X11 Applications :: GTK",
+  "Environment :: Win32 (MS Windows)",
+  "Environment :: MacOS X",
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: GNU General Public License (GPL)",
+  "Programming Language :: Python",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Topic :: Multimedia :: Video :: Non-Linear Editor"
+]
+
+[project.urls]
+Homepage = "https://www.advene.org/"
+Documentation = "https://www.advene.org/"
+Repository = "https://github.com/oaubert/advene.git"
+"Bug Tracker" = "https://github.com/oaubert/advene/issues"
+Changelog = "https://github.com/oaubert/advene/blob/master/CHANGES.txt"

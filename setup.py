@@ -4,6 +4,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 import os
+from pathlib import Path
+import re
 from setuptools import setup, find_packages
 import sys
 
@@ -15,8 +17,7 @@ def check_changelog(maindir, version):
     with open(os.path.join( maindir, "CHANGES.txt" ), 'r') as f:
         l=f.readline()
     if not l.startswith('advene (' + version + ')'):
-        logger.error("The CHANGES.txt does not seem to match version %s\n%s\nUpdate either the CHANGES.txt or the lib/advene/core/version.py file", version, l)
-        sys.exit(1)
+        logger.warning("*" * 80 + "\nThe CHANGES.txt does not seem to match version %s\n%s\nUpdate either the CHANGES.txt or the lib/advene/core/version.py file", version, l)
     return True
 
 def get_plugin_list(*package):
@@ -43,14 +44,13 @@ def get_plugin_list(*package):
     return plugins
 
 def get_version():
-    """Get the version number of the package."""
-    maindir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    if os.path.exists(os.path.join(maindir, "setup.py")):
-        # Chances are that we were in a development tree...
-        libpath=os.path.join(maindir, "lib")
-        sys.path.insert (0, libpath)
-        import advene.core.version
-        version=advene.core.version.version
+    """Get the version number of the package.
+    """
+    maindir = Path(__file__).absolute().parent
+    versionfile = maindir / "lib" / "advene" / "core" / "version.py"
+    info = re.findall(r"version=.(\d+\.\d+)", versionfile.read_text())
+    if info:
+        version = info[0]
     else:
         raise Exception("Unable to determine advene version number.")
     check_changelog(maindir, version)
@@ -121,16 +121,8 @@ def generate_data_files():
 myname = "Olivier Aubert"
 myemail = "contact@olivieraubert.net"
 
-setup (name = "advene",
-       version = _version,
-       description = "Annotate DVds, Exchange on the NEt",
-       keywords = "dvd,video,annotation",
-       author = "Advene project team",
-       author_email = myemail,
-       maintainer = myname,
-       maintainer_email = myemail,
-       url = "https://www.advene.org/",
-       license = "GPL",
+# See pyproject.toml for static metadata
+setup (version = _version,
        long_description = """Annotate DVds, Exchange on the NEt
 
  The Advene (Annotate DVd, Exchange on the NEt) project is aimed
@@ -167,17 +159,6 @@ setup (name = "advene",
        scripts = [ 'bin/%s' % SCRIPTNAME, 'bin/advene_import', 'bin/advene_export' ],
 
        data_files = generate_data_files(),
-
-       classifiers = [
-    'Environment :: X11 Applications :: GTK',
-    'Environment :: Win32 (MS Windows)',
-    'Development Status :: 5 - Production/Stable',
-    'License :: OSI Approved :: GNU General Public License (GPL)',
-    'Programming Language :: Python',
-    'Intended Audience :: End Users/Desktop',
-    'Operating System :: OS Independent',
-    'Topic :: Multimedia :: Video :: Non-Linear Editor'
-    ],
 
     **platform_options
 )
