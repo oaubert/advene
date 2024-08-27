@@ -98,7 +98,7 @@ class CorpusStatistics(AdhocView):
         columns = {}
         for (name, label, col) in (
                 ('title', _("Title"), 3),
-                ('package', _("Recueil"), 1),
+                ('package', _("Package"), 1),
                 ('annotations', _("Annotations"), 4) ):
             columns[name] = Gtk.TreeViewColumn(label,
                 Gtk.CellRendererText(),
