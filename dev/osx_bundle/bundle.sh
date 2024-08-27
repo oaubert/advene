@@ -66,13 +66,10 @@ function main {
     git clone ../.. "$CLONE"
     (cd "$CLONE"; git checkout "$GIT_TAG")
     (
-     ## FIXME check quodlibet backport
-     ## # This is is a bit hackish. More proper investigation would be needed to determine why setup.py install does not find its own install dir
-     ## export PYTHONPATH="$APP_PREFIX/lib/$PYTHONID/site-packages:$PYTHONPATH"
      cd "$CLONE"
-     jhbuild run "$PYTHON" "$CLONE"/setup.py install \
+     jhbuild run "$PYTHON" -m pip install \
         --prefix="$APP_PREFIX" --root="/" \
-        --record="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt
+        --log="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt
     )
     rm -Rf "$CLONE"
 
