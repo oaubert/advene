@@ -131,32 +131,37 @@ class GlobalPackage:
         self.controller = controller
 
     @property
+    def package_list(self):
+        return [ p
+                 for a, p in self.controller.packages.items()
+                 if a != 'advene' ]
+    @property
     def annotations(self):
-        for p in self.controller.packages.values():
+        for p in self.package_list:
             for a in p.annotations:
                 yield a
 
     @property
     def relations(self):
-        for p in self.controller.packages.values():
+        for p in self.package_list:
             for r in p.relations:
                 yield r
 
     @property
     def annotationTypes(self):
-        for p in self.controller.packages.values():
+        for p in self.package_list:
             for at in p.annotationTypes:
                 yield at
 
     @property
     def relationTypes(self):
-        for p in self.controller.packages.values():
+        for p in self.package_list:
             for rt in p.relationTypes:
                 yield rt
 
     @property
     def schemas(self):
-        for p in self.controller.packages.values():
+        for p in self.package_list:
             for s in p.schemas:
                 yield s
 

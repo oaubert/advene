@@ -349,6 +349,13 @@ class AdveneApplication(Gtk.Application):
                 ( _("Update annotation screenshots"), "app.update-screenshots", _("Update screenshots for annotation bounds"), "screenshot_update" ),
                 ( _("_Select player"), Gio.Menu(), _("Select the player plugin"), "player_select_menu" ),
             ), "", "" ),
+            (_("Corpus"), (
+                ( _("Load corpus"), "app.corpus-load", _("Load a corpus"), "corpus_load" ),
+                ( _("Save corpus"), "app.corpus-save", _("Save all loaded packages"), "corpus_save" ),
+                ( _("Table of annotations"), "app.corpus-annotations", _("Display all annotations in a table"), "corpus_annotations" ),
+                #( _("Corpus analysis"), "app.corpus-analysis", _("Analyse loaded corpus"), "corpus_analysis" ),
+                ( _("Corpus statistics"), "app.corpus-statistics", _("Display statistics about loaded corpus"), "corpus_statistics" ),
+                ), "", ""),
             (_("Packages"), Gio.Menu(), "", "package_list_menu" ),
             (_("_Help"), (
                 ( _("Help"), "app.help", "", "help" ),
@@ -4858,6 +4865,65 @@ Image cache information: %(imagecache)s
             self.gui.toolbar_container.show()
             self.gui.stbv_combo.get_parent().show()
         return True
+
+    @named_action(name="app.corpus-load")
+    def on_corpus_load_activate (self, button=None, data=None):
+        """Load multiple packages from a directory.
+        """
+        rootdir = dialog.get_dirname(title=_("Directory to recursively search for packages"))
+        if rootdir:
+            rootdir = Path(rootdir)
+            packages = []
+            for dirpath, dirnames, filenames in os.walk(rootdir):
+                dirpath = Path(dirpath)
+                packages += [ dirpath / filename
+                              for filename in filenames
+                              if Path(filename).suffix == '.azp' ]
+            selection = dialog.list_selector(title=_("Select packages that are part of the corpus"),
+                                             text=_(f"{len(packages)} packages found in {rootdir.name}.\nSelect those that must be included in the corpus."),
+                                             members=[ (package, str(package), True)
+                                                       for package in packages ],
+                                             multiple=True)
+            if selection:
+                for filename in selection:
+                    self.controller.load_package(uri=str(filename))
+            answer = dialog.message_dialog(_(f"Loaded {len(packages)} packages.\nDo you want to save them as a corpus (.apl) file to get back more easily (advised)?"), icon=Gtk.MessageType.QUESTION)
+            if answer:
+                self.activate_action('app.corpus-save')
+
+    @named_action(name="app.corpus-save")
+    def on_save_corpus_activate (self, button=None, data=None):
+        """Save the current corpus
+        """
+        if config.data.path['data']:
+            d = str(config.data.path['data'])
+        else:
+            d = None
+        filename = dialog.get_filename(title=_("Save the corpus in..."),
+                                       action=Gtk.FileChooserAction.SAVE,
+                                       button=Gtk.STOCK_SAVE,
+                                       default_dir=d,
+                                       filter='session')
+        if filename:
+            (p, ext) = os.path.splitext(filename)
+            if ext == '':
+                # Add a pertinent extension
+                filename = filename + '.apl'
+            self.controller.save_session (filename)
+            self.log(_("Session saved in %s") % filename)
+        return True
+
+    @named_action(name="app.corpus-statistics")
+    def on_corpus_statistics_activate (self, button=None, data=None):
+        """Stats on the corpus
+        """
+        self.open_adhoc_view('corpusstatistics')
+
+    @named_action(name="app.corpus-annotations")
+    def on_corpus_annotations_activate (self, button=None, data=None):
+        """Display all corpus annotations
+        """
+        self.open_adhoc_view('table', source='global_annotations', label="Corpus annotations")
 
 if __name__ == '__main__':
     app = AdveneApplication ()
