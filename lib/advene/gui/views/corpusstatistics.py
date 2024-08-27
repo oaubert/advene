@@ -83,10 +83,11 @@ class CorpusStatistics(AdhocView):
             p = self.packages[alias]
             return f"{alias} - { p.title } - { len(p.annotationTypes) } types d'annotation - { len(p.annotations) } annotations"
 
+        packages_info = "\n".join(package_info(alias) for alias in self.packages)
         self.set_summary(f"""<big><b>Corpus statistics</b></big>
 
         {len(self.packages)} loaded packages :
-{"\n".join(package_info(alias) for alias in self.packages)}
+{packages_info}
         """)
 
     def build_annotation_type_table(self):
