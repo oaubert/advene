@@ -111,8 +111,8 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-gst-editing-services \
         "${MINGW_PACKAGE_PREFIX}"-libsrtp \
         "${MINGW_PACKAGE_PREFIX}"-gtksourceview3  \
-        "${MINGW_PACKAGE_PREFIX}"-python3-setuptools \
-        "${MINGW_PACKAGE_PREFIX}"-python3-pillow \
+        "${MINGW_PACKAGE_PREFIX}"-python-setuptools \
+        "${MINGW_PACKAGE_PREFIX}"-python-pillow \
 
     PIP_REQUIREMENTS="\
 rdflib
