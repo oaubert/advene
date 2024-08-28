@@ -829,10 +829,8 @@
 
   <meson id="pulseaudio" mesonargs="-Dtests=false -Ddaemon=false -Ddoxygen=false -Ddatabase=simple">
     <branch module="pulseaudio/pulseaudio/-/archive/v${version}/pulseaudio-v${version}.tar.gz"
-        repo="gitlab" version="16.1"
-        hash="sha256:bd9df649ba2062b3bedea168e75745b755b789223aeb23ca47686f103170a481">
-      <patch file="patches/pulseaudio.provide-tarball-version.patch" strip="1"/>
-      <patch file="patches/pulseaudio.47a69187.patch" strip="1"/>
+        repo="gitlab" version="17.0"
+        hash="sha256:896eab02c40783fc0a5dfd098b6f3ec1586686651ee4dcac573dcef666f4531f">
     </branch>
     <dependencies>
       <dep package="liblzo"/>
