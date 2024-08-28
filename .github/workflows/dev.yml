@@ -7,6 +7,8 @@ on:
 
 jobs:
   windows:
+    # Temporarily disable - we debug macosx
+    if: false
     runs-on: windows-latest
     strategy:
       fail-fast: true
