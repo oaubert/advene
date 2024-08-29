@@ -75,6 +75,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Note: we are using fetch-depth: 0 here to fetch the whole
+          # history and especially tags, since we use git describe
+          # afterwards to generate the installer filename.
+          fetch-depth: 0
 
       - name: Install JHBuild
         run: |
