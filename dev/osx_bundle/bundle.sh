@@ -64,13 +64,18 @@ function main {
     # clone this repo and install into the bundle
     CLONE="$QL_OSXBUNDLE_BUNDLE_DEST"/_temp_clone
     git clone ../.. "$CLONE"
-    (cd "$CLONE"; git checkout "$GIT_TAG")
     (
-     cd "$CLONE"
-     jhbuild run "$PYTHON" -m pip install \
-        --prefix="$APP_PREFIX" --root="/" \
-        --log="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt \
-        .
+        cd "$CLONE"
+
+        local GIT_DESCRIBE
+        GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
+        echo "build=f'{version}-r${GIT_DESCRIBE}'" >> "${CLONE}/lib/advene/core/version.py"
+        echo "build_date='$(date -Is)'">> "${CLONE}/lib/advene/core/version.py"
+
+        jhbuild run "$PYTHON" -m pip install \
+                --prefix="$APP_PREFIX" --root="/" \
+                --log="$QL_OSXBUNDLE_BUNDLE_DEST"/_install_log.txt \
+                .
     )
     rm -Rf "$CLONE"
 
