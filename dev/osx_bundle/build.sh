@@ -7,9 +7,9 @@ source env.sh
 
 cargo -V || (echo "Requires rust"; exit 1)
 
-jhbuild build meta-bootstrap
+jhbuild build --no-interact meta-bootstrap
 #jhbuild build advene
-jhbuild build pulseaudio
+jhbuild build --no-interact pulseaudio
 
 # Ref dir:
 #  /Users/runner/work/advene/advene/dev/osx_bundle/_home/jhbuild_checkoutroot/pulseaudio-v17.0/
