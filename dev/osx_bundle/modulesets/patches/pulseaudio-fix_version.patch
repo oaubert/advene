@@ -5,7 +5,7 @@ index ba3d01d..6cfebb9 100644
 @@ -1,5 +1,5 @@
  project('pulseaudio', 'c',
 -        version : run_command(find_program('git-version-gen'), join_paths(meson.current_source_dir(), '.tarball-version'), check : false).stdout().strip(),
-+        version : "v.17.0",
++        version : 'v.17.0',
          meson_version : '>= 0.50.0',
          default_options : [ 'c_std=gnu11', 'cpp_std=c++17' ]
          )
