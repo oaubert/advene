@@ -831,6 +831,7 @@
     <branch module="pulseaudio/pulseaudio/-/archive/v${version}/pulseaudio-v${version}.tar.gz"
         repo="gitlab" version="17.0"
         hash="sha256:896eab02c40783fc0a5dfd098b6f3ec1586686651ee4dcac573dcef666f4531f">
+      <patch file="patches/pulseaudio-fix_version.patch" strip="1"/>
     </branch>
     <dependencies>
       <dep package="liblzo"/>
