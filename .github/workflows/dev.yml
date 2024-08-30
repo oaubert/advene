@@ -72,6 +72,8 @@ jobs:
 
   macos:
     runs-on: macos-latest
+    env:
+      ACTIONS_STEP_DEBUG: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
