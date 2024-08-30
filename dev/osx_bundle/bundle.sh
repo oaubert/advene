@@ -9,7 +9,11 @@
 # Pass the tag/revision to install, or install the current revision
 # if nothing is passed
 
+# Exit on error
 set -e
+
+# Display executed lines
+set -x
 
 # shellcheck source-path=SCRIPTDIR
 source env.sh
