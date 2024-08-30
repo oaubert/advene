@@ -3,6 +3,7 @@ name: Advene packaging workflow
 on:
   push:
     tags:
+    # Run on tagging with release/*
     - 'release/*'
   workflow_dispatch:
     inputs:
@@ -17,7 +18,8 @@ jobs:
       fail-fast: true
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           # Note: we are using fetch-depth: 0 here to fetch the whole
           # history and especially tags, since we use git describe
@@ -27,16 +29,27 @@ jobs:
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: UCRT64
+          msystem: MINGW64
           update: true
           install: >-
             git
             dos2unix
-            mingw-w64-ucrt-x86_64-7zip
-            mingw-w64-ucrt-x86_64-nsis
-            mingw-w64-ucrt-x86_64-curl
-            mingw-w64-ucrt-x86_64-python
-            mingw-w64-ucrt-x86_64-cc
+            mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-gdk-pixbuf2
+            mingw-w64-x86_64-librsvg
+            mingw-w64-x86_64-gtk3
+            mingw-w64-x86_64-libsoup3
+            mingw-w64-x86_64-gstreamer
+            mingw-w64-x86_64-gst-plugins-base
+            mingw-w64-x86_64-gst-plugins-good
+            mingw-w64-x86_64-gst-plugins-bad
+            mingw-w64-x86_64-gst-libav
+            mingw-w64-x86_64-gst-plugins-ugly
+            mingw-w64-x86_64-python
+            mingw-w64-x86_64-cc
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-gobject-introspection
+            mingw-w64-x86_64-appstream
 
       - name: Build Installer
         env:
@@ -47,6 +60,7 @@ jobs:
             BUILD_REF="$(git rev-parse --abbrev-ref HEAD)"
           fi
           cd dev/win_installer
+          ./bootstrap.sh
           ./build.sh "$BUILD_REF"
           cd ../..
           ARTIFACT_PATHNAME=$(ls dev/win_installer/advene-*-installer.exe | head -n 1)
@@ -54,10 +68,78 @@ jobs:
           echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
 
-      - name: "Upload binary as artifact"
-        uses: actions/upload-artifact@v2
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
         with:
-          path: dev/win_installer/advene-*-installer.exe
+          name: installer
+          path: dev/win_installer/*.exe
+
+      - name: "Create Release"
+        id: create_release
+        uses: actions/create-release@v1
+        # Do not execute step if we do not have a tag.
+        # If we invoke by event trigger, then it
+        # will create a refs/heads/master tag which will make a
+        # mess. See
+        # https://github.com/actions/create-release/issues/13#issuecomment-629741295
+        # for more details.
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: "Upload Release Asset"
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.2
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ${{ env.ARTIFACT_PATHNAME }}
+          asset_name: ${{ env.ARTIFACT_NAME }}
+          asset_content_type: application/octet-stream
+
+  macos:
+    runs-on: macos-latest
+    env:
+      ACTIONS_STEP_DEBUG: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Note: we are using fetch-depth: 0 here to fetch the whole
+          # history and especially tags, since we use git describe
+          # afterwards to generate the installer filename.
+          fetch-depth: 0
+
+      - name: Install JHBuild
+        run: |
+          cd dev/osx_bundle
+          ./bootstrap.sh
+
+      - name: Build dependencies
+        run: |
+          cd dev/osx_bundle
+          ./build.sh
+
+      - name: Create bundle
+        run: |
+          cd dev/osx_bundle
+          ./bundle.sh
+          cd ../..
+          ARTIFACT_PATHNAME=$(ls dev/osx_bundle/_build/*.dmg | head -n 1)
+          ARTIFACT_NAME=$(basename $ARTIFACT_PATHNAME)
+          echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
+      - name: "Upload binary as artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          path: dev/osx_bundle/_build/*.dmg
 
       - name: "Create Release"
         id: create_release
