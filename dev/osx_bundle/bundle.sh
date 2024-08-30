@@ -13,7 +13,7 @@
 set -e
 
 # Display executed lines
-set -x
+# set -x
 
 # shellcheck source-path=SCRIPTDIR
 source env.sh
