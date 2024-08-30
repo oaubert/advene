@@ -116,11 +116,12 @@ function main {
         "$ADVENE" > "$ADVENE/Contents/Resources/content.txt"
 
     DMG_SETTINGS="misc/dmg_settings.py"
+    DMG_FILE="$QL_OSXBUNDLE_BUNDLE_DEST/Advene-$VERSION.dmg"
     jhbuild run dmgbuild -s "$DMG_SETTINGS" -D app="$ADVENE" \
-        "Advene $VERSION" "$QL_OSXBUNDLE_BUNDLE_DEST/ADVENE-$VERSION.dmg"
+        "Advene $VERSION" "$DMG_FILE"
 
     (cd "$QL_OSXBUNDLE_BUNDLE_DEST" && \
-        shasum -a256 "Advene-$VERSION.dmg" > "Advene-$VERSION.dmg.sha256")
+        shasum -a256 "$DMG_FILE" > "${DMG_FILE}.sha256" )
 }
 
 main "$@";
