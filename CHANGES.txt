@@ -7,11 +7,11 @@ advene (3.14) unstable; urgency=medium
   * Win32: the integrated web server works again on Windows (inclusion of
     CherryPy in the installer)
 
-  * Linux: Wayland fixes - Advene works directly in Wayland sessions,
+  * Linux: Wayland fixes - Advene works as-is in Wayland sessions,
     which is the default on Ubuntu.
 
   * Timeline view:
-    - there is a view option that display all relations of the same type on mouse over.
+    - new view option to display all relations of the same type on mouse over
     - the shortcut for splitting an annotation is Control-T
 
   * Transcription view:
