@@ -228,6 +228,7 @@ Function custom_gui_init
 FunctionEnd
 
 Section "Uninstall"
+    SetShellVarContext all
     SetAutoClose true
 
     ; Remove start menu entries

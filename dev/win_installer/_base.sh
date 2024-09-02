@@ -232,7 +232,8 @@ function cleanup_after {
     rm -Rf "${MINGW_ROOT}"/etc/pkcs11
     rm -Rf "${MINGW_ROOT}"/etc/gtk-3.0/im-multipress.conf
     rm -Rf "${MINGW_ROOT}"/share/zsh
-    rm -Rf "${MINGW_ROOT}"/share/pixmaps
+    # Do not delete pixmaps: Advene uses it
+    #rm -Rf "${MINGW_ROOT}"/share/pixmaps
     rm -Rf "${MINGW_ROOT}"/share/gnome-shell
     rm -Rf "${MINGW_ROOT}"/share/dbus-1
     rm -Rf "${MINGW_ROOT}"/share/gir-1.0
