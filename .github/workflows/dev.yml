@@ -65,7 +65,7 @@ jobs:
       - name: Upload Results
         uses: actions/upload-artifact@v4
         with:
-          name: installer
+          name: Windows installer
           path: dev/win_installer/*.exe
 
   macos:
@@ -104,6 +104,7 @@ jobs:
       - name: "Upload binary as artifact"
         uses: actions/upload-artifact@v4
         with:
+          name: MacOSX dmg image
           path: dev/osx_bundle/_build/*.dmg
 
 #       - name: "Create Release"
