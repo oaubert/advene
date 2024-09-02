@@ -102,6 +102,7 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-good \
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-bad \
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-ugly \
+        "${MINGW_PACKAGE_PREFIX}"-gst-plugin-gtk \
         "${MINGW_PACKAGE_PREFIX}"-gst-libav \
         "${MINGW_PACKAGE_PREFIX}"-python-certifi \
         "${MINGW_PACKAGE_PREFIX}"-python-pytest \
