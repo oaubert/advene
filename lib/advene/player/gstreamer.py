@@ -615,7 +615,8 @@ class Player:
         if config.data.os == "win32":
             # From
             # http://stackoverflow.com/questions/25823541/get-the-window-handle-in-pygi
-            if not widget.ensure_native():
+            # We check for ensure_native since win32 gtk3 DrawingArea seems to miss this method.
+            if hasattr(widget, 'ensure_native') and not widget.ensure_native():
                 logger.error("Cannot embed video player - it requires a native window")
                 return
             ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
