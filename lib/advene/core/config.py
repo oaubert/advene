@@ -672,6 +672,7 @@ class Config:
         """
         if self.os != 'win32':
             return
+        self.player['vout'] = 'd3d'
         self.player['dvd-device']='E:'
 
     def darwin_specific_config(self):
