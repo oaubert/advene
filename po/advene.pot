@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-27 17:40+0200\n"
+"POT-Creation-Date: 2024-09-09 18:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3159,7 +3159,7 @@ msgid "Id"
 msgstr ""
 
 #: ../lib/advene/gui/views/table.py:318
-#: ../lib/advene/gui/views/corpusstatistics.py:101
+#: ../lib/advene/gui/views/corpusstatistics.py:102
 #: ../lib/advene/gui/views/finder.py:105 ../lib/advene/util/helper.py:281
 msgid "Package"
 msgstr ""
@@ -3230,7 +3230,7 @@ msgid "Element id"
 msgstr ""
 
 #: ../lib/advene/gui/views/table.py:710
-#: ../lib/advene/gui/views/corpusstatistics.py:100
+#: ../lib/advene/gui/views/corpusstatistics.py:101
 #: ../lib/advene/gui/util/dialog.py:512 ../lib/advene/gui/edit/imports.py:333
 #: ../lib/advene/gui/edit/dvdselect.py:75
 #: ../lib/advene/gui/edit/transcribe.py:1036
@@ -3466,26 +3466,26 @@ msgstr ""
 msgid "Global analyses of multiple packages"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:102
+#: ../lib/advene/gui/views/corpusstatistics.py:103
 #: ../lib/advene/gui/views/interactivequery.py:464
 #: ../lib/advene/gui/edit/imports.py:183 ../lib/advene/gui/edit/imports.py:184
 msgid "Annotations"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:130
+#: ../lib/advene/gui/views/corpusstatistics.py:131
 msgid "Corpus summary"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:150
+#: ../lib/advene/gui/views/corpusstatistics.py:151
 #, python-brace-format
 msgid "Corpus analysis - {package_count} packages"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:156
+#: ../lib/advene/gui/views/corpusstatistics.py:157
 msgid "Summary"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:157
+#: ../lib/advene/gui/views/corpusstatistics.py:158
 msgid "Table"
 msgstr ""
 
