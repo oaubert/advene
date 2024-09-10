@@ -1235,33 +1235,33 @@ class AdveneApplication(Gtk.Application):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label(label=title + "\nLeave the first field empty to unconditionnaly replace all contents.\nYou can use special characters \\n or \\t.")
+        l = Gtk.Label(label=title + "\nLeave the first field empty to unconditionnaly replace all contents.\nYou can use special characters \\n or \\t.")
         l.set_line_wrap(True)
         l.show()
         d.vbox.pack_start(l, False, True, 0)
 
-        hb=Gtk.HBox()
+        hb = Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Find word") + " "), False, False, 0)
-        search_entry=Gtk.Entry()
+        search_entry = Gtk.Entry()
         search_entry.set_text(default_search or "")
         hb.pack_start(search_entry, True, True, 0)
         d.vbox.pack_start(hb, False, True, 0)
 
-        hb=Gtk.HBox()
+        hb = Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Replace by") + " "), False, False, 0)
-        replace_entry=Gtk.Entry()
+        replace_entry = Gtk.Entry()
         hb.pack_start(replace_entry, True, True, 0)
         d.vbox.pack_start(hb, False, True, 0)
 
         d.connect('key-press-event', dialog.dialog_keypressed_cb)
         d.show_all()
         dialog.center_on_mouse(d)
-        res=d.run()
+        res = d.run()
         if res == Gtk.ResponseType.OK:
             search = unescape_string(search_entry.get_text())
             replace = unescape_string(replace_entry.get_text())
-            count=0
-            batch_id=object()
+            count = 0
+            batch_id = object()
             for a in elements:
                 if not isinstance(a, (Annotation, Relation, View)):
                     continue
