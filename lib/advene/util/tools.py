@@ -204,6 +204,14 @@ def title2id(t):
     (text, count) = re.subn(r'[^\w]', '-', text)
     return text
 
+def printable(s):
+    """Return the string with non-printable characters stripped.
+    """
+    if not s:
+        return s
+    else:
+        return ''.join(c for c in s if c.isprintable())
+
 def unescape_string(s):
     """Unescape special characters.
 

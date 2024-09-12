@@ -91,7 +91,7 @@ import advene.model.tal.context
 
 import advene.core.mediacontrol
 import advene.util.helper as helper
-from advene.util.tools import unescape_string, open_in_filebrowser, detect_by_bom
+from advene.util.tools import unescape_string, open_in_filebrowser, detect_by_bom, printable
 import xml.etree.ElementTree as ET
 
 import advene.util.importer
@@ -1258,8 +1258,12 @@ class AdveneApplication(Gtk.Application):
         dialog.center_on_mouse(d)
         res = d.run()
         if res == Gtk.ResponseType.OK:
-            search = unescape_string(search_entry.get_text())
-            replace = unescape_string(replace_entry.get_text())
+
+            # When copy/pasting from the transcription
+            # (e.g.[SPEAKER_00]) non-printable characters are present
+            # It would be best to fix it in the source of the copy, but we can do it here too
+            search = unescape_string(printable(search_entry.get_text()))
+            replace = unescape_string(printable(replace_entry.get_text()))
             count = 0
             batch_id = object()
             for a in elements:
