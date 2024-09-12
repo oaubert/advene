@@ -1,4 +1,4 @@
-This package was downloaded from http://advene.org/
+This package was downloaded from https://advene.org/
 
 Upstream Authors:
 
@@ -10,7 +10,7 @@ Upstream Authors:
 Documentation:
 
   A user guide can be found in the public Advene wiki, feel free to contribute:
-  http://advene.org/wiki/
+  https://advene.org/wiki/
 
 Copyright:
 
@@ -30,30 +30,3 @@ Copyright:
 
 On Debian systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL'.
-
-
-Virtualbox image:
-https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/
-The password to your VM is "Passw0rd!"
-
-Registry file:
-/c/Users/IEUser/Local Settings/Application Data/Microsoft/Windows/INetCache/gstreamer-1.0/registry.x86_64-mingw.bin
-
-Investigate
-~/src/pywebview (for native web component)
-
-Github action for msys:
-https://github.com/msys2/setup-msys2
-https://medium.com/@rkttu/write-your-github-actions-workflow-for-build-windows-application-94e5a989f477
-
-snapshotter issue:
-https://marc.info/?l=gstreamer-devel&m=144595442217240&w=2
-
-
-
-http://lifestyletransfer.com/how-to-use-gstreamer-appsink-in-python/
-https://gist.github.com/cbenhagen/76b24573fa63e7492fb6
-https://gist.githubusercontent.com/cbenhagen/76b24573fa63e7492fb6/raw/99a603fd4d3d008b947621c389237d6a6c8ae744/gst-appsink-opencv.py
-
-No inheritance necessary- using appsink+signal seems to work:
-http://gstreamer-devel.966125.n4.nabble.com/Can-not-get-right-data-from-appsink-in-python-td4685864.html

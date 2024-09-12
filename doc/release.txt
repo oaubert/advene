@@ -1,13 +1,8 @@
 Checklist for the release of a new version :
 
     * Update lib/advene/core/version.py (version)
-    * Run ./scripts/update_version to update svn rev + date
-    * Update README.win32 (dependencies) + README
-    * Generate installers/packages
+    * Update translations
+    * Update README
+    * Update CHANGES.txt
     * Test
-    * svn-copy from trunk to tags/n_version
-    * Upload on gna.org
-    * Announce on gna.org
-    * Update downloads + news on the website
-    * Send the announce on  advene-users, AVIS, vlc-devel, partners
-
+    * Run scripts/release N.NN
