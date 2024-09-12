@@ -2,13 +2,19 @@ advene (3.14) unstable; urgency=medium
 
   * or should we say the 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482 release?
 
-  * MacOS X Sonoma fix - thanks to Quodlibet for their install scripts.
+  * MacOS X Sonoma fix: Advene works again on recent Mac - thanks to
+    Quodlibet for their install scripts.
 
   * Win32: the integrated web server works again on Windows (inclusion of
     CherryPy in the installer)
 
   * Linux: Wayland fixes - Advene works as-is in Wayland sessions,
     which is the default on Ubuntu.
+
+  * The popup menu on schema/types now offers to Search/Replace and Offset annotations.
+
+  * The Edit/Global menu item displays a popup menu operating on all
+    package's annotations, such as Search/Replace and Offset.
 
   * Timeline view:
     - new view option to display all relations of the same type on mouse over
@@ -17,11 +23,6 @@ advene (3.14) unstable; urgency=medium
   * Transcription view:
     - allow to toggle end timestamp display
     - add match count and prev/next navigation in search
-
-  * The popup menu on schema/types now offers to Search/Replace and Offset annotations.
-
-  * The Edit/Global menu item displays a popup menu operating on all
-    package's annotations, such as Search/Replace and Offset.
 
   * Corpus actions - a new menu item, that will offer various displays and
     actions on all loaded packages. More to come...
@@ -39,7 +40,7 @@ advene (3.14) unstable; urgency=medium
   * Advene is now a GtkApplication, which means that most of its actions
     can be triggered through DBus.
 
- -- Olivier Aubert <contact@olivieraubert.net>  Tue, 27 Aug 2024 16:00:28 +0200
+ -- Olivier Aubert <contact@olivieraubert.net>  Thu, 12 Sep 2024 19:20:58 +0200
 
 advene (3.13) unstable; urgency=medium
 
