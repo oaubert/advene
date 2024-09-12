@@ -57,6 +57,8 @@ class AnnotationDisplay(AdhocView):
     def set_annotation(self, a=None):
         """This method takes either an annotation, a time value or None as parameter.
         """
+        if self.annotation and self.is_modified():
+            self.save_annotation()
         self.annotation = a
         if self.completer is not None:
             self.completer.element = a
@@ -66,6 +68,15 @@ class AnnotationDisplay(AdhocView):
     def set_master_view(self, v):
         v.register_slave_view(self)
         self.close_on_package_load = False
+
+    def save_annotation(self):
+        if isinstance(self.annotation, Annotation):
+            self.controller.notify('EditSessionStart', element=self.annotation, immediate=True)
+            self.annotation.content.data = self.label['contents'].get_text()
+            self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
+            self.controller.notify('EditSessionEnd', element=self.annotation)
+            self.label['contents'].get_buffer().set_modified(False)
+        return
 
     def update_annotation(self, annotation=None, event=None):
         if annotation != self.annotation:
@@ -247,11 +258,7 @@ class AnnotationDisplay(AdhocView):
         # Contents frame
         def handle_ok(b):
             b.hide()
-            if isinstance(self.annotation, Annotation):
-                self.controller.notify('EditSessionStart', element=self.annotation, immediate=True)
-                self.annotation.content.data = self.label['contents'].get_text()
-                self.controller.notify("AnnotationEditEnd", annotation=self.annotation)
-                self.controller.notify('EditSessionEnd', element=self.annotation)
+            self.save_annotation()
             return True
 
         hbox = Gtk.HBox()
