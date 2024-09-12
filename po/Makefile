@@ -10,7 +10,7 @@ FORCE:
 
 pot: POTFILES
 	xgettext --from-code=utf-8 -d $(DOMAIN) -o $(DOMAIN).pot -f POTFILES
-	perl -pi -e 's/^.+POT-Creation-Date.+//' $(DOMAIN).pot
+	perl -pi -e 's/^.+POT-Creation-Date.+\n//' $(DOMAIN).pot
 update-po:
 	for po in *.po; do \
 		lingua=`basename $$po .po`; \
