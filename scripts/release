@@ -1,21 +1,27 @@
 #! /bin/sh
 
-SYNTAX="$0 version_number"
+SYNTAX="$0 VERSION_NUMBER [tag]"
 
 VERSION=${1:?$SYNTAX}
+COMMAND="${2}"
 errors=""
 
-cd $(dirname "$0")/.. || exit
+cd $(dirname "$0")/.. || { echo "Cannot cd to Advene dir" ; exit ; }
 
 # Things to do/check upon release
 
 # Check translations
-# FIXME
+echo "Checking translations"
+(cd po ; make pot)
+if ! git diff --quiet po/advene.pot
+then
+    errors="${errors}Translations have been updated. You should 'make update', check and commit them.\n"
+fi
 
 # Check that changelog is up-to-date
 if ! head -1 CHANGES.txt | grep -q "$VERSION"
 then
-    errors="${errors}Update CHANGES.txt\n"
+    errors="${errors}Update CHANGES.txt to match version $VERSION\n"
 fi
 
 if grep -Eq '^\s+--\s*$' CHANGES.txt
@@ -31,10 +37,22 @@ fi
 
 if [ ! -z "$errors" ]
 then
+    echo "*************************************************************"
+    echo "Things to do before release:"
     echo "$errors"
     exit 1
 fi
 
-echo "All checks ok for release. Tagging release/${VERSION}"
-# Tag -a release/N.N
-git tag -a "release/${VERSION}"
+echo "All checks ok for release."
+
+
+if [ "$COMMAND" = "tag" ]
+then
+    echo "Tagging release/${VERSION}"
+    # Tag -a release/N.N
+    git tag -a "release/${VERSION}"
+else
+    echo "To tag ${VERSION}, execute"
+    echo "$0 $1 tag"
+fi
+
