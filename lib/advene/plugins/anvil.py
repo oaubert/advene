@@ -64,25 +64,25 @@ class AnvilImporter(GenericImporter):
         return self.package
 
     def iterator(self, root):
-        schema=self.package.get_element_by_id('anvil')
+        schema = self.package.get_element_by_id('anvil')
         if root.tag != 'annotation':
             logger.error("Invalid Anvil file format: %s", root.tag)
             return
 
-        progress=0.01
+        progress = 0.01
         self.progress(progress)
-        l=root.findall('.//track')
-        type_incr=0.98/len(l)
-        for track in l:
-            at=self.create_annotation_type (schema, track.attrib['name'])
+        tracks = root.findall('.//track')
+        type_incr = 0.98 / len(tracks)
+        for track in tracks:
+            at = self.create_annotation_type (schema, track.attrib['name'])
             self.progress(value=progress, label="Converting " + at.id)
-            attribnames=set()
-            elements=track.findall('.//el')
-            el_incr=type_incr / len(elements)
+            attribnames = set()
+            elements = track.findall('.//el')
+            el_incr = type_incr / len(elements)
             for el in elements:
                 progress += el_incr
                 self.progress(progress)
-                content="\n".join( [ "%s=%s" % (a.attrib['name'], a.text)
+                content = "\n".join( [ "%s=%s" % (a.attrib['name'], a.text)
                                      for a in el.findall('attribute') ] )
                 attribnames.update([ a.attrib['name'] for a in el.findall('attribute') ])
                 yield {
@@ -92,7 +92,7 @@ class AnvilImporter(GenericImporter):
                     'end': int(float(el.attrib['end']) * 1000),
                     }
             if len(attribnames) == 1:
-                n=list(attribnames)[0]
+                n = list(attribnames)[0]
                 # Only 1 attribute name. Define an appropriate
                 # representation for the type.
                 at.setMetaData(config.data.namespace, 'representation', 'here/content/parsed/' + n)

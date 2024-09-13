@@ -95,7 +95,7 @@ class KeywordImporter(GenericImporter):
         for a in self.source_type.annotations:
             keywords = rake.extract(a.content.data)
             if keywords:
-                an = yield {
+                yield {
                     'type': new_atype,
                     'begin': a.fragment.begin,
                     'end': a.fragment.end,

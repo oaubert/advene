@@ -81,12 +81,12 @@ class EditAccumulator(AccumulatorPopup):
         hbox.pack_start(b, False, True, 0)
 
         t=self.get_short_title(element)
-        l=Gtk.Label()
-        l.set_markup('<b>%s</b>' % t.replace('<', '&lt;'))
-        hbox.pack_start(l, True, True, 0)
+        label = Gtk.Label()
+        label.set_markup('<b>%s</b>' % t.replace('<', '&lt;'))
+        hbox.pack_start(label, True, True, 0)
 
         self.edited_elements[element]=w
-        w._title_label=l
+        w._title_label = label
         self.display(w, title=hbox)
 
         def handle_destroy(*p):
@@ -129,11 +129,11 @@ class EditAccumulator(AccumulatorPopup):
         return True
 
     def update_element(self, element, event):
-        if not event.endswith('EditEnd') or not element in self.edited_elements:
+        if not event.endswith('EditEnd') or element not in self.edited_elements:
             return False
-        w=self.edited_elements[element]
-        l=w._title_label
-        l.set_markup('<b>%s</b>' % self.get_short_title(element).replace('<', '&lt;'))
+        w = self.edited_elements[element]
+        label = w._title_label
+        label.set_markup('<b>%s</b>' % self.get_short_title(element).replace('<', '&lt;'))
         return True
 
     def update_annotation(self, annotation, event):

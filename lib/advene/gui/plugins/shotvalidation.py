@@ -93,9 +93,11 @@ class ShotValidation(AdhocView):
     def goto_current(self, *p):
         """Select annotation containing current player time.
         """
-        l=[ a for a in self.annotations if self.controller.player.current_position_value in a.fragment ]
-        if l:
-            self.set_index(self.annotations.index(l[0]))
+        annotations = [ a
+                        for a in self.annotations
+                        if self.controller.player.current_position_value in a.fragment ]
+        if annotations:
+            self.set_index(self.annotations.index(annotations[0]))
         return True
 
     def merge(self, *p):
@@ -232,8 +234,8 @@ class ShotValidation(AdhocView):
         self.prev_button.connect("clicked", lambda b: self.set_index(self.index - 1))
         hb.add(self.prev_button)
 
-        l = Gtk.Label(label="#")
-        hb.pack_start(l, False, True, 0)
+        label = Gtk.Label(label="#")
+        hb.pack_start(label, False, True, 0)
 
         self.next_button = Gtk.Button(_("Next cut >"))
         self.next_button.set_tooltip_text(_("Display next cut"))

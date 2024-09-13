@@ -182,9 +182,9 @@ class AbstractBundle:
     def get_by_id(self, id_):
         """Inefficient but helpful method.
         """
-        l=[ e for e in self._dict.values() if e.id == id_ ]
-        if len(l) == 1:
-            return l[0]
+        elements = [ e for e in self._dict.values() if e.id == id_ ]
+        if len(elements) == 1:
+            return elements[0]
         else:
             return None
 

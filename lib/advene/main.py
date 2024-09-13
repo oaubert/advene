@@ -166,17 +166,17 @@ Aborting.""", dir_path)
         import advene.core.controller
         c = advene.core.controller.AdveneController()
         c.init()
-        l = [ v for v in c.get_export_filters() if v.get_id() == filter ]
-        if not l:
+        filters = [ v for v in c.get_export_filters() if v.get_id() == filter ]
+        if not filters:
             logger.error("Export filter %s is not defined", filter)
             c.on_exit()
             sys.exit(1)
-        l = l[0]
+        selected = filters[0]
         if not config.data.args:
             logger.error("Syntax: advene -f filter_name [-o output=foo.ext] input.azp")
             c.on_exit()
             sys.exit(1)
-        ext = l.extension
+        ext = selected.extension
 
         for f in config.data.args:
             output = config.data.options.options.get('output')
@@ -190,7 +190,7 @@ Aborting.""", dir_path)
             logger.warning("Converting %s into %s", f, output)
             c.load_package(f)
             # FIXME: could trigger events?
-            c.apply_export_filter(c.package, l, output)
+            c.apply_export_filter(c.package, selected, output)
         c.on_exit()
         sys.exit(0)
 

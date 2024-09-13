@@ -701,7 +701,7 @@ class Config:
         """Register a content handler.
         """
         # FIXME: check signature ?
-        if not handler in self.content_handlers:
+        if handler not in self.content_handlers:
             self.content_handlers.append(handler)
         return True
 
@@ -730,12 +730,12 @@ class Config:
         Return None if no content handler is valid (should not happen, as
         TextContentHandler is builtin).
         """
-        l=[ (c, c.can_handle(mimetype)) for c in self.content_handlers ]
-        if not l:
+        handlers = [ (c, c.can_handle(mimetype)) for c in self.content_handlers ]
+        if not handlers:
             return None
         else:
-            l.sort(key=operator.itemgetter(1), reverse=True)
-            return l[0][0]
+            handlers.sort(key=operator.itemgetter(1), reverse=True)
+            return handlers[0][0]
 
     def get_homedir(self):
         """Return the user's homedir.
@@ -894,24 +894,25 @@ class Config:
         git_dir = Path(__file__).parents[3].joinpath('.git')
         if git_dir.is_dir():
             # We are in a git tree. Let's get the version information
-            # from there if we can call git
+            # from there if we can
             try:
                 git_version = subprocess.check_output(["git", "--git-dir=%s" % git_dir.as_posix(), "describe"]).strip().decode('utf-8')
-            except:
+            except subprocess.CalledProcessError:
                 pass
             if git_version is None:
                 # Cannot call git. Let's try the manual approach...
                 try:
-                    with open(git_dir.joinpath("HEAD").as_posix(), "r") as f:
+                    with open((git_dir / "HEAD").as_posix(), "r") as f:
                         head = f.read().strip()
                     if head.startswith('ref: '):
+                        ref = git_dir / head[5:]
                         # Using a ref.
-                        with open(git_dir.joinpath(head[5:]).as_posix(), "r") as f:
+                        with open(ref.as_posix(), "r") as f:
                             git_version = f.read().strip()
                     else:
                         # Not using a ref. Assume it is a sha1
                         git_version = head
-                except:
+                except FileNotFoundError:
                     pass
         if git_version is not None:
             v = "Advene development version %s" % git_version

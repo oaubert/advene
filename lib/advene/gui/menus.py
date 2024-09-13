@@ -14,7 +14,7 @@ from gi.repository import Gtk
 
 import advene.core.config as config
 
-from advene.gui.actions import to_variant, menuitem_new
+from advene.gui.actions import menuitem_new
 
 # Copied from https://github.dev/gaphor/gaphor/blob/master/gaphor/ui/recentfiles.py
 class RecentFilesMenu(Gio.Menu):

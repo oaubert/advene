@@ -23,9 +23,6 @@ from io import StringIO
 
 import advene.model.util.uri
 
-ELEMENT_NODE = xml.dom.Node.ELEMENT_NODE
-TEXT_NODE = xml.dom.Node.TEXT_NODE
-
 from advene.model.constants import adveneNS, dcNS, xlinkNS, TEXT_NODE, ELEMENT_NODE
 
 # TODO: let in here only classes which have no __init__ methods

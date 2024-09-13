@@ -88,7 +88,7 @@ class _match_filter_dict (dict, metaclass=auto_properties):
                     pass
 
         elif key == 'type':
-            if not self['class'] in self.__classes_w_types:
+            if self['class'] not in self.__classes_w_types:
                 raise AdveneValueError (
                     'viewable-class %s does cannot have a viewable-type' %
                     self['class'])

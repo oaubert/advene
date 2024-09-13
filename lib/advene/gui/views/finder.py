@@ -153,30 +153,30 @@ class DetailedTreeModel:
         elif isinstance (node, Relation):
             children = []
         elif isinstance (node, AnnotationType):
-            if not node in self.childrencache:
+            if node not in self.childrencache:
                 self.childrencache[node] = node.annotations
             children = self.childrencache[node]
         elif isinstance (node, RelationType):
-            if not node in self.childrencache:
+            if node not in self.childrencache:
                 self.childrencache[node] = node.relations
             children = self.childrencache[node]
         elif isinstance (node, Schema):
             # Do not cache these elements
-            l=list(node.annotationTypes)
-            l.extend(node.relationTypes)
-            children = l
+            elements = list(node.annotationTypes)
+            elements.extend(node.relationTypes)
+            children = elements
         elif isinstance (node, View):
             children = []
         elif isinstance (node, Query):
             children = []
         elif isinstance (node, Package):
-            if not node in self.childrencache:
+            if node not in self.childrencache:
                 self.childrencache[node] = [node.schemas, self.virtual['views'], node.queries, node.resources or _("No resources") ]
             children = self.childrencache[node]
         elif isinstance (node, AbstractBundle):
             children = node
         elif isinstance (node, Resources):
-            if not node in self.childrencache:
+            if node not in self.childrencache:
                 self.childrencache[node] = node.children()
             children = self.childrencache[node]
         elif isinstance (node, ResourceData):
@@ -382,12 +382,12 @@ class ModelColumn(FinderColumn):
         return True
 
     def on_button_press(self, widget, event):
-        if not event.button in (1, 3):
+        if event.button not in (1, 3):
             return False
         x = int(event.x)
         y = int(event.y)
-        node=None
-        if not event.window is widget.get_bin_window():
+        node = None
+        if event.window is not widget.get_bin_window():
             return False
         model = widget.get_model()
         t = widget.get_path_at_pos(x, y)
@@ -557,7 +557,7 @@ class ViewColumn(FinderColumn):
         if t == 'static':
             self.label['activate'].set_label(_("Open in webbrowser"))
             self.label['info'].set_markup(_("View applied to %s\n") % self.element.matchFilter['class'])
-            if not self.element.matchFilter['class'] in ('package', '*'):
+            if self.element.matchFilter['class'] not in ('package', '*'):
                 self.label['activate'].set_sensitive(False)
         elif t == 'dynamic':
             self.label['info'].set_text('')
@@ -573,13 +573,13 @@ class ViewColumn(FinderColumn):
     def activate(self, *p):
         """Action to be executed.
         """
-        t=helper.get_view_type(self.element)
+        t = helper.get_view_type(self.element)
         if t == 'static':
-            c=self.controller.build_context()
+            c = self.controller.build_context()
             try:
-                url=c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
+                url = c.evaluateValue('here/view/%s/absolute_url' % self.element.id)
                 self.controller.open_url(url)
-            except:
+            except Exception:
                 logger.warning("Cannot open static view: error when trying to get its url", exc_info=True)
         elif t == 'dynamic':
             self.controller.activate_stbv(self.element)

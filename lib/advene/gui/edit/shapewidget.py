@@ -649,10 +649,10 @@ class Text(Rectangle):
     def edit_properties_widget(self):
         """Build a widget to edit the shape properties.
         """
-        vbox=super(Text, self).edit_properties_widget()
+        vbox = super(Text, self).edit_properties_widget()
 
         def label_widget(label, widget):
-            hb=Gtk.HBox()
+            hb = Gtk.HBox()
             hb.add(Gtk.Label(label=label))
             hb.pack_start(widget, False, True, 0)
             return hb
@@ -660,21 +660,21 @@ class Text(Rectangle):
         # Text
         textsel = Gtk.Entry()
         textsel.set_text(self.text)
-        l=label_widget(_("Text"), textsel)
-        vbox.pack_start(l, False, True, 0)
+        label = label_widget(_("Text"), textsel)
+        vbox.pack_start(label, False, True, 0)
         # Put the text at the beginning
-        vbox.reorder_child(l, 0)
-        vbox.widgets['text']=textsel
+        vbox.reorder_child(label, 0)
+        vbox.widgets['text'] = textsel
 
         # Text size
         textsizesel = Gtk.SpinButton()
         textsizesel.set_range(4, 80)
         textsizesel.set_increments(1, 4)
         textsizesel.set_value(self.textsize)
-        l=label_widget(_("Textsize"), textsizesel)
-        vbox.pack_start(l, False, True, 0)
-        vbox.reorder_child(l, 1)
-        vbox.widgets['textsize']=textsizesel
+        label = label_widget(_("Textsize"), textsizesel)
+        vbox.pack_start(label, False, True, 0)
+        vbox.reorder_child(label, 1)
+        vbox.widgets['textsize'] = textsizesel
 
         return vbox
 
@@ -883,9 +883,9 @@ class Line(Rectangle):
         arrowsize.set_range(1, 40)
         arrowsize.set_increments(1, 4)
         arrowsize.set_value(self.arrowwidth)
-        l=label_widget(_("Arrow size"), arrowsize)
-        vbox.pack_start(l, False, True, 0)
-        vbox.reorder_child(l, 1)
+        label = label_widget(_("Arrow size"), arrowsize)
+        vbox.pack_start(label, False, True, 0)
+        vbox.reorder_child(label, 1)
         vbox.widgets['arrowwidth']=arrowsize
         return vbox
 
@@ -1742,11 +1742,11 @@ class ShapeDrawer:
             miny = sys.maxsize
             maxx = 0
             maxy = 0
-            for l in (oldbounds, bounds):
-                minx = min( (l[0][0], l[1][0], minx) )
-                miny = min( (l[0][1], l[1][1], miny) )
-                maxx = max( (l[0][0], l[1][0], maxx) )
-                maxy = max( (l[0][1], l[1][1], maxx) )
+            for limits in (oldbounds, bounds):
+                minx = min( (limits[0][0], limits[1][0], minx) )
+                miny = min( (limits[0][1], limits[1][1], miny) )
+                maxx = max( (limits[0][0], limits[1][0], maxx) )
+                maxy = max( (limits[0][1], limits[1][1], maxx) )
             widget.queue_draw_area(minx - 1, miny - 1, maxx - minx + 2, maxy - miny + 2)
         else:
             # Check for control points
@@ -1954,9 +1954,9 @@ class ShapeEditor:
         self.drawer.remove_object(o)
         return True
 
-    def build_selector(self, l, callback):
+    def build_selector(self, items, callback):
         sel = Gtk.ComboBoxText()
-        for s in l:
+        for s in items:
             sel.append_text(s)
         sel.connect('changed', callback)
         sel.set_active(0)

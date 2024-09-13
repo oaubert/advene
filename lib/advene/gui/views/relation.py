@@ -49,13 +49,13 @@ class RelationView:
         return True
 
     def build_widget(self):
-        l=Gtk.Label()
-        l.set_markup("<b>%s</b> relation between\nann. <i>%s</i>\nand\nann. <i>%s</i>" %
-                     (self.relation.type.title.replace('<', '&lt;'),
-                      self.relation.members[0].id,
-                      self.relation.members[1].id))
-        b=Gtk.Button()
-        b.add(l)
+        label = Gtk.Label()
+        label.set_markup("<b>%s</b> relation between\nann. <i>%s</i>\nand\nann. <i>%s</i>" %
+                         (self.relation.type.title.replace('<', '&lt;'),
+                          self.relation.members[0].id,
+                          self.relation.members[1].id))
+        b = Gtk.Button()
+        b.add(label)
         b.connect('clicked', self.popup)
 
         return b

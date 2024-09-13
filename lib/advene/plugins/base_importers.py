@@ -159,19 +159,19 @@ class TextImporter(GenericImporter):
         stored_data = None
         index = 1
         while True:
-            l = f.readline()
-            if not l or not self.progress(f.tell() / filesize):
+            line = f.readline()
+            if not line or not self.progress(f.tell() / filesize):
                 break
-            l = l.strip()
+            line = line.strip()
 
-            if l.startswith('#'):
+            if line.startswith('#'):
                 # Comment
                 continue
-            data = whitespace_re.split(l, 2)
+            data = whitespace_re.split(line, 2)
 
             if not data:
                 # Error, cannot do anything with it.
-                self.log("invalid data: ", l)
+                self.log("invalid data: ", line)
                 continue
 
             try:
@@ -193,7 +193,7 @@ class TextImporter(GenericImporter):
             # We have only a begin time.
             if len(data) == 2:
                 if self.timestampmode == 'both':
-                    self.log("Cannot find end timestamp: ", l)
+                    self.log("Cannot find end timestamp: ", line)
                     continue
                 if stored_data is None:
                     # First line. Just buffer timestamp
@@ -219,7 +219,7 @@ class TextImporter(GenericImporter):
                     # Invalid timestamp or 'begin' mode - consider
                     # that we have only a begin time, followed by
                     # data.
-                    data = whitespace_re.split(l, 1)
+                    data = whitespace_re.split(line, 1)
                     if stored_data is None:
                         # First line. Just buffer timestamp and data
                         try:
@@ -249,7 +249,7 @@ class TextImporter(GenericImporter):
                     index += 1
                     continue
                 elif end is None and self.timestampmode == 'both':
-                    self.log("Cannot find end timestamp: ", l)
+                    self.log("Cannot find end timestamp: ", line)
                     continue
                 else:
                     # We have valid begin and end times.
@@ -296,6 +296,7 @@ class TextImporter(GenericImporter):
                 'type': type_.strip(),
 
             }
+
     def set_regexp(self, r):
         self.re = re.compile(r)
 
@@ -338,17 +339,17 @@ class LsDVDImporter(GenericImporter):
             return 0
 
     def iterator(self, f):
-        reg=re.compile(self.regexp)
-        begin=1
-        incr=0.02
-        progress=0.1
-        for l in f:
+        reg = re.compile(self.regexp)
+        begin = 1
+        incr = 0.02
+        progress = 0.1
+        for line in f:
             progress += incr
             if not self.progress(progress, _("Processing data")):
                 break
-            l=l.rstrip()
-            l=str(l, self.encoding).encode('utf-8')
-            m=reg.search(l)
+            line = line.rstrip()
+            line = str(line, self.encoding).encode('utf-8')
+            m = reg.search(line)
             if m is not None:
                 d=m.groupdict()
                 duration=helper.parse_time(d['duration'])
@@ -394,24 +395,24 @@ class ChaplinImporter(GenericImporter):
             return 0
 
     def iterator(self, f):
-        reg=re.compile(self.regexp)
-        begin=1
-        end=1
-        chapter=None
-        for l in f:
-            l=l.rstrip()
-            l=str(l, self.encoding).encode('utf-8')
-            m=reg.search(l)
+        reg = re.compile(self.regexp)
+        begin = 1
+        end = 1
+        chapter = None
+        for line in f:
+            line = line.rstrip()
+            line = str(line, self.encoding).encode('utf-8')
+            m = reg.search(line)
             if m is not None:
-                d=m.groupdict()
-                end=helper.parse_time(d['begin'])
+                d = m.groupdict()
+                end = helper.parse_time(d['begin'])
                 if chapter is not None:
-                    res={ 'content': "Chapter %s" % chapter,
-                          'begin': begin,
-                          'end': end }
+                    res = { 'content': "Chapter %s" % chapter,
+                            'begin': begin,
+                            'end': end }
                     yield res
-                chapter=d['chapter']
-                begin=end
+                chapter = d['chapter']
+                begin = end
         # FIXME: the last chapter is not valid (no end value). We
         # should run 'chaplin -l' and get its length there.
 
@@ -607,54 +608,54 @@ class PraatImporter(GenericImporter):
             return 0
 
     def iterator(self, f):
-        l=f.readline()
-        if not 'ooTextFile' in l:
+        line = f.readline()
+        if 'ooTextFile' not in line:
             logger.error("Invalid PRAAT file")
             return
 
-        name_re=re.compile(r'^(\s+)name\s*=\s*"(.+)"')
-        boundary_re=re.compile(r'^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
-        text_re=re.compile(r'^(\s+)text\s*=\s*"(.*)"')
+        name_re = re.compile(r'^(\s+)name\s*=\s*"(.+)"')
+        boundary_re = re.compile(r'^(\s+)(xmin|xmax)\s*=\s*([\d\.]+)')
+        text_re = re.compile(r'^(\s+)text\s*=\s*"(.*)"')
 
-        current_type=None
-        type_align=0
+        current_type = None
+        type_align = 0
 
-        begin=None
-        end=None
+        begin = None
+        end = None
 
         while True:
-            l=f.readline()
-            if not l:
+            line = f.readline()
+            if not line:
                 break
-            l=str(l, 'iso-8859-1').encode('utf-8')
-            m=name_re.match(l)
+            line = str(line, 'iso-8859-1').encode('utf-8')
+            m = name_re.match(line)
             if m:
-                ws, current_type=m.group(1, 2)
-                type_align=len(ws)
+                ws, current_type = m.group(1, 2)
+                type_align = len(ws)
                 if current_type not in self.atypes:
-                    self.atypes[current_type]=self.create_annotation_type(self.schema, current_type)
+                    self.atypes[current_type] = self.create_annotation_type(self.schema, current_type)
                 continue
-            m=boundary_re.match(l)
+            m = boundary_re.match(line)
             if m:
                 ws, name, t = m.group(1, 2, 3)
                 if len(ws) <= type_align:
                     # It is either the xmin/xmax for the current type
                     # or a upper-level xmin. Ignore.
                     continue
-                v=int(float(t) * 1000)
+                v = int(float(t) * 1000)
                 if name == 'xmin':
-                    begin=v
+                    begin = v
                 else:
-                    end=v
+                    end = v
                 continue
-            m=text_re.match(l)
+            m = text_re.match(line)
             if m:
                 ws, text = m.group(1, 2)
                 if len(ws) <= type_align:
-                    logger.error("Error: invalid alignment for %s", l)
+                    logger.error("Error: invalid alignment for %s", line)
                     continue
                 if begin is None or end is None or current_type is None:
-                    logger.error("Error: found text tag before xmin or xmax info: %s", l)
+                    logger.error("Error: found text tag before xmin or xmax info: %s", line)
                     continue
                 yield {
                     'type': self.atypes[current_type],
@@ -664,10 +665,10 @@ class PraatImporter(GenericImporter):
                     }
 
     def process_file(self, filename):
-        f=open(filename, 'rb')
+        f = open(filename, 'rb')
 
         self.init_package(filename)
-        self.schema=self.create_schema('praat',
+        self.schema = self.create_schema('praat',
                                        title="PRAAT converted schema")
         self.convert(self.iterator(f))
         f.close()
@@ -716,19 +717,19 @@ class CmmlImporter(GenericImporter):
         return msec
 
     def xml_to_text(self, element):
-        l=[]
+        lines = []
         if isinstance(element, handyxml.HandyXmlWrapper):
-            element=element.node
+            element = element.node
         if element.nodeType is xml.dom.Node.TEXT_NODE:
             # Note: element.data returns a unicode object
             # that happens to be in the default encoding (iso-8859-1
             # currently on my system). We encode it to utf-8 to
             # be sure to deal only with this encoding afterwards.
-            l.append(element.data.encode('utf-8'))
+            lines.append(element.data.encode('utf-8'))
         elif element.nodeType is xml.dom.Node.ELEMENT_NODE:
             for e in element.childNodes:
-                l.append(self.xml_to_text(e))
-        return "".join(l)
+                lines.append(self.xml_to_text(e))
+        return "".join(lines)
 
     def iterator(self, cm):
         # Parse stream information
@@ -765,13 +766,13 @@ class CmmlImporter(GenericImporter):
 
             # Link attribute
             try:
-                l=clip.a[0]
-                d={
+                link = clip.a[0]
+                d = {
                     'type': self.atypes['link'],
                     'begin': begin,
                     'end': end,
-                    'content': "href=%s\ntext=%s" % (l.href,
-                                                     self.xml_to_text(l).replace("\n", "\\n")),
+                    'content': "href=%s\ntext=%s" % (link.href,
+                                                     self.xml_to_text(link).replace("\n", "\\n")),
                     }
                 if end is None:
                     delayed.append(d)

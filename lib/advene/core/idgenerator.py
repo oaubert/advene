@@ -77,23 +77,23 @@ class Generator:
 
     def init(self, package):
         """Initialize the indexes for the given package."""
-        prefixes=list(self.prefix.values())
+        prefixes = list(self.prefix.values())
         re_id = re.compile("^(" + "|".join(prefixes) + ")([0-9]+)")
-        last_id={}
+        last_id = {}
         for k in prefixes:
-            last_id[k]=0
+            last_id[k] = 0
 
         # FIXME: find all package ids
-        for l in (package.annotations, package.relations,
-                  package.schemas,
-                  package.annotationTypes, package.relationTypes,
-                  package.views, package.queries):
-            for i in l.ids():
+        for elements in (package.annotations, package.relations,
+                         package.schemas,
+                         package.annotationTypes, package.relationTypes,
+                         package.views, package.queries):
+            for i in elements.ids():
                 self.existing.append(i)
-                m=re_id.match(i)
+                m = re_id.match(i)
                 if m:
-                    n=int(m.group(2))
-                    k=m.group(1)
+                    n = int(m.group(2))
+                    k = m.group(1)
                     if last_id[k] < n:
                         last_id[k] = n
         # last_id contains the last index used for each prefix

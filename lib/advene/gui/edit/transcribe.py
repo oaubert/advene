@@ -619,25 +619,25 @@ class TranscriptionEdit(AdhocView):
     def populate(self, annotations):
         """Populate the buffer with data taken from the given annotations.
         """
-        b=self.textview.get_buffer()
+        b = self.textview.get_buffer()
         # Clear the buffer
-        begin,end=b.get_bounds()
+        begin, end = b.get_bounds()
         b.delete(begin, end)
         # FIXME: check for conflicting bounds
-        l=[ (a.fragment.begin, a.fragment.end, a)
-            for a in annotations ]
-        l.sort(key=operator.itemgetter(0))
-        last_end=-1
-        for (begin, end, a) in l:
+        bounds = sorted(((a.fragment.begin, a.fragment.end, a)
+                         for a in annotations),
+                        key=operator.itemgetter(0))
+        last_end = -1
+        for (begin, end, a) in bounds:
             if begin < last_end or end < last_end:
                 self.log(_("Invalid timestamp"))
                 pass
-            it=b.get_iter_at_mark(b.get_insert())
+            it = b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(begin, it)
             b.insert_at_cursor(str(a.content.data))
-            it=b.get_iter_at_mark(b.get_insert())
+            it = b.get_iter_at_mark(b.get_insert())
             self.create_timestamp_mark(end, it)
-            last_end=end
+            last_end = end
         return
 
     def find_preceding_mark(self, i):
@@ -690,18 +690,20 @@ class TranscriptionEdit(AdhocView):
         return True
 
     def update_position(self, pos):
-        l=[ m for m in self.marks if m.value <= pos and not m.anchor.get_deleted() ]
-        if l:
-            cm=l[-1]
+        marks = [ m
+                  for m in self.marks
+                  if m.value <= pos and not m.anchor.get_deleted() ]
+        if marks:
+            cm = marks[-1]
             if cm != self.current_mark:
                 # Restore the properties of the previous current mark
                 if self.current_mark is not None:
                     self.update_mark(self.current_mark)
                 cm.set_color(self.colors['current'])
-                b=self.textview.get_buffer()
+                b = self.textview.get_buffer()
                 begin, end = b.get_bounds()
                 b.remove_tag_by_name('past', begin, end)
-                it=b.get_iter_at_child_anchor(cm.anchor)
+                it = b.get_iter_at_child_anchor(cm.anchor)
                 if it is not None:
                     b.apply_tag_by_name('past', begin, it)
                     if self.options['autoscroll']:
@@ -710,7 +712,7 @@ class TranscriptionEdit(AdhocView):
         else:
             if self.current_mark is not None:
                 self.update_mark(self.current_mark)
-            self.current_mark=None
+            self.current_mark = None
         return True
 
     def parse_transcription(self, show_ignored=False, strip_blank=True):
@@ -992,10 +994,10 @@ class TranscriptionEdit(AdhocView):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label(label=_("Choose the annotation-type where to create annotations.\n"))
-        l.set_line_wrap(True)
-        l.show()
-        d.vbox.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=_("Choose the annotation-type where to create annotations.\n"))
+        label.set_line_wrap(True)
+        label.show()
+        d.vbox.pack_start(label, False, True, 0)
 
         # Anticipated declaration of some widgets, which need to be
         # updated in the handle_new_type_selection callback.
@@ -1027,10 +1029,10 @@ class TranscriptionEdit(AdhocView):
         hb.pack_start(type_selection, False, True, 0)
         d.vbox.pack_start(hb, False, True, 0)
 
-        l=Gtk.Label(label=_("You want to create a new type. Please specify its schema and title."))
-        l.set_line_wrap(True)
-        l.show()
-        new_type_dialog.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=_("You want to create a new type. Please specify its schema and title."))
+        label.set_line_wrap(True)
+        label.show()
+        new_type_dialog.pack_start(label, False, True, 0)
 
         hb=Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Title") + " "), False, False, 0)
@@ -1051,9 +1053,9 @@ class TranscriptionEdit(AdhocView):
 
         d.vbox.pack_start(new_type_dialog, True, True, 0)
 
-        l=Gtk.Label()
-        l.set_markup("<b>" + _("Export options") + "</b>")
-        d.vbox.pack_start(l, False, True, 0)
+        label = Gtk.Label()
+        label.set_markup("<b>" + _("Export options") + "</b>")
+        d.vbox.pack_start(label, False, True, 0)
 
         d.vbox.pack_start(delete_existing_toggle, False, True, 0)
 

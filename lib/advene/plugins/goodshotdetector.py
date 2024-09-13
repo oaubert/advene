@@ -74,9 +74,9 @@ class DelakisShotDetectImporter(GenericImporter):
         return 0
 
     def process_file(self, filename):
-        at = self.ensure_new_type('shot',
-                                  title=_("Shot (%s profile)") % self.profile,
-                                  description = _("Detected shots"))
+        self.ensure_new_type('shot',
+                             title=_("Shot (%s profile)") % self.profile,
+                             description = _("Detected shots"))
 
         #Compute or load histogram
         histofile = filename + '-histogram.npy'

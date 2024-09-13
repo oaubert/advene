@@ -211,7 +211,7 @@ class _advene_context (simpleTALES.Context):
                 except (TypeError, KeyError):
                     try:
                         val = temp[int(path)]
-                    except:
+                    except Exception:
                         #self.log.debug ("Not found.")
                         raise simpleTALES.PathNotFoundException() from None
             # Advene hook: stack resolution
@@ -331,6 +331,6 @@ class AdveneContext(_advene_context):
             raise AdveneTalesException(
                 'TALES expression %s returned None in context %s' %
                 (expr, self)) from None
-        except:
+        except Exception:
             logger.error("Unhandled exception - please report", exc_info=True)
         return r

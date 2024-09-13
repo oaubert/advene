@@ -86,42 +86,42 @@ class InteractiveQuery(AdhocView):
         self.widget=self.build_widget()
 
     def get_interactive_query(self):
-        l=helper.get_id(self.controller.package.queries, '_interactive')
-        if l:
-            q=SimpleQuery()
-            q.from_xml(l.content.stream)
-            q.container=l
-            return l, q
+        element = helper.get_id(self.controller.package.queries, '_interactive')
+        if element:
+            q = SimpleQuery()
+            q.from_xml(element.content.stream)
+            q.container = element
+            return element, q
         else:
             # Create the query
-            el=self.controller.package.createQuery(ident='_interactive')
-            el.author=config.data.userid
-            el.date=helper.get_timestamp()
-            el.title=_("Interactive query")
+            el = self.controller.package.createQuery(ident='_interactive')
+            el.author = config.data.userid
+            el.date = helper.get_timestamp()
+            el.title = _("Interactive query")
 
             # Create a basic query
-            q=SimpleQuery(sources=self.sources,
-                          rvalue="element")
+            q = SimpleQuery(sources=self.sources,
+                            rvalue="element")
             q.add_condition(Condition(lhs="element/content/data",
                                       operator="contains",
                                       rhs="string:a"))
 
-            el.content.mimetype='application/x-advene-simplequery'
-            el.content.data=q.xml_repr()
+            el.content.mimetype = 'application/x-advene-simplequery'
+            el.content.data = q.xml_repr()
 
             self.controller.package.queries.append(el)
 
             self.controller.notify('QueryCreate', query=el)
-            q.container=el
+            q.container = el
             return el, q
 
     def save_query(self, *p):
         """Saves the query in the package.
         """
-        l=self.eq.invalid_items()
-        if l:
+        items = self.eq.invalid_items()
+        if items:
             self.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
-                     % ", ".join(l))
+                     % ", ".join(items))
             return True
         # Update the query
         self.eq.update_value()
@@ -168,10 +168,10 @@ class InteractiveQuery(AdhocView):
 
     def validate(self, button=None):
         # Get the query
-        l=self.eq.invalid_items()
-        if l:
+        items = self.eq.invalid_items()
+        if items:
             self.log(_("Invalid query.\nThe following fields have an invalid value:\n%s")
-                     % ", ".join(l))
+                     % ", ".join(items))
             return True
         self.eq.update_value()
         query=self.eq.model
@@ -328,10 +328,10 @@ class InteractiveResult(AdhocView):
     def create_comment(self, *p):
         if hasattr(self, 'table'):
             # There are annotations
-            l=self.table.get_elements()
-            v=self.controller.create_static_view(elements=l)
+            elements = self.table.get_elements()
+            v = self.controller.create_static_view(elements=elements)
             if isinstance(self.query, Quicksearch):
-                v.title=_("Comment on annotations containing %s") % self.query.searched
+                v.title = _("Comment on annotations containing %s") % self.query.searched
                 self.controller.notify('ViewEditEnd', view=v)
             self.controller.gui.open_adhoc_view('edit', element=v, destination=self._destination)
         return True
@@ -339,24 +339,24 @@ class InteractiveResult(AdhocView):
     def create_montage(self, *p):
         if hasattr(self, 'table'):
             # There are annotations
-            l=self.table.get_elements()
-            self.controller.gui.open_adhoc_view('montage', elements=l, destination=self._destination)
+            elements = self.table.get_elements()
+            self.controller.gui.open_adhoc_view('montage', elements=elements, destination=self._destination)
         return True
 
     def create_annotations(self, *p):
         if self.table is not None:
             # There are annotations
-            l=self.table.get_elements()
+            elements = self.table.get_elements()
         else:
-            l=None
-        if l:
-            at=self.controller.gui.ask_for_annotation_type(text=_("Choose the annotation type where annotations will be created."),
-                                                           create=True)
+            elements = None
+        if elements:
+            at = self.controller.gui.ask_for_annotation_type(text=_("Choose the annotation type where annotations will be created."),
+                                                             create=True)
             if at is None:
                 return False
             at.setMetaData(config.data.namespace_prefix['dc'], 'description', _("Copied result of the '%s' query") % self.query)
             self.controller.notify('AnnotationTypeEditEnd', annotationtype=at)
-            for a in l:
+            for a in elements:
                 self.controller.transmute_annotation(a, at)
         return True
 
@@ -364,9 +364,9 @@ class InteractiveResult(AdhocView):
         default_search = None
         if isinstance(self.query, Quicksearch) and self.query.searched.split():
             default_search = self.query.searched.split()[0]
-        l = self.table.get_elements()
-        self.controller.gui.search_replace_dialog(l,
-                                                  title=_("Search/replace content in %d elements") % len(l),
+        elements = self.table.get_elements()
+        self.controller.gui.search_replace_dialog(elements,
+                                                  title=_("Search/replace content in %d elements") % len(elements),
                                                   default_search=default_search)
         return True
 
@@ -417,18 +417,18 @@ class InteractiveResult(AdhocView):
             v.add(Gtk.Label(label=_("Empty result")))
         elif isinstance(self.result, (list, tuple, AbstractBundle)):
             # Check if there are annotations
-            l=[ a for a in self.result if isinstance(a, Annotation) ]
-            cr=len(self.result)
-            cl=len(l)
+            annotations = [ a for a in self.result if isinstance(a, Annotation) ]
+            cr = len(self.result)
+            cl = len(annotations)
 
             if cr == cl:
-                t=_("Result is a list of %d annotations.") % cr
+                t = _("Result is a list of %d annotations.") % cr
             else:
-                t=_("Result is a list of  %(number)d elements with %(elements)s.") % {
-                    'elements': helper.format_element_name("annotation", len(l)),
-                    'number': len(self.result)}
+                 t =_("Result is a list of  %(number)d elements with %(elements)s.") % {
+                     'elements': helper.format_element_name("annotation", len(annotations)),
+                     'number': len(self.result)}
 
-            label=Gtk.Label(label=t)
+            label = Gtk.Label(label=t)
             label.set_ellipsize(Pango.EllipsizeMode.END)
             label.set_line_wrap(True)
             top_box.add(label)
@@ -447,36 +447,36 @@ class InteractiveResult(AdhocView):
                     self.controller.notify(event, annotation=a)
                 return True
 
-            if l:
+            if annotations:
                 # Instanciate a table view
-                table=AnnotationTable(controller=self.controller, elements=l)
+                table=AnnotationTable(controller=self.controller, elements=annotations)
 
                 if cr == cl:
                     # Only annotations.
                     v.add(table.widget)
                 else:
                     # Mixed annotations + other elements
-                    notebook=Gtk.Notebook()
+                    notebook = Gtk.Notebook()
                     notebook.set_tab_pos(Gtk.PositionType.TOP)
                     notebook.popup_disable()
                     v.add(notebook)
 
                     notebook.append_page(table.widget, Gtk.Label(label=_("Annotations")))
 
-                    gtable=GenericTable(controller=self.controller, elements=[ e
-                                                                               for e in self.result
-                                                                               if not isinstance(e, Annotation) ])
+                    gtable = GenericTable(controller=self.controller, elements=[ e
+                                                                                 for e in self.result
+                                                                                 if not isinstance(e, Annotation) ])
                     notebook.append_page(gtable.widget, Gtk.Label(label=_("Other elements")))
 
 
                 for (icon, tip, action) in (
-                        ('timeline.png' , _("Display annotations in timeline"), lambda b: self.open_in_timeline(l)),
+                        ('timeline.png' , _("Display annotations in timeline"), lambda b: self.open_in_timeline(annotations)),
                         ('transcription.png', _("Display annotations as transcription"), lambda b:
                          self.controller.gui.open_adhoc_view('transcription',
                                                              label=self._label,
                                                              destination=self._destination,
-                                                             elements=l)),
-                        ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, l)),
+                                                             elements=annotations)),
+                        ('highlight.png', _("Highlight annotations"), lambda b: toggle_highlight(b, annotations)),
                         (Gtk.STOCK_CONVERT, _("Export table"), lambda b: table.csv_export()),
                         (Gtk.STOCK_NEW, _("Create annotations from the result"), self.create_annotations),
                         ('montage.png', _("Define a montage with the result"), self.create_montage),
@@ -484,34 +484,34 @@ class InteractiveResult(AdhocView):
                         (Gtk.STOCK_FIND_AND_REPLACE, _("Search and replace strings in the annotations content"), self.search_replace),
                 ):
                     if icon.endswith('.png'):
-                        ti=get_pixmap_toolbutton(icon)
+                        ti = get_pixmap_toolbutton(icon)
                     else:
-                        ti=Gtk.ToolButton(stock_id=icon)
+                        ti = Gtk.ToolButton(stock_id=icon)
                     ti.connect('clicked', action)
                     ti.set_tooltip_text(tip)
                     tb.insert(ti, -1)
 
-                self.table=table
+                self.table = table
             else:
                 # Only Instanciate a generic table view
-                gtable=GenericTable(controller=self.controller, elements=self.result)
+                gtable = GenericTable(controller=self.controller, elements=self.result)
                 v.add(gtable.widget)
 
                 ti=Gtk.ToolButton(Gtk.STOCK_CONVERT)
                 ti.connect('clicked', lambda b: gtable.csv_export())
                 ti.set_tooltip_text(_("Export table"))
                 tb.insert(ti, -1)
-                self.table=gtable
+                self.table = gtable
 
 
-            ti=get_pixmap_toolbutton('editaccumulator.png',
-                                     lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
+            ti = get_pixmap_toolbutton('editaccumulator.png',
+                                       lambda b: self.open_in_edit_accumulator(self.table.get_elements()))
             ti.set_tooltip_text(_("Edit elements"))
             tb.insert(ti, -1)
 
             if config.data.preferences['expert-mode']:
-                ti=get_pixmap_toolbutton('python.png',
-                                         lambda b: self.open_in_evaluator(self.table.get_elements()))
+                ti = get_pixmap_toolbutton('python.png',
+                                           lambda b: self.open_in_evaluator(self.table.get_elements()))
                 ti.set_tooltip_text(_("Open in python evaluator"))
                 tb.insert(ti, -1)
         else:
@@ -524,35 +524,35 @@ class InteractiveResult(AdhocView):
         self.controller.gui.open_adhoc_view('interactivequery', destination='east')
         return True
 
-    def open_in_timeline(self, l):
-        self.controller.gui.open_adhoc_view('timeline', label=self._label, destination=self._destination, elements=l)
+    def open_in_timeline(self, elements):
+        self.controller.gui.open_adhoc_view('timeline', label=self._label, destination=self._destination, elements=elements)
         return True
 
-    def open_in_edit_accumulator(self, l):
+    def open_in_edit_accumulator(self, elements):
         if not self.controller.gui.edit_accumulator:
             self.controller.gui.open_adhoc_view('editaccumulator')
-        a=self.controller.gui.edit_accumulator
-        for e in l:
+        a = self.controller.gui.edit_accumulator
+        for e in elements:
             a.edit(e)
         return True
 
-    def open_in_evaluator(self, l):
-        p=self.controller.package
+    def open_in_evaluator(self, elements):
+        p = self.controller.package
         try:
-            a=p.annotations[-1]
+            a = p.annotations[-1]
         except IndexError:
-            a=None
+            a = None
 
-        ev=advene.gui.evaluator.Evaluator(globals_=globals(),
-                                          locals_={'package': p,
-                                                   'result': l,
-                                                   'p': p,
-                                                   'a': a,
-                                                   'c': self.controller,
-                                                   'self': self,
-                                                   'pp': pprint.pformat },
-                                          historyfile=config.data.advenefile('evaluator.log', 'settings'))
-        w=ev.popup(embedded=True)
+        ev = advene.gui.evaluator.Evaluator(globals_=globals(),
+                                            locals_={'package': p,
+                                                     'result': elements,
+                                                     'p': p,
+                                                     'a': a,
+                                                     'c': self.controller,
+                                                     'self': self,
+                                                     'pp': pprint.pformat },
+                                            historyfile=config.data.advenefile('evaluator.log', 'settings'))
+        w = ev.popup(embedded=True)
 
         self.controller.gui.init_window_size(w, 'evaluator')
 

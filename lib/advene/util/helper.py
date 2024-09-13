@@ -172,7 +172,7 @@ small_time_regexp=re.compile(r'(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$
 time_regexp=re.compile(r'((?P<h>\d+):)?(?P<m>\d+):(?P<s>\d+)((?P<sep>[.,:f])(?P<ms>\d+))?$')
 float_regexp = re.compile(r'(?P<s>\d*)\.(?P<ms>\d*)')
 def parse_time(s):
-    """Convert a time string as long.
+    r"""Convert a time string as long.
 
     This function tries to handle multiple formats:
 
@@ -293,7 +293,7 @@ element_label = {
 def get_type(el):
     try:
         t = element_label[type(el)]
-    except:
+    except Exception:
         t = type(el).__name__
     return t
 
@@ -332,31 +332,31 @@ def get_valid_members (el):
     # FIXME: try to sort items in a meaningful way
 
     # FIXME: return only simple items if not in expert mode
-    l = []
+    items = []
     try:
-        l.extend(el.ids())
+        items.extend(el.ids())
     except AttributeError:
         try:
-            l.extend(list(el.keys()))
+            items.extend(list(el.keys()))
         except AttributeError:
             pass
-    if l:
-        l.insert(0, _('---- Elements ----'))
+    if items:
+        items.insert(0, _('---- Elements ----'))
 
-    pl=[e[0]
-        for e in inspect.getmembers(type(el))
-        if isinstance(e[1], property) and e[1].fget is not None]
+    pl = [ e[0]
+           for e in inspect.getmembers(type(el))
+           if isinstance(e[1], property) and e[1].fget is not None ]
     if pl:
-        l.append(_('---- Attributes ----'))
-        l.extend(pl)
+        items.append(_('---- Attributes ----'))
+        items.extend(pl)
 
-    l.append(_('---- Methods ----'))
+    items.append(_('---- Methods ----'))
     # Global methods
-    l.extend (AdveneContext.defaultMethods ())
+    items.extend (AdveneContext.defaultMethods ())
     # User-defined global methods
-    l.extend (config.data.global_methods)
+    items.extend (config.data.global_methods)
 
-    return l
+    return items
 
 def import_element(package, element, controller, notify=True):
     p=package
@@ -447,7 +447,7 @@ def get_statistics(fname):
         # Generate it (it can take some time)
         try:
             p=Package(uri=fname)
-        except Exception as e:
+        except Exception:
             raise _("Error:\n%s")
         st=p.generate_statistics()
         p.close()
@@ -559,7 +559,7 @@ element_declinations={
 
 def format_element_name(name, count=None):
     """Formats an element name (from the model) according to count."""
-    if not name in element_declinations:
+    if name not in element_declinations:
         return name
 
     if count is None:

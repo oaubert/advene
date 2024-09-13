@@ -26,10 +26,7 @@ from gettext import gettext as _
 from gi.repository import GObject
 from gi.repository import Gtk
 
-import advene.core.config as config
 from advene.gui.views import AdhocView
-
-import advene.util.helper as helper
 
 name="Corpus statistics"
 

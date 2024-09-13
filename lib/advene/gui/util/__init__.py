@@ -162,7 +162,7 @@ def overlay_svg_as_pixbuf(png_data="", svg_data="", width=None, height=None):
 
     @return: a PNG image
     """
-    if not '<svg' in svg_data:
+    if '<svg' not in svg_data:
         # Generate pseudo-svg with data
         svg_data="""<svg:svg xmlns:svg="http://www.w3.org/2000/svg" width="320pt" height="200pt" version='1' preserveAspectRatio="xMinYMin meet" viewBox='0 0 320 200'>
   <svg:text x='10' y='190' fill="white" font-size="24" stroke="black" font-family="sans-serif">%s</svg:text>
@@ -171,9 +171,9 @@ def overlay_svg_as_pixbuf(png_data="", svg_data="", width=None, height=None):
 
     try:
         loader = GdkPixbuf.PixbufLoader.new_with_type('svg')
-    except:
+    except Exception:
         logger.error("Unable to load the SVG pixbuf loader", exc_info=True)
-        loader=None
+        loader = None
     if loader is not None:
         try:
             loader.write(svg_data.encode('utf-8'))
@@ -340,7 +340,7 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
     if c:
         try:
             widgets = c.get_selected_annotation_widgets()
-            if not widget in widgets:
+            if widget not in widgets:
                 widgets = None
         except AttributeError:
             logger.error("Cannot get_selected_annotation_widgets", exc_info=True)
@@ -372,8 +372,8 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
             selection.set(selection.get_target(), 8, "\n".join( controller.build_context(here=w.annotation).evaluateValue('here/absolute_url') for w in widgets ).encode('utf8'))
         else:
             try:
-                uri=controller.build_context(here=el).evaluateValue('here/absolute_url')
-            except:
+                uri = controller.build_context(here=el).evaluateValue('here/absolute_url')
+            except Exception:
                 uri="No URI for " + str(el)
             selection.set(selection.get_target(), 8, uri.encode('utf8'))
     elif targetType == typ['timestamp']:
@@ -393,42 +393,42 @@ def drag_data_get_cb(widget, context, selection, targetType, timestamp, controll
 
 def contextual_drag_begin(widget, context, element, controller):
     if callable(element):
-        element=element()
-    context._element=element
+        element = element()
+    context._element = element
 
     if hasattr(widget, '_drag_begin'):
         if widget._drag_begin(widget, context):
             return False
 
-    w=Gtk.Window(Gtk.WindowType.POPUP)
+    w = Gtk.Window(Gtk.WindowType.POPUP)
     w.set_decorated(False)
     w.get_style_context().add_class('advene_drag_icon')
 
-    v=Gtk.VBox()
+    v = Gtk.VBox()
     v.get_style_context().add_class('advene_drag_icon')
 
     def get_coloured_label(t, color=None):
-        l=Gtk.Label()
-        #l.set_ellipsize(Pango.EllipsizeMode.END)
+        label = Gtk.Label()
+        #label.set_ellipsize(Pango.EllipsizeMode.END)
         if color is None:
-            color='white'
-        l.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t.replace('<', '&lt;')))
-        return l
+            color = 'white'
+        label.set_markup("""<span background="%s" foreground="black">%s</span>""" % (color, t.replace('<', '&lt;')))
+        return label
 
     if isinstance(element, int):
         begin = image_new_from_pixbuf(png_to_pixbuf(controller.get_snapshot(position=element, precision=config.data.preferences['bookmark-snapshot-precision']), width=config.data.preferences['drag-snapshot-width']))
         begin.get_style_context().add_class('advene_drag_icon')
 
-        l=Gtk.Label()
-        l.set_text(helper.format_time(element))
-        l.get_style_context().add_class('advene_drag_icon')
+        label = Gtk.Label()
+        label.set_text(helper.format_time(element))
+        label.get_style_context().add_class('advene_drag_icon')
 
         v.pack_start(begin, False, True, 0)
-        v.pack_start(l, False, True, 0)
+        v.pack_start(label, False, True, 0)
         w.set_size_request(int(1.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, Annotation):
         # Pictures HBox
-        h=Gtk.HBox()
+        h = Gtk.HBox()
         h.get_style_context().add_class('advene_drag_icon')
         begin = image_new_from_pixbuf(png_to_pixbuf(controller.get_snapshot(annotation=element), width=config.data.preferences['drag-snapshot-width']))
         begin.get_style_context().add_class('advene_drag_icon')
@@ -440,32 +440,32 @@ def contextual_drag_begin(widget, context, element, controller):
         h.pack_start(end, False, True, 0)
         v.pack_start(h, False, True, 0)
 
-        l=get_coloured_label(controller.get_title(element), controller.get_element_color(element))
-        l.get_style_context().add_class('advene_drag_icon')
-        v.pack_start(l, False, True, 0)
+        label = get_coloured_label(controller.get_title(element), controller.get_element_color(element))
+        label.get_style_context().add_class('advene_drag_icon')
+        v.pack_start(label, False, True, 0)
         w.get_style_context().add_class('advene_drag_icon')
         w.set_size_request(int(2.5 * config.data.preferences['drag-snapshot-width']), -1)
     elif isinstance(element, AnnotationType):
-        l=get_coloured_label(_("Annotation Type %(title)s:\n%(count)s") % {
+        label = get_coloured_label(_("Annotation Type %(title)s:\n%(count)s") % {
             'title': controller.get_title(element),
             'count': helper.format_element_name('annotation', len(element.annotations)),
         }, controller.get_element_color(element))
-        v.pack_start(l, False, True, 0)
+        v.pack_start(label, False, True, 0)
     elif isinstance(element, RelationType):
-        l=get_coloured_label(_("Relation Type %(title)s:\n%(count)s") % {
+        label = get_coloured_label(_("Relation Type %(title)s:\n%(count)s") % {
             'title': controller.get_title(element),
             'count': helper.format_element_name('relation', len(element.relations)),
         }, controller.get_element_color(element))
-        v.pack_start(l, False, True, 0)
+        v.pack_start(label, False, True, 0)
     else:
-        l=get_coloured_label("%s %s" % (helper.get_type(element),
-                                        controller.get_title(element)),
-                             controller.get_element_color(element))
-        v.pack_start(l, False, True, 0)
+        label = get_coloured_label("%s %s" % (helper.get_type(element),
+                                              controller.get_title(element)),
+                                   controller.get_element_color(element))
+        v.pack_start(label, False, True, 0)
 
     w.add(v)
     w.show_all()
-    widget._icon=w
+    widget._icon = w
     Gtk.drag_set_icon_widget(context, w, 0, 0)
     return True
 
@@ -548,7 +548,7 @@ def window_to_png(widget, output="/tmp/win.png"):
     def get_window(wid):
         try:
             return wid.get_bin_window()
-        except:
+        except Exception:
             return wid.get_window()
 
     # Get current size

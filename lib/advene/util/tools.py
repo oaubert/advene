@@ -233,6 +233,13 @@ def get_keyword_list(s):
         regexp = COMMA_REGEXP
     return [ w for w in regexp.split(s) if len(w) >= COMPLETION_SIZE_LIMIT ]
 
+def first(iterable):
+    """Return the first value of an iterable.
+
+    Return None if there is no value
+    """
+    return next(iterable, None)
+
 def median(values):
     """Return the median value of a list of values.
     """
@@ -253,11 +260,11 @@ def get_timestamp():
 def get_id(source, id_):
     """Return the element whose id is id_ in source.
     """
-    l=[ e for e in source if e.id == id_ ]
-    if len(l) != 1:
+    elements = [ e for e in source if e.id == id_ ]
+    if len(elements) != 1:
         return None
     else:
-        return l[0]
+        return elements[0]
 
 # Valid TALES expression check
 
@@ -289,11 +296,11 @@ def is_valid_tales(expr):
         return True
     if path_any_re.match(expr):
         return True
-    m=path_tales_re.match(expr)
+    m = path_tales_re.match(expr)
     if m:
         return is_valid_tales(expr=m.group(2))
     # Check that the first element is a valid TALES root element
-    root=expr.split('/', 1)[0]
+    root = expr.split('/', 1)[0]
     return root in root_elements
 
 def get_video_stream_from_website(url):
@@ -303,38 +310,40 @@ def get_video_stream_from_website(url):
 
     Supports: dailymotion, youtube, googlevideo
     """
-    stream=None
+    stream = None
     if  'dailymotion' in url:
         if '/get/' in url:
             return url
-        u=urlopen(url)
-        data=[ l for l in u.readlines() if '.addVariable' in l and 'flv' in l ]
+        u = urlopen(url)
+        data = [ line
+                 for line in u.readlines()
+                 if '.addVariable' in line and 'flv' in line ]
         u.close()
         if data:
-            addr=re.findall('\"(http.+?)\"', data[0])
+            addr = re.findall('\"(http.+?)\"', data[0])
             if addr:
-                stream=unquote(addr[0])
+                stream = unquote(addr[0])
     elif 'youtube.com' in url:
         if '/get_video' in url:
             return url
-        u=urlopen(url)
-        data=[ l for l in u.readlines() if 'player2.swf' in l ]
+        u = urlopen(url)
+        data = [ line for line in u.readlines() if 'player2.swf' in line ]
         u.close()
         if data:
-            addr=re.findall('(video_id=.+?)\"', data[0])
+            addr = re.findall('(video_id=.+?)\"', data[0])
             if addr:
-                stream='http://www.youtube.com/get_video?' + addr[0].strip()
+                stream = 'http://www.youtube.com/get_video?' + addr[0].strip()
     elif 'video.google.com' in url:
         if '/videodownload' in url:
             return url
-        u=urlopen(url)
-        data=[ l for l in u.readlines() if '.gvp' in l ]
+        u = urlopen(url)
+        data = [ line for line in u.readlines() if '.gvp' in line ]
         u.close()
         if data:
-            addr=re.findall(r'http://.+?.gvp\?docid=.\d+', data[0])
+            addr = re.findall(r'http://.+?.gvp\?docid=.\d+', data[0])
             if addr:
-                u=urlopen(addr[0])
-                data=[ l for l in u.readlines() if 'url:' in l ]
+                u = urlopen(addr[0])
+                data = [ line for line in u.readlines() if 'url:' in line ]
                 u.close()
                 if data:
                     stream=data[0][4:].strip()
@@ -398,7 +407,8 @@ def common_fieldnames(elements):
     res=set()
     for e in elements:
         if e.content.mimetype == 'application/x-advene-structured':
-            res.update( (regexp.findall(l) or [ '_error' ])[0] for l in e.content.data.split('\n') )
+            res.update( (regexp.findall(line) or [ '_error' ])[0]
+                        for line in e.content.data.split('\n') )
     return res
 
 parsed_representation = re.compile(r'^here/content/parsed/([\w\d_\.]+)$')

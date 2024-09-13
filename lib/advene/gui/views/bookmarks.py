@@ -28,6 +28,7 @@ import urllib.request, urllib.parse, urllib.error
 # Advene part
 import advene.core.config as config
 import advene.util.helper as helper
+from advene.util.tools import first
 from advene.gui.util import get_small_stock_button, dialog, get_pixmap_toolbutton
 from advene.gui.util import decode_drop_parameters
 from advene.gui.util.completer import Completer
@@ -114,11 +115,7 @@ class Bookmarks(AdhocView):
         self.refresh()
 
     def get_matching_bookmark(self, t):
-        l=[ w for w in self.bookmarks if w.value == t ]
-        if l:
-            return l[0]
-        else:
-            return None
+        return first(w for w in self.bookmarks if w.value == t)
 
     def get_save_arguments(self):
         return self.options, ([ ('bookmark', '%d:%s' % (b.value, b.comment) ) for b in self.bookmarks ])
@@ -310,22 +307,22 @@ class BookmarkWidget:
         return True
 
     def build_widget(self):
-        self.image=TimestampRepresentation(self.value, None, self.controller, comment_getter=lambda: self.comment, width=self.width, precision=config.data.preferences['bookmark-snapshot-precision'])
+        self.image = TimestampRepresentation(self.value, None, self.controller, comment_getter=lambda: self.comment, width=self.width, precision=config.data.preferences['bookmark-snapshot-precision'])
 
         self.image.connect('clicked', self.image.goto_and_refresh)
 
         if self.display_comments:
-            hbox=Gtk.HBox()
-            self.comment_entry=Gtk.TextView()
+            hbox = Gtk.HBox()
+            self.comment_entry = Gtk.TextView()
             # Hook the completer component
-            completer=Completer(textview=self.comment_entry,
-                                controller=self.controller,
-                                element=self.comment_entry.get_buffer(),
-                                indexer=self.controller.package._indexer)
+            completer = Completer(textview=self.comment_entry,
+                                  controller=self.controller,
+                                  element=self.comment_entry.get_buffer(),
+                                  indexer=self.controller.package._indexer)
             self.comment_entry.set_wrap_mode(Gtk.WrapMode.WORD)
-            fd=Pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
+            fd = Pango.FontDescription('sans %d' % config.data.preferences['timeline']['font-size'])
             self.comment_entry.modify_font(fd)
-            b=self.comment_entry.get_buffer()
+            b = self.comment_entry.get_buffer()
             b.set_text(self.comment)
 
             def focus_in_event(wid, event):
@@ -341,13 +338,13 @@ class BookmarkWidget:
             self.comment_entry.connect('focus-out-event', focus_out_event)
 
             def update_comment(buf):
-                self.comment=buf.get_text(*buf.get_bounds() + (False,))
+                self.comment = buf.get_text(*buf.get_bounds() + (False,))
                 return True
             b.connect('changed', update_comment)
 
             #self.comment_entry.set_size_request(config.data.preferences['bookmark-snapshot-width'], -1)
 
-            sw=Gtk.ScrolledWindow()
+            sw = Gtk.ScrolledWindow()
             sw.add(self.comment_entry)
             sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
             hbox.pack_start(self.image, False, True, 0)

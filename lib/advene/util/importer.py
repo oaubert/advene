@@ -302,13 +302,13 @@ class GenericImporter:
         """
         if prefix == "":
             prefix = "at_converted"
-        l=[ at.id for at in self.package.annotationTypes ]
-        if prefix in l:
+        ids = [ at.id for at in self.package.annotationTypes ]
+        if prefix in ids:
             i = 1
             atid = None
             while atid is None:
-                t=prefix + str(i)
-                if not t in l:
+                t = prefix + str(i)
+                if t not in ids:
                     atid = t
                 else:
                     i += 1
@@ -621,7 +621,7 @@ class ExternalAppImporter(GenericImporter):
         if self.process:
             try:
                 self.process.terminate()
-            except:
+            except Exception:
                 logger.warning("Cannot terminate application", exc_info=True)
         self.process = None
 
@@ -785,7 +785,7 @@ Available filters:
 
     i.optionparser.set_usage(USAGE)
     if option_list:
-        args = i.process_options(option_list)
+        i.process_options(option_list)
 
     # (for .sub conversion for instance, --fps, --offset)
     logger.info("Converting %s to %s using %s", inputfile, outputfile, i.name)

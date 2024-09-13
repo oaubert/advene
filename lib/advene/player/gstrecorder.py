@@ -378,7 +378,7 @@ class Player:
                 self.imagesink.props.widget.show()
                 if widget is not None:
                     widget.hide()
-            except:
+            except Exception:
                 logger.exception("Embedding error")
             return
 
@@ -451,11 +451,11 @@ class Player:
         return self.mute_volume is not None
 
     def disp(self, e, indent="  "):
-        l=[str(e)]
+        lines = [str(e)]
         if hasattr(e, 'elements'):
-            i=indent+"  "
-            l.extend( [ self.disp(c, i) for c in e.elements() ])
-        return ("\n"+indent).join(l)
+            i = indent+"  "
+            lines.extend( [ self.disp(c, i) for c in e.elements() ])
+        return ("\n"+indent).join(lines)
 
     def fullscreen(self, *p):
         # Not implemented

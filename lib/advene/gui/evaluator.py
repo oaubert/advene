@@ -135,16 +135,14 @@ class Evaluator:
         return
 
     def load_data(self, name):
-        res=[]
+        res = []
         if name is None:
             return res
         try:
-            f=open(name, 'r', encoding='utf-8')
+            with open(name, 'r', encoding='utf-8') as f:
+                res = [ line.strip() for line in f ]
         except IOError:
             return []
-        for l in f:
-            res.append(l.rstrip())
-        f.close()
         return res
 
     def save_data(self, data, name):
@@ -153,12 +151,11 @@ class Evaluator:
         if name is None:
             return
         try:
-            f=open(name, 'w', encoding='utf-8')
+            with open(name, 'w', encoding='utf-8') as f:
+                for line in data:
+                    f.write(line + "\n")
         except IOError:
-            return []
-        for l in data:
-            f.write(l + "\n")
-        f.close()
+            return
         return
 
     def close(self, *p):
@@ -249,16 +246,16 @@ class Evaluator:
         b.delete(begin, end)
         return True
 
-    def log(self, *p):
+    def log(self, *params):
         """Log a message.
         """
-        b=self.output.get_buffer()
-        end=b.get_bounds()[1]
+        b = self.output.get_buffer()
+        end = b.get_bounds()[1]
         b.place_cursor(end)
-        for l in p:
-            if not isinstance(l, str):
-                l = str(l, 'utf-8')
-            b.insert_at_cursor(l)
+        for param in params:
+            if not isinstance(param, str):
+                param = str(param, 'utf-8')
+            b.insert_at_cursor(param)
         return True
 
     def help(self, *p, **kw):
@@ -419,7 +416,7 @@ class Evaluator:
                 except Exception as e:
                     self.log("Exception in result visualisation: ", str(e))
             if symbol is not None:
-                if not '.' in symbol and not symbol.endswith(']'):
+                if '.' not in symbol and not symbol.endswith(']'):
                     self.log('\n\n[Value stored in %s]' % symbol)
                     self.locals_[symbol]=res
                 else:
@@ -503,7 +500,7 @@ class Evaluator:
             # on element._ type string.
             completion=[ a for a in completion if not a.startswith('_') ]
         except (Exception, SyntaxError):
-            if not '.' in expr:
+            if '.' not in expr:
                 # Beginning of an element name (in global() or locals() or builtins)
                 v=dict(self.globals_)
                 v.update(self.locals_)
@@ -737,8 +734,8 @@ class Evaluator:
     def add_bookmark(self, *p):
         """Add the current expression as a bookmark.
         """
-        ex=self.get_expression()
-        if not re.match(r'^\s*$', ex) and not ex in self.bookmarks:
+        ex = self.get_expression()
+        if not re.match(r'^\s*$', ex) and ex not in self.bookmarks:
             self.bookmarks.append(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
             self.status_message("Bookmark saved")
@@ -747,7 +744,7 @@ class Evaluator:
     def remove_bookmark(self, *p):
         """Remove the current expression from bookmarks.
         """
-        ex=self.get_expression()
+        ex = self.get_expression()
         if ex in self.bookmarks:
             self.bookmarks.remove(ex)
             self.save_data(self.bookmarks, self.bookmarkfile)
@@ -771,10 +768,10 @@ class Evaluator:
         m.popup(None, widget, None, 0, 1, Gtk.get_current_event_time())
         return True
 
-    def info(self, *p):
+    def info(self, *params):
         if self.display_info_widget:
-            for l in p:
-                self.logbuffer.insert_at_cursor(time.strftime("%H:%M:%S") + l + "\n")
+            for param in params:
+                self.logbuffer.insert_at_cursor(time.strftime("%H:%M:%S") + param + "\n")
         return True
 
     def dump_tree(self, w, indent=0):

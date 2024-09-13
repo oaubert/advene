@@ -76,7 +76,7 @@ class ViewBook(AdhocView):
         """Clear the viewbook.
         """
         for v in self.views:
-            if not v in self.permanent_widgets:
+            if v not in self.permanent_widgets:
                 self.remove_view(v)
 
     def add_view(self, v, name=None, permanent=False):
@@ -175,18 +175,18 @@ class ViewBook(AdhocView):
                 return True
             return False
 
-        e=Gtk.EventBox()
+        e = Gtk.EventBox()
         e.set_visible_window(False)
         e.set_above_child(True)
         if len(name) > 13:
-            shortname=str(name)[:12] + helper.chars.ellipsis
+            shortname = str(name)[:12] + helper.chars.ellipsis
         else:
-            shortname=name
-        l=Gtk.Label()
-        l.set_markup("<small>%s</small>" % shortname)
+            shortname = name
+        label = Gtk.Label()
+        label.set_markup("<small>%s</small>" % shortname)
         if self.controller.gui:
             e.set_tooltip_text(name)
-        e.add(l)
+        e.add(label)
         e.connect('button-press-event', popup_menu, v)
 
         if not permanent:

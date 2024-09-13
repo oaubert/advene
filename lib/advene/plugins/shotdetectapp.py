@@ -23,7 +23,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
-import os
 import re
 import tempfile
 
@@ -113,12 +112,12 @@ class ShotdetectAppImporter(ExternalAppImporter):
         num = 1
         begin = 0
         while True:
-            l = self.process.stderr.readline()
-            l = l.decode('utf-8')
-            if not l:
+            line = self.process.stderr.readline()
+            line = line.decode('utf-8')
+            if not line:
                 break
-            logger.debug("Read line %s", l)
-            ms = shot_re.findall(l)
+            logger.debug("Read line %s", line)
+            ms = shot_re.findall(line)
             if ms:
                 ts = 0
                 try:

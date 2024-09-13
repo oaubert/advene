@@ -296,7 +296,7 @@ class SAPITTSEngine(TTSEngine):
         try:
             import win32com.client
             voice = win32com.client.Dispatch("sapi.SPVoice")
-        except:
+        except Exception:
             voice = None
         return voice
 

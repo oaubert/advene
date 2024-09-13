@@ -154,7 +154,7 @@ class PackageImporter(AdhocView):
         self.buttonbox = Gtk.HButtonBox()
 
         def validate(b):
-            m = self.mergerview.store
+            model = self.mergerview.store
             suffix = self.suffix_entry.get_text().strip()
             if not suffix:
                 dialog.message_dialog(_("The suffix cannot be empty."), icon=Gtk.MessageType.ERROR)
@@ -164,10 +164,10 @@ class PackageImporter(AdhocView):
             type_count = 0
             # Let's use differ methods to copy elements
             differ = Differ(source=self.sourcepackage, destination=self.destpackage, controller=self.controller)
-            batch_id=object()
-            for l in m:
-                if l[self.mergerview.COLUMN_APPLY]:
-                    source_at = l[self.mergerview.COLUMN_ELEMENT]
+            batch_id = object()
+            for row in model:
+                if row[self.mergerview.COLUMN_APPLY]:
+                    source_at = row[self.mergerview.COLUMN_ELEMENT]
                     logger.debug("Copying %s (%d annotations)", source_at.title, len(source_at.annotations))
                     type_count += 1
                     dest_at = differ.copy_annotation_type(source_at, generate_id=True)
@@ -183,15 +183,15 @@ class PackageImporter(AdhocView):
             return True
 
         def select_all(b):
-            model=self.mergerview.store
-            for l in model:
-                l[self.mergerview.COLUMN_APPLY] = True
+            model = self.mergerview.store
+            for row in model:
+                row[self.mergerview.COLUMN_APPLY] = True
             return True
 
         def unselect_all(b):
-            model=self.mergerview.store
-            for l in model:
-                l[self.mergerview.COLUMN_APPLY] = False
+            model = self.mergerview.store
+            for row in model:
+                row[self.mergerview.COLUMN_APPLY] = False
             return True
 
         def toggle_selection(b):

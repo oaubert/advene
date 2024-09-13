@@ -187,15 +187,15 @@ class Menu:
 
     def search_replace_content(self, widget, el):
         if isinstance(el, (Annotation, View)):
-            l = [ el ]
+            elements = [ el ]
             title = _("Replace content in %s" % self.controller.get_title(el))
         elif isinstance(el, AnnotationType):
-            l = el.annotations
+            elements = el.annotations
             title = _("Replace content in annotations of type %s" % self.controller.get_title(el))
         elif isinstance(el, Package):
-            l = el.annotations
+            elements = el.annotations
             title = _("Replace content in all annotations")
-        self.controller.gui.search_replace_dialog(l, title=title)
+        self.controller.gui.search_replace_dialog(elements, title=title)
         return True
 
     def copy_id (self, widget, el):
@@ -225,15 +225,15 @@ class Menu:
     def create_montage(self, widget, rt):
         """Create a montage from a relationtype.
         """
-        l = list(set( r.members[0] for r in rt.relations ))
+        annotations = list(set( r.members[0] for r in rt.relations ))
         res = []
-        if l:
-            l.sort(key=lambda a: a.fragment.begin)
-            ann = l[0]
+        if annotations:
+            annotations.sort(key=lambda a: a.fragment.begin)
+            ann = annotations[0]
             while True:
                 res.append(ann)
                 try:
-                    l.remove(ann)
+                    annotations.remove(ann)
                 except ValueError:
                     pass
                 r = ann.typedRelatedOut.get(rt.id, None)
@@ -243,8 +243,8 @@ class Menu:
                     ann = r[0]
                 if ann is None or ann in res:
                     # End of relations. Look for other roots.
-                    if l:
-                        ann = l[0]
+                    if annotations:
+                        ann = annotations[0]
                     else:
                         break
         self.controller.gui.open_adhoc_view('montage', elements=res)
@@ -337,16 +337,16 @@ class Menu:
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label()
-        l.set_markup(_("<b>Renumber all annotations according to their order.</b>\n\n<i>Note that this action cannot be undone.</i>\nReplace the first numeric value of the annotation content with the new annotation number.\nIf no numeric value is found and the annotation is structured, it will insert the number.\nIf no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.\nThe offset parameter allows you to renumber from a given annotation."))
-        l.set_line_wrap(True)
-        l.show()
-        d.vbox.add(l)
+        label = Gtk.Label()
+        label.set_markup(_("<b>Renumber all annotations according to their order.</b>\n\n<i>Note that this action cannot be undone.</i>\nReplace the first numeric value of the annotation content with the new annotation number.\nIf no numeric value is found and the annotation is structured, it will insert the number.\nIf no numeric value is found and the annotation is of type text/plain, it will overwrite the annotation content.\nThe offset parameter allows you to renumber from a given annotation."))
+        label.set_line_wrap(True)
+        label.show()
+        d.vbox.add(label)
 
-        hb=Gtk.HBox()
-        l=Gtk.Label(label=_("Offset"))
-        hb.pack_start(l, False, True, 0)
-        s=Gtk.SpinButton()
+        hb = Gtk.HBox()
+        label = Gtk.Label(label=_("Offset"))
+        hb.pack_start(label, False, True, 0)
+        s = Gtk.SpinButton()
         s.set_range(-5, len(at.annotations))
         s.set_value(1)
         s.set_increments(1, 5)
@@ -357,24 +357,24 @@ class Menu:
         d.show_all()
         dialog.center_on_mouse(d)
 
-        res=d.run()
+        res = d.run()
         if res == Gtk.ResponseType.OK:
-            re_number=re.compile(r'(\d+)')
-            re_struct=re.compile(r'^num=(\d+)$', re.MULTILINE)
-            offset=s.get_value_as_int() - 1
-            l=at.annotations
-            l.sort(key=lambda a: a.fragment.begin)
-            l=l[offset:]
-            size=float(len(l))
-            dial=Gtk.Dialog(_("Renumbering %d annotations") % size,
-                            self.controller.gui.gui.win,
-                            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
-            prg=Gtk.ProgressBar()
+            re_number = re.compile(r'(\d+)')
+            re_struct = re.compile(r'^num=(\d+)$', re.MULTILINE)
+            offset = s.get_value_as_int() - 1
+            annotations = at.annotations
+            annotations.sort(key=lambda a: a.fragment.begin)
+            annotations = annotations[offset:]
+            size = float(len(annotations))
+            dial = Gtk.Dialog(_("Renumbering %d annotations") % size,
+                              self.controller.gui.gui.win,
+                              Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                              (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
+            prg = Gtk.ProgressBar()
             dial.vbox.pack_start(prg, False, True, 0)
             dial.show_all()
 
-            for i, a in enumerate(l[offset:]):
+            for i, a in enumerate(annotations):
                 prg.set_text(_("Annotation #%d") % i)
                 prg.set_fraction( i / size )
                 while Gtk.events_pending():
@@ -383,20 +383,20 @@ class Menu:
                 if a.type.mimetype == 'application/x-advene-structured':
                     if re_struct.search(a.content.data):
                         # A 'num' field is present. Update it.
-                        data=re_struct.sub("num=%d" % (i+1), a.content.data)
+                        data = re_struct.sub("num=%d" % (i+1), a.content.data)
                     else:
                         # Insert the num field
-                        data=("num=%d\n" % (i+1)) + a.content.data
+                        data = ("num=%d\n" % (i+1)) + a.content.data
                 elif re_number.search(a.content.data):
                     # There is a number. Simply substitute the new one.
-                    data=re_number.sub(str(i+1), a.content.data)
+                    data = re_number.sub(str(i+1), a.content.data)
                 elif a.type.mimetype == 'text/plain':
                     # Overwrite the contents
-                    data=str(i+1)
+                    data = str(i+1)
                 else:
-                    data=None
+                    data = None
                 if data is not None and a.content.data != data:
-                    a.content.data=data
+                    a.content.data = data
             self.controller.notify('PackageActivate', package=self.controller.package)
             dial.destroy()
 
@@ -537,32 +537,32 @@ class Menu:
                 # The submenu was already populated.
                 return False
             if el.incomingRelations:
-                i=Gtk.MenuItem(_("Incoming"))
+                i = Gtk.MenuItem(_("Incoming"))
                 submenu.append(i)
-                i=Gtk.SeparatorMenuItem()
+                i = Gtk.SeparatorMenuItem()
                 submenu.append(i)
-                for t, l in el.typedRelatedIn.items():
-                    at=self.controller.package.get_element_by_id(t)
-                    m=Gtk.MenuItem(self.get_title(at), use_underline=False)
-                    amenu=Gtk.Menu()
+                for typ, annotations in el.typedRelatedIn.items():
+                    at = self.controller.package.get_element_by_id(typ)
+                    m = Gtk.MenuItem(self.get_title(at), use_underline=False)
+                    amenu = Gtk.Menu()
                     m.set_submenu(amenu)
-                    amenu.connect('map', build_submenu, at, l)
+                    amenu.connect('map', build_submenu, at, annotations)
                     submenu.append(m)
             if submenu.get_children():
                 # There were incoming annotations. Use a separator
-                i=Gtk.SeparatorMenuItem()
+                i = Gtk.SeparatorMenuItem()
                 submenu.append(i)
             if el.outgoingRelations:
-                i=Gtk.MenuItem(_("Outgoing"))
+                i = Gtk.MenuItem(_("Outgoing"))
                 submenu.append(i)
-                i=Gtk.SeparatorMenuItem()
+                i = Gtk.SeparatorMenuItem()
                 submenu.append(i)
-                for t, l in el.typedRelatedOut.items():
-                    at=self.controller.package.get_element_by_id(t)
-                    m=Gtk.MenuItem(self.get_title(at), use_underline=False)
-                    amenu=Gtk.Menu()
+                for typ, annotations in el.typedRelatedOut.items():
+                    at = self.controller.package.get_element_by_id(typ)
+                    m = Gtk.MenuItem(self.get_title(at), use_underline=False)
+                    amenu = Gtk.Menu()
                     m.set_submenu(amenu)
-                    amenu.connect('map', build_submenu, at, l)
+                    amenu.connect('map', build_submenu, at, annotations)
                     submenu.append(m)
             submenu.show_all()
             return False

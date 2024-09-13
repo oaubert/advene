@@ -91,8 +91,8 @@ class CreateElementPopup:
         if self.type_ in (Annotation, Relation, AnnotationType, RelationType,
                           View, Query, Resources, ResourceData):
             hbox = Gtk.HBox()
-            l = Gtk.Label(label=_("Type"))
-            hbox.pack_start(l, True, True, 0)
+            label = Gtk.Label(label=_("Type"))
+            hbox.pack_start(label, True, True, 0)
 
             if self.type_ == Annotation:
                 if isinstance(self.parent, AnnotationType):
@@ -135,16 +135,16 @@ class CreateElementPopup:
             if self.mimetype is None:
                 preselect=type_list[0]
             else:
-                l=[ e for e in type_list if e.id == self.mimetype ]
-                if l:
-                    preselect=l[0]
+                types = [ e for e in type_list if e.id == self.mimetype ]
+                if types:
+                    preselect = types[0]
                 else:
                     # Insert self.mimetype in the list
-                    preselect=ViewType(self.mimetype, self.mimetype)
+                    preselect = ViewType(self.mimetype, self.mimetype)
                     type_list.insert(0, preselect)
             d.type_combo = dialog.list_selector_widget(
-                members=[ (t, self.controller.get_title(t)) for t in type_list  ],
-                preselect=preselect)
+                members = [ (t, self.controller.get_title(t)) for t in type_list  ],
+                preselect = preselect)
             hbox.pack_start(d.type_combo, True, True, 0)
 
             d.vbox.add(hbox)
@@ -363,9 +363,9 @@ if __name__ == "__main__":
         cr.popup()
         return True
 
-    for (t, l) in element_label.items():
-        b = Gtk.Button(l)
-        b.connect('clicked', create_element_cb, t)
+    for (element, label) in element_label.items():
+        b = Gtk.Button(label)
+        b.connect('clicked', create_element_cb, element)
         b.show()
         vbox.pack_start(b, True, True, 0)
 

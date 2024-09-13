@@ -654,8 +654,11 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
     message). If it returns False, the merge is canceled.
 
     """
+    def default_callback(n, message):
+        logger.info(message)
+
     if callback is None:
-        callback = lambda n, l: logger.info(l)
+        callback = default_callback
 
     logger.info(_("Merging %(sources)s into %(references)s, producing %(output)s") % { "sources": to_be_merged,
                                                                                        "references": refname,
@@ -693,9 +696,9 @@ def merge_package(refname, to_be_merged, outputname=None, debug=False, dry_run=F
         differ = Differ(source, dest)
         diff = differ.diff()
         if debug:
-            import pdb; pdb.set_trace()
+            breakpoint()
         for name, s, d, action, value in diff:
-            if include and not name in include:
+            if include and name not in include:
                 continue
             if name in exclude and filters[exclude[name]](d):
                 continue
@@ -727,7 +730,7 @@ if __name__ == "__main__":
     exclude = None
     # Syntax: key1=value1:key2=value2... with optional value
     if args.exclude:
-        exclude = dict( (l.split('=', 1) if '=' in l else (l, 'all'))
-                        for l in args.exclude.split(':'))
+        exclude = dict( (arg.split('=', 1) if '=' in arg else (arg, 'all'))
+                        for arg in args.exclude.split(':'))
 
     merge_package(args.reference_package, args.other_packages, args.output_package, debug=args.debug, dry_run=args.dry_run, include=include, exclude=exclude)

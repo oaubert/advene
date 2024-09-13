@@ -35,6 +35,7 @@ import advene.gui.edit.elements
 import advene.gui.popup
 
 import advene.util.helper as helper
+from advene.util.tools import first
 from advene.gui.util import dialog, png_to_pixbuf, contextual_drag_begin, contextual_drag_end
 from advene.gui.util.completer import Completer
 
@@ -155,27 +156,25 @@ class AnnotationTable(AdhocView):
             def custom(a):
                 return tuple()
         args = (object, str, str, str, int, int, str, str, str, GdkPixbuf.Pixbuf, str, str) + custom(None)
-        l=Gtk.ListStore(*args)
-        if not elements:
-            return l
+        store = Gtk.ListStore(*args)
         for a in elements:
             if isinstance(a, Annotation):
-                l.append( (a,
-                           self.controller.get_title(a),
-                           self.controller.get_title(a.type),
-                           a.id,
-                           a.fragment.begin,
-                           a.fragment.end,
-                           helper.format_time(a.fragment.duration),
-                           helper.format_time(a.fragment.begin),
-                           helper.format_time(a.fragment.end),
-                           png_to_pixbuf(self.controller.get_snapshot(annotation=a),
-                                         height=32),
-                           self.controller.get_element_color(a),
-                           a.ownerPackage.getTitle()
-                           ) + custom(a),
-                          )
-        return l
+                store.append( (a,
+                               self.controller.get_title(a),
+                               self.controller.get_title(a.type),
+                               a.id,
+                               a.fragment.begin,
+                               a.fragment.end,
+                               helper.format_time(a.fragment.duration),
+                               helper.format_time(a.fragment.begin),
+                               helper.format_time(a.fragment.end),
+                               png_to_pixbuf(self.controller.get_snapshot(annotation=a),
+                                             height=32),
+                               self.controller.get_element_color(a),
+                               a.ownerPackage.getTitle()
+                               ) + custom(a),
+                             )
+        return store
 
     def set_elements(self, elements, custom_data=None):
         """Use a new set of elements.
@@ -212,7 +211,7 @@ class AnnotationTable(AdhocView):
             self.last_edited_path = None
 
     def motion_notify_event_cb(self, tv, event):
-        if not event.get_window() is tv.get_bin_window():
+        if event.get_window() is not tv.get_bin_window():
             return False
         if event.is_hint:
             pointer = event.get_window().get_pointer()
@@ -360,13 +359,8 @@ class AnnotationTable(AdhocView):
             if not selection:
                 return None
             store, paths=selection.get_selected_rows()
-            l=[ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
-            if not l:
-                return None
-            elif len(l) == 1:
-                return l[0]
-            else:
-                return l
+            return first(store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths)
+
         tree_view.connect('drag-begin', contextual_drag_begin, get_element, self.controller)
         tree_view.connect('drag-end', contextual_drag_end)
 
@@ -556,7 +550,7 @@ class AnnotationTable(AdhocView):
         return False
 
     def tree_view_button_cb(self, widget=None, event=None):
-        if not event.get_window() is widget.get_bin_window():
+        if event.get_window() is not widget.get_bin_window():
             return False
 
         retval = False
@@ -647,15 +641,13 @@ class GenericTable(AdhocView):
 
         Columns: element, content (title), type, id
         """
-        l=Gtk.ListStore(object, str, str, str)
-        if not elements:
-            return l
+        store = Gtk.ListStore(object, str, str, str)
         for e in elements:
-            l.append( (e,
-                       self.controller.get_title(e),
-                       helper.get_type(e),
-                       getattr(e, 'id', str(e))) )
-        return l
+            store.append( (e,
+                           self.controller.get_title(e),
+                           helper.get_type(e),
+                           getattr(e, 'id', str(e))) )
+        return store
 
     def csv_export(self, name=None):
         if name is None:

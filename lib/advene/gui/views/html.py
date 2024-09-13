@@ -88,8 +88,8 @@ class webkit_wrapper:
         logger.debug(f"Decide policy {decision_type} {decision.get_request().get_uri()}")
         if decision_type == WebKit2.PolicyDecisionType.NAVIGATION_ACTION:
             url = decision.get_request().get_uri()
-            l = urllib.parse.urlparse(url)
-            if self.no_content_re.match(l[2]):
+            components = urllib.parse.urlparse(url)
+            if self.no_content_re.match(components[2]):
                 # No content - stop navigation
                 decision.ignore()
                 # Trigger request ourselves since we prevented Webkit to do it

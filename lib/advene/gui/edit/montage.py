@@ -217,12 +217,12 @@ class Montage(AdhocView):
         return True
 
     def update_position(self, pos):
-        w=self.current_widget
+        w = self.current_widget
         if w is None:
             return
-        f=w.annotation.fragment
-        if not pos in f:
-            w.fraction_marker=None
+        f = w.annotation.fragment
+        if pos not in f:
+            w.fraction_marker = None
             return
         w.fraction_marker = 1.0 * (pos - f.begin) / f.duration
 
@@ -259,11 +259,11 @@ class Montage(AdhocView):
             self.set_annotation_active(annotation, False)
         elif event == 'AnnotationEditEnd':
             # Update its representations
-            l=[ w.update_widget() for w in self.contents if w.annotation == annotation ]
+            [ w.update_widget() for w in self.contents if w.annotation == annotation ]
         elif event == 'AnnotationDelete':
-            l=[ w for w in self.contents if w.annotation == annotation ]
-            if l:
-                for w in l:
+            widgets = [ w for w in self.contents if w.annotation == annotation ]
+            if widgets:
+                for w in widgets:
                     self.contents.remove(w)
                 self.refresh()
         return True
@@ -324,18 +324,18 @@ class Montage(AdhocView):
             """Go to the beginning of the annotation, and program the next jump.
             """
             try:
-                w=next(annotation_queue)
+                w = next(annotation_queue)
                 if self.current_widget is not None:
                     self.current_widget.fraction_marker=None
-                self.current_widget=w
-                a=w.annotation
+                self.current_widget = w
+                a = w.annotation
             except StopIteration:
                 self.controller.update_status('pause')
                 for w in self.contents:
                     self.set_widget_active(w, False)
                 if self.current_widget is not None:
-                    self.current_widget.fraction_marker=None
-                self.current_widget=None
+                    self.current_widget.fraction_marker = None
+                self.current_widget = None
                 return False
             # Go to the annotation
             # Change position only if we are not already at the right place
@@ -360,12 +360,12 @@ class Montage(AdhocView):
         return True
 
     def build_widget(self):
-        self.zoom_adjustment=Gtk.Adjustment.new(value=1.0,
-                                                lower=0.01,
-                                                upper=2.0,
-                                                step_increment=.01,
-                                                page_increment=.1,
-                                                page_size=.1)
+        self.zoom_adjustment = Gtk.Adjustment.new(value=1.0,
+                                                  lower=0.01,
+                                                  upper=2.0,
+                                                  step_increment=.01,
+                                                  page_increment=.1,
+                                                  page_size=.1)
 
         def zoom_adj_change(adj):
             # Update the value of self.scale accordingly
@@ -373,7 +373,7 @@ class Montage(AdhocView):
             if not self.mainbox.get_window():
                 # The widget is not yet realized
                 return True
-            display_size=self.mainbox.get_parent().get_window().get_width()
+            display_size = self.mainbox.get_parent().get_window().get_width()
             # Dropzones are approximately 10 pixels wide, and should
             # be taken into account, but it enforces handling the corner cases
             self.scale.set_value(1.0 * self.duration / (display_size / adj.get_value() ))
@@ -384,14 +384,14 @@ class Montage(AdhocView):
 
         def remove_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['uri-list']:
-                m=re.match('advene:/adhoc/%d/(.+)' % hash(self),
+                m = re.match('advene:/adhoc/%d/(.+)' % hash(self),
                            selection.get_data().decode('utf-8'))
                 if m:
-                    h=int(m.group(1))
-                    l=[ w for w in self.contents if hash(w) == h ]
-                    if l:
+                    h = int(m.group(1))
+                    widgets = [ w for w in self.contents if hash(w) == h ]
+                    if widgets:
                         # Found the element. Remove it.
-                        self.contents.remove(l[0])
+                        self.contents.remove(widgets[0])
                         self.refresh()
                 return True
             else:
@@ -400,13 +400,13 @@ class Montage(AdhocView):
 
         self.zoom_adjustment.connect('value-changed', zoom_adj_change)
 
-        v=Gtk.VBox()
+        v = Gtk.VBox()
 
         # Toolbar
-        tb=Gtk.Toolbar()
+        tb = Gtk.Toolbar()
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
-        b=get_small_stock_button(Gtk.STOCK_DELETE)
+        b = get_small_stock_button(Gtk.STOCK_DELETE)
         b.set_tooltip_text(_("Drop an annotation here to remove it from the list"))
         b.drag_dest_set(Gtk.DestDefaults.MOTION |
                         Gtk.DestDefaults.HIGHLIGHT |
@@ -414,33 +414,33 @@ class Montage(AdhocView):
                         config.data.get_target_types('uri-list'),
                         Gdk.DragAction.COPY | Gdk.DragAction.LINK)
         b.connect('drag-data-received', remove_drag_received)
-        ti=Gtk.ToolItem()
+        ti = Gtk.ToolItem()
         ti.add(b)
         tb.insert(ti, -1)
 
-        b=Gtk.ToolButton(Gtk.STOCK_MEDIA_PLAY)
+        b = Gtk.ToolButton(Gtk.STOCK_MEDIA_PLAY)
         b.set_tooltip_text(_("Play the montage"))
         b.connect('clicked', self.play)
         tb.insert(b, -1)
 
-        b = Gtk.ToolButton(Gtk.STOCK_SAVE)
+        b  =  Gtk.ToolButton(Gtk.STOCK_SAVE)
         b.set_tooltip_text(_("Save the view in the package"))
         b.connect('clicked', self.save_view)
         tb.insert(b, -1)
 
         def zoom_entry(entry):
-            f=entry.get_text()
+            f = entry.get_text()
 
-            i=re.findall(r'\d+', f)
+            i = re.findall(r'\d+', f)
             if i:
-                f=int(i[0])/100.0
+                f = int(i[0])/100.0
             else:
                 return True
             self.zoom_adjustment.set_value(f)
             return True
 
         def zoom_change(combo):
-            v=combo.get_current_element()
+            v = combo.get_current_element()
             if isinstance(v, float):
                 self.zoom_adjustment.set_value(v)
             return True
@@ -449,17 +449,17 @@ class Montage(AdhocView):
             self.zoom_adjustment.set_value(self.zoom_adjustment.get_value() * factor)
             return True
 
-        b=Gtk.ToolButton(Gtk.STOCK_ZOOM_OUT)
+        b = Gtk.ToolButton(Gtk.STOCK_ZOOM_OUT)
         b.connect('clicked', zoom, 1.3)
         b.set_tooltip_text(_("Zoom out"))
         tb.insert(b, -1)
 
-        b=Gtk.ToolButton(Gtk.STOCK_ZOOM_IN)
+        b = Gtk.ToolButton(Gtk.STOCK_ZOOM_IN)
         b.connect('clicked', zoom, .7)
         b.set_tooltip_text(_("Zoom in"))
         tb.insert(b, -1)
 
-        self.zoom_combobox=dialog.list_selector_widget(members=[
+        self.zoom_combobox = dialog.list_selector_widget(members=[
             ( f, "%d%%" % int(100*f) )
             for f in [ (1.0 / pow(1.5, n)) for n in range(0, 10) ]
         ],
@@ -468,12 +468,12 @@ class Montage(AdhocView):
         self.zoom_combobox.get_child().connect('activate', zoom_entry)
         self.zoom_combobox.get_child().set_width_chars(4)
 
-        ti=Gtk.ToolItem()
+        ti = Gtk.ToolItem()
         ti.add(self.zoom_combobox)
         ti.set_tooltip_text(_("Set zoom level"))
         tb.insert(ti, -1)
 
-        b=Gtk.ToolButton(Gtk.STOCK_ZOOM_100)
+        b = Gtk.ToolButton(Gtk.STOCK_ZOOM_100)
         b.connect('clicked', lambda i: self.zoom_adjustment.set_value(1.0))
         b.set_tooltip_text(_("Set 100% zoom"))
         tb.insert(b, -1)
@@ -491,22 +491,22 @@ class Montage(AdhocView):
             for a in set(w.annotation for w in self.contents):
                 self.controller.notify(event, annotation=a)
             return True
-        i=Gtk.Image()
+        i = Gtk.Image()
         i.set_from_file(config.data.advenefile( ( 'pixmaps', 'highlight.png') ))
-        b=Gtk.ToggleToolButton()
+        b = Gtk.ToggleToolButton()
         b.set_tooltip_text(_("Highlight annotations"))
         b.set_icon_widget(i)
-        b.highlight=True
+        b.highlight = True
         b.connect('clicked', toggle_highlight)
         tb.insert(b, -1)
 
         v.pack_start(tb, False, True, 0)
 
-        self.mainbox=Gtk.HBox()
+        self.mainbox = Gtk.HBox()
 
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
+                sources = [ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 for ann in sources:
                     if ann is None:
                         self.log("Problem when getting annotation from DND")
@@ -515,13 +515,13 @@ class Montage(AdhocView):
                     # If the origin is from the same montage, then
                     # consider it is a move and remove the origin
                     # annotation
-                    w=Gtk.drag_get_source_widget(context)
+                    w = Gtk.drag_get_source_widget(context)
                     if w in self.contents:
                         self.contents.remove(w)
                 self.refresh()
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                at=self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
+                at = self.controller.package.annotationTypes.get(str(selection.get_data(), 'utf8'))
                 for a in at.annotations:
                     self.insert(a)
                 self.refresh()
@@ -536,15 +536,15 @@ class Montage(AdhocView):
                         Gdk.DragAction.COPY | Gdk.DragAction.LINK | Gdk.DragAction.MOVE)
         v.connect('drag-data-received', mainbox_drag_received)
 
-        sw=Gtk.ScrolledWindow()
+        sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
         sw.add_with_viewport(self.mainbox)
-        self.scrollwindow=sw
+        self.scrollwindow = sw
 
         v.pack_start(sw, False, True, 0)
 
-        a=AnnotationDisplay(controller=self.controller)
-        f=Gtk.Frame.new(_("Inspector"))
+        a = AnnotationDisplay(controller=self.controller)
+        f = Gtk.Frame.new(_("Inspector"))
         f.add(a.widget)
         v.add(f)
         self.controller.gui.register_view (a)
@@ -553,10 +553,10 @@ class Montage(AdhocView):
 
         v.pack_start(Gtk.VBox(), True, True, 0)
 
-        hb=Gtk.HBox()
-        l=Gtk.Label(label=_("Total duration:"))
-        hb.pack_start(l, False, True, 0)
-        self.duration_label=Gtk.Label(label='??')
+        hb = Gtk.HBox()
+        label = Gtk.Label(label=_("Total duration:"))
+        hb.pack_start(label, False, True, 0)
+        self.duration_label = Gtk.Label(label='??')
         hb.pack_start(self.duration_label, False, True, 0)
         v.pack_start(hb, False, True, 0)
 

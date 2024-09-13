@@ -47,7 +47,8 @@ import sys
 import time
 from urllib.parse import urljoin, parse_qsl
 from urllib.request import urlopen
-import urllib.parse, urllib.error
+import urllib.parse
+import urllib.error
 import webbrowser
 
 import advene.core.config as config
@@ -363,8 +364,8 @@ class AdveneController:
         """Load the plugins from the given directory.
         """
         logger.debug("Loading plugins from %s", directory)
-        l=advene.core.plugin.PluginCollection(directory, prefix)
-        for p in l:
+        plugins = advene.core.plugin.PluginCollection(directory, prefix)
+        for p in plugins:
             try:
                 # Do not log plugin info if it could not be
                 # initialized (return False).  For compatibility with
@@ -379,7 +380,7 @@ class AdveneController:
             except AttributeError:
                 logger.error("AttributeError in %s/%s", directory, p.name, exc_info=True)
                 pass
-        return l
+        return plugins
 
     def queue_action(self, method, *args, **kw):
         """Queue an action.
@@ -572,32 +573,35 @@ class AdveneController:
                 # Find the next relevant position.
                 # First check the current annotations
                 if self.restricted_annotations:
-                    l=[an for an in self.active_annotations if an in self.restricted_annotations and an != a ]
+                    active_annotations = [an
+                                           for an in self.active_annotations
+                                           if an in self.restricted_annotations and an != a ]
                 else:
-                    l=[an for an in self.active_annotations if an.type == a.type and an != a ]
-                if l:
+                    active_annotations = [an
+                                          for an in self.active_annotations
+                                          if an.type == a.type and an != a ]
+                if active_annotations:
                     # There is a least one other annotation of the
                     # same type which is also active. We can just wait for its end.
                     return True
                 # future_begins holds a sorted list of (annotation, begin, end)
                 if self.restricted_annotations:
-                    l=[(an, an.fragment.begin, an.fragment.end)
-                       for an in self.restricted_annotations
-                       if an.fragment.begin > a.fragment.end ]
+                    future_annotations = [(an, an.fragment.begin, an.fragment.end)
+                                          for an in self.restricted_annotations
+                                          if an.fragment.begin > a.fragment.end ]
                 else:
-                    l=[an
-                       for an in self.future_begins
-                       if an[0].type == t ]
-                if l and l[0][1] > a.fragment.end:
-                    self.queue_action(self.update_status, 'seek', l[0][1])
+                    future_annotations = [an
+                                          for an in self.future_begins
+                                          if an[0].type == t ]
+                if future_annotations and future_annotations[0][1] > a.fragment.end:
+                    self.queue_action(self.update_status, 'seek', future_annotations[0][1])
                 else:
                     # No next annotation. Return to the start
                     if self.restricted_annotations:
-                        l=self.restricted_annotations
+                        annotations = self.restricted_annotations
                     else:
-                        l=[ an.fragment.begin for an in at.annotations ]
-                        l.sort()
-                    self.queue_action(self.update_status, "set", position=l[0])
+                        annotations = list(sorted(an.fragment.begin for an in at.annotations))
+                    self.queue_action(self.update_status, "set", position=annotations[0])
             return True
 
         if at is not None:
@@ -612,10 +616,9 @@ class AdveneController:
                     pass
                 self.update_status("resume")
             else:
-                l=[ a.fragment.begin for a in at.annotations ]
-                if l:
-                    l.sort()
-                    self.update_status("start", position=l[0])
+                starting_annotations = list(sorted(a.fragment.begin for a in at.annotations))
+                if starting_annotations:
+                    self.update_status("start", position=starting_annotations[0])
 
         self.notify('RestrictType', annotationtype=at)
         return True
@@ -657,41 +660,53 @@ class AdveneController:
             else:
                 return s.lower()
 
+        def raw_content(element):
+            return element.content.data
+
+        def normalized_content(element):
+            return normalize_case(e.content.data)
+
         if case_sensitive:
-            data_func=lambda e: e.content.data
+            data_func = raw_content
         else:
-            data_func=lambda e: normalize_case(e.content.data)
+            data_func = normalized_content
 
         if sources is None:
-            sources=[ "all_annotations" ]
+            sources = [ "all_annotations" ]
 
         # Replace standard \n/\t escape, because \ are parsed by shlex
-        searched=searched.replace('\\n', '%n').replace('\\t', '%t')
+        searched = searched.replace('\\n', '%n').replace('\\t', '%t')
         try:
-            words=[ unescape_string(w) for w in shlex.split(searched) ]
+            words = [ unescape_string(w) for w in shlex.split(searched) ]
         except ValueError:
             # Unbalanced quote. Just do a split along whitespace, the
             # user may be looking for a string with a quote and not
             # know it should be escaped.
-            words=[ w.replace('%n', "\n").replace('%t', "\t") for w in searched.split() ]
+            words = [ w.replace('%n', "\n").replace('%t', "\t") for w in searched.split() ]
 
-        mandatory=[ w[1:] for w in words if w.startswith('+') ]
-        exceptions=[ w[1:] for w in words if w.startswith('-') ]
-        normal=[ w for w in words if not w.startswith('+') and not w.startswith('-') ]
+        mandatory = [ w[1:] for w in words if w.startswith('+') ]
+        exceptions = [ w[1:] for w in words if w.startswith('-') ]
+        normal = [ w for w in words if not w.startswith('+') and not w.startswith('-') ]
 
-        result=[]
+        result = []
+
+        def element_tags(element):
+            return element.tags
+
+        def normalized_element_tags(element):
+            return [ normalize_case(t) for t in element.tags ]
 
         for source in sources:
             if source == 'tags':
-                sourcedata=itertools.chain( p.annotations, p.relations )
+                sourcedata = itertools.chain( p.annotations, p.relations )
                 if case_sensitive:
-                    data_func=lambda e: e.tags
+                    data_func = element_tags
                 else:
-                    data_func=lambda e: [ normalize_case(t) for t in e.tags ]
+                    data_func = normalized_element_tags
             elif source == 'ids':
                 # Special search.
                 for i in searched.split():
-                    e=p.get_element_by_id(i)
+                    e = p.get_element_by_id(i)
                     if e is not None:
                         result.append(e)
                 continue
@@ -702,22 +717,22 @@ class AdveneController:
                 elif source == 'global_annotations':
                     sourcedata = self.global_package.annotations
                 else:
-                    c=self.build_context()
-                    sourcedata=c.evaluateValue(source)
+                    c = self.build_context()
+                    sourcedata = c.evaluateValue(source)
 
             for w in mandatory:
-                w=normalize_case(w)
-                sourcedata=[ el for el in sourcedata if w in data_func(el) ]
+                w = normalize_case(w)
+                sourcedata = [ el for el in sourcedata if w in data_func(el) ]
             for w in exceptions:
-                w=normalize_case(w)
-                sourcedata=[ el for el in sourcedata if w not in data_func(el) ]
+                w = normalize_case(w)
+                sourcedata = [ el for el in sourcedata if w not in data_func(el) ]
             if not normal:
                 # No "normal" search terms. Return the result.
                 result.extend(sourcedata)
             else:
                 normal=[ normalize_case(el) for el in normal ]
                 for e in sourcedata:
-                    data=data_func(e)
+                    data = data_func(e)
                     for w in normal:
                         if w in data:
                             result.append(e)
@@ -814,13 +829,13 @@ class AdveneController:
     def busy_port_info(self):
         """Display the processes using the webserver port.
         """
-        processes=[]
-        pat=':%d' % config.data.webserver['port']
-        f=os.popen('netstat -atlnp 2> /dev/null', 'r')
-        for l in f.readlines():
-            if pat not in l:
+        processes = []
+        pat = ':%d' % config.data.webserver['port']
+        f = os.popen('netstat -atlnp 2> /dev/null', 'r')
+        for line in f.readlines():
+            if pat not in line:
                 continue
-            pid=l.rstrip().split()[-1]
+            pid = line.rstrip().split()[-1]
             processes.append(pid)
         f.close()
         logger.warning(_("Cannot start the webserver\nThe following processes seem to use the %(port)s port: %(processes)s") % { 'port': pat,
@@ -961,7 +976,7 @@ class AdveneController:
                 if "=" in content:
                     # Let's assume that content is simple-structured data.
                     try:
-                        data = dict( (k, v) for l in content.splitlines() for (k, v) in l.split('=') )
+                        data = dict( (k, v) for line in content.splitlines() for (k, v) in line.split('=') )
                         # Add other keys
                         data.update(dict( (f, "") for f in sorted(el.type._fieldnames) ))
                         # Serialize
@@ -972,7 +987,7 @@ class AdveneController:
                 else:
                     content = "\n".join( "%s=" % f for f in sorted(el.type._fieldnames) ) + "\ncontent=%s" % content.replace("\n", " ")
             elif 'svg' in el.type.mimetype:
-                if not '<svg' in content:
+                if '<svg' not in content:
                     # It must be simple text. Generate appropriate SVG.
                     content = """<svg:svg width="640pt" height="480pt" preserveAspectRatio="xMinYMin meet" version="1" viewBox="0 0 640 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg">
   <text fill="green" name="Content" stroke="green" style="stroke-width:1; font-family: sans-serif; font-size: 22" x="8" y="390">%s</text>
@@ -1513,7 +1528,7 @@ class AdveneController:
                 d={ 'name': annotation.content.data.replace('\n', '\\n') }
             elif annotation.type.mimetype == 'application/x-advene-structured':
                 r=re.compile(r'^(\w+)=(.*)')
-                d=dict([ (r.findall(l) or [ ('_error', l) ])[0] for l in annotation.content.data.split('\n') ])
+                d=dict([ (r.findall(line) or [ ('_error', line) ])[0] for line in annotation.content.data.split('\n') ])
                 name="Unknown"
                 for n in ('name', 'title', 'content'):
                     if n in d:
@@ -1740,7 +1755,7 @@ class AdveneController:
             for name, s, d, action, value in differ.diff_structure():
                 try:
                     action(s, d)
-                except:
+                except Exception:
                     logger.error("Error when splitting package (%s)", name, exc_info=True)
             # Copy relevant annotations (contained in segment)
             count = 0
@@ -2010,27 +2025,27 @@ class AdveneController:
         self.package._modified = False
 
         # State dictionary
-        self.package.state=DefaultDict(default=0)
+        self.package.state = DefaultDict(default=0)
 
         # Initialize the color palette for the package
         # Remove already used colors
-        l=list(config.data.color_palette)
+        colors = list(config.data.color_palette)
         for at in self.package.annotationTypes:
             try:
-                l.remove(at.getMetaData(config.data.namespace, 'color'))
+                colors.remove(at.getMetaData(config.data.namespace, 'color'))
             except ValueError:
                 pass
-        if not l:
+        if not colors:
             # All colors were used.
-            l=list(config.data.color_palette)
-        self.package._color_palette=helper.CircularList(l)
+            colors = list(config.data.color_palette)
+        self.package._color_palette = helper.CircularList(colors)
 
         # Parse tag_colors attribute
         cols = self.package.getMetaData (config.data.namespace, "tag_colors")
         if cols:
             d = dict(parse_qsl(cols))
         else:
-            d={}
+            d = {}
         self.package._tag_colors=d
 
         self.pending_duration_update = True
@@ -2104,10 +2119,10 @@ class AdveneController:
         del self.aliases[p]
         del self.packages[alias]
         if self.package == p:
-            l=[ a for a in self.packages.keys() if a != 'advene' ]
+            packages = [ a for a in self.packages.keys() if a != 'advene' ]
             # There should be at least 1 key
-            if l:
-                self.activate_package(l[0])
+            if packages:
+                self.activate_package(packages[0])
             else:
                 # We removed the last package. Create a new empty one.
                 self.load_package()
@@ -2234,11 +2249,11 @@ class AdveneController:
         """
         p=context.evaluateValue('package')
         # Check that all fragments are Millisecond fragments.
-        l = [a.id for a in p.annotations
-             if not isinstance (a.fragment, MillisecondFragment)]
-        if l:
+        annotations = [a.id for a in p.annotations
+                       if not isinstance (a.fragment, MillisecondFragment)]
+        if annotations:
             self.package = None
-            logger.error(_("Cannot load package: the following annotations do not have Millisecond fragments: %s"), ", ".join(l))
+            logger.error(_("Cannot load package: the following annotations do not have Millisecond fragments: %s"), ", ".join(annotations))
             return True
 
         # Fix annotation content mimetype if it is different from its
@@ -2286,7 +2301,7 @@ class AdveneController:
         for source in ('views', 'schemas', 'queries'):
             uris=[ e.uri for e in getattr(p, source) ]
             for e in getattr(i, source):
-                if not e.uri in uris:
+                if e.uri not in uris:
                     logger.info("Missing %s: importing it", str(e))
                     helper.import_element(p, e, self, notify=False)
         return True
@@ -2422,8 +2437,8 @@ class AdveneController:
                 import difflib
                 diff=difflib.Differ()
                 logger.debug("-----------")
-                for l in diff.compare(start, end):
-                    logger.debug(l)
+                for line in diff.compare(start, end):
+                    logger.debug(line)
                 logger.debug("-----------")
             self.event_handler.reset_queue()
             self.event_handler.clear_state()
@@ -2447,7 +2462,7 @@ class AdveneController:
             # Terminate the video player
             try:
                 self.player.exit()
-            except:
+            except Exception:
                 logger.error(_("Got exception when stopping player."), exc_info=True)
             self.cleanup_done = True
         return True
@@ -2522,7 +2537,7 @@ class AdveneController:
         """
         try:
             self.player.position_update ()
-        except:
+        except Exception:
             # The player is down. Restart it.
             logger.info("Restarting player...", exc_info=True)
             self.player_restarted += 1
@@ -2786,11 +2801,18 @@ class AdveneController:
         If the ident parameter is given, then return either the
         corresponding exporter class, or None.
         """
-        valid_filter = lambda v: True
+        def always_valid(view):
+            return True
+        def valid_for_package(view):
+            return view.is_valid_for('package')
+        def valid_for_annotationtype(view):
+            view.is_valid_for('annotation-type')
+
+        valid_filter = always_valid
         if isinstance(element, Package):
-            valid_filter = lambda v: v.is_valid_for('package')
+            valid_filter = valid_for_package
         elif isinstance(element, AnnotationType):
-            valid_filter = lambda v: v.is_valid_for('annotation-type')
+            valid_filter = valid_for_annotationtype
         filters = [ e for e in get_exporter().values() if valid_filter(e) ]
         if ident is not None:
             filters = [ e for e in filters if e.get_id() == ident ]

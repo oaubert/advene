@@ -27,7 +27,7 @@ try:
     import scipy.spatial
     from scipy.cluster.vq import vq
     missing_modules = False
-except:
+except ImportError:
     missing_modules = True
 
 import advene.core.config as config

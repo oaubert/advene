@@ -76,7 +76,7 @@ def register(controller=None):
                                      engine.input_handler)
                 method=engine.action_brldisplay
                 engine.brldisplay("Advene connected")
-        except:
+        except Exception:
             logger.warning(_("Could not initialize BrlTTY. No braille support."))
 
     # Register the Braille action even if the API is not available.
@@ -157,11 +157,11 @@ class BrlEngine:
                 navigate_bookmark(+1)
             else:
                 # Navigate to the next annotation in the type
-                l=[an
-                   for an in self.controller.future_begins
-                   if an[0].type == self.currenttype ]
-                if l:
-                    self.controller.queue_action(self.controller.update_status, 'seek', l[0][1])
+                future = [an
+                          for an in self.controller.future_begins
+                          if an[0].type == self.currenttype ]
+                if future:
+                    self.controller.queue_action(self.controller.update_status, 'seek', future[0][1])
         elif k in(brlapi.KEY_SYM_LEFT, ALVA_LPAD_LEFT, ALVA_MPAD_BUTTON1):
             if self.currenttype == 'scroll':
                 if self.char_index >= 0:
@@ -173,11 +173,11 @@ class BrlEngine:
                 navigate_bookmark(-1)
             else:
                 # Navigate to the previous annotation in the type
-                pos=self.controller.player.current_position_value
-                l=[ an for an in self.currenttype.annotations if an.fragment.end < pos ]
-                l.sort(key=lambda a: a.fragment.begin, reverse=True)
-                if l:
-                    self.controller.queue_action(self.controller.update_status, 'seek', l[0].fragment.begin)
+                pos = self.controller.player.current_position_value
+                previous = [ an for an in self.currenttype.annotations if an.fragment.end < pos ]
+                previous.sort(key=lambda a: a.fragment.begin, reverse=True)
+                if previous:
+                    self.controller.queue_action(self.controller.update_status, 'seek', previous[0].fragment.begin)
         elif k in (brlapi.KEY_SYM_UP, brlapi.KEY_SYM_DOWN, ALVA_LPAD_UP, ALVA_LPAD_DOWN):
             types=list( self.controller.package.annotationTypes )
             types.sort(key=lambda at: at.title or at.id)

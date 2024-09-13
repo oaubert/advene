@@ -77,10 +77,10 @@ class FeatureDetectImporter(GenericImporter):
         return 0
 
     def process_file(self, filename):
-        at = self.ensure_new_type('feature',
-                                  title=_("Feature %s") % self.classifier,
-                                  mimetype='image/svg+xml',
-                                  description=_("Detected %s") % self.classifier)
+        self.ensure_new_type('feature',
+                             title=_("Feature %s") % self.classifier,
+                             mimetype='image/svg+xml',
+                            description=_("Detected %s") % self.classifier)
 
         self.progress(0, _("Detection started"))
         video = cv2.VideoCapture(str(filename))

@@ -163,7 +163,6 @@ class AnnotationPlaceholder:
         """
 
         # Find out the pixbuf size
-        import cairo
         context = cairo.Context(cairo.ImageSurface(cairo.FORMAT_ARGB32, 1, 1))
         context.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         context.set_font_size(12)
@@ -635,8 +634,8 @@ class HTMLContentHandler (ContentHandler):
         if menu is None:
             menu=Gtk.Menu()
 
-        def open_link(i, l):
-            self.open_link(l)
+        def open_link(i, link):
+            self.open_link(link)
             return True
 
         def goto_position(i, pos):
@@ -679,9 +678,9 @@ class HTMLContentHandler (ContentHandler):
                     new_menuitem(_("display as table"), select_presentation, ap, ['table'])
                     new_menuitem(_("display as transcription"), select_presentation, ap, ['transcription'])
 
-            l=[ m for m in ctx if m._tag == 'a' ]
-            if l:
-                link=dict(l[0]._attr).get('href', None)
+            marks = [ m for m in ctx if m._tag == 'a' ]
+            if marks:
+                link = dict(marks[0]._attr).get('href', None)
                 if link:
                     if '/media/play' in link:
                         new_menuitem(_("Play video"), open_link, link)
@@ -725,9 +724,9 @@ class HTMLContentHandler (ContentHandler):
                         self.controller.update_status('seek', a.fragment.begin)
                 return False
 
-            l=[ m for m in ctx if m._tag == 'a' ]
-            if l:
-                link=dict(l[0]._attr).get('href', None)
+            marks = [ m for m in ctx if m._tag == 'a' ]
+            if marks:
+                link = dict(marks[0]._attr).get('href', None)
                 self.open_link(link)
                 return False
         return False

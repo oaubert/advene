@@ -205,7 +205,7 @@ class CinelabImporter(GenericImporter):
                     c = v.find(ns('cinelab:content'))
                     if c and c.attrib['mimetype'] == 'application/x-advene-type-constraint':
                         # We know how to parse this
-                        data = dict( l.split('=') for l in c.text.splitlines() )
+                        data = dict( line.split('=') for line in c.text.splitlines() )
                         if data.get('mimetype'):
                             at.mimetype = data.get('mimetype')
 

@@ -177,7 +177,7 @@ class Player:
             self.captioner=Gst.ElementFactory.make('textoverlay', 'captioner')
             # FIXME: move to config.data
             self.captioner.props.font_desc='Sans 24'
-        except:
+        except Exception:
             self.captioner=None
 
         self.imageoverlay=None
@@ -185,7 +185,7 @@ class Player:
             try:
                 self.imageoverlay=Gst.ElementFactory.make(svgelement, 'overlay')
                 self.imageoverlay.props.fit_to_frame = True
-            except:
+            except Exception:
                 logger.error("Gstreamer SVG overlay element is not available", exc_info=True)
 
         try:
@@ -454,7 +454,7 @@ class Player:
         s.uri = self.get_uri()
         try:
             dur = self.player.query_duration(Gst.Format.TIME)[1]
-        except:
+        except Exception:
             duration = 0
         else:
             duration = dur / Gst.MSECOND
@@ -608,7 +608,7 @@ class Player:
                 container.pack_start(self.imagesink.props.widget, True, True, 0)
                 self.imagesink.props.widget.show()
                 widget.hide()
-            except:
+            except Exception:
                 logger.exception("Embedding error")
             return
 

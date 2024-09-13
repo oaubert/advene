@@ -247,10 +247,10 @@ class FrameSelector:
     def build_widget(self):
         vb=Gtk.VBox()
 
-        l = Gtk.Label(label=self.label)
-        vb.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=self.label)
+        vb.pack_start(label, False, True, 0)
 
-        hb=Gtk.HBox()
+        hb = Gtk.HBox()
 
         eb = Gtk.EventBox()
         ar = Gtk.Arrow(Gtk.ArrowType.LEFT, Gtk.ShadowType.IN)

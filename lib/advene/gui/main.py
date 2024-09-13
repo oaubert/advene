@@ -266,7 +266,8 @@ class AdveneApplication(Gtk.Application):
         self.controller = advene.core.controller.AdveneController()
         self.controller.register_gui(self)
         # Text abbreviations
-        self.text_abbreviations = dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() )
+        self.text_abbreviations = dict( line.split(" ", 1)
+                                        for line in config.data.preferences['text-abbreviations'].splitlines() )
 
         # Register defined actions in this instance
         register_named_actions(self)
@@ -537,10 +538,10 @@ class AdveneApplication(Gtk.Application):
         # Register plugins.
         for n in ('plugins', 'views', 'edit'):
             try:
-                l=self.controller.load_plugins(os.path.join(
-                    os.path.dirname(advene.__file__), 'gui', n),
-                                               prefix="advene_gui_%s" % n)
-                self.gui_plugins.extend(l)
+                plugins = self.controller.load_plugins(os.path.join(
+                                                       os.path.dirname(advene.__file__), 'gui', n),
+                                                       prefix="advene_gui_%s" % n)
+                self.gui_plugins.extend(plugins)
             except OSError:
                 logger.error("OSerror while trying to load %s plugins" % n)
         # Explicitly register checker view (which is no longer a plugin)
@@ -718,7 +719,7 @@ class AdveneApplication(Gtk.Application):
                 continue
             if name in ('browser', 'schemaeditor') and not config.data.preferences['expert-mode']:
                 continue
-            if name not in ('webbrowser', 'comment') and not name in self.registered_adhoc_views:
+            if name not in ('webbrowser', 'comment') and name not in self.registered_adhoc_views:
                 self.log("Missing basic adhoc view %s" % name)
                 continue
             b=Gtk.Button()
@@ -751,7 +752,7 @@ class AdveneApplication(Gtk.Application):
                 tree=ET.parse(stream)
                 stream.close()
                 self.workspace_restore(tree.getroot())
-            except:
+            except Exception:
                 logger.error("Cannot restore default workspace", exc_info=True)
         else:
             # Open default views
@@ -823,10 +824,10 @@ class AdveneApplication(Gtk.Application):
         """Return the list of icon pixbuf appropriate for Window.set_icon_list.
         """
         if not hasattr(self, '_icon_list'):
-            l=[ GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile(
-                ( 'pixmaps', 'icon_advene%d.png' % size ) ))
-                for size in (16, 32, 48, 64, 128) ]
-            self._icon_list=[ i for i in l if i is not None ]
+            icons = [ GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile(
+                                                     ( 'pixmaps', 'icon_advene%d.png' % size ) ))
+                      for size in (16, 32, 48, 64, 128) ]
+            self._icon_list = [ i for i in icons if i is not None ]
         return self._icon_list
 
     def set_busy_cursor(self, busy=False):
@@ -1057,14 +1058,14 @@ class AdveneApplication(Gtk.Application):
             # Update the content indexer
             self.controller.package._indexer.element_update(element)
 
-            l=self.last_edited
+            elements = self.last_edited
             # Refresh the edit popup
             for e in [ e for e in self.edit_popups if e.element == element ]:
                 e.refresh()
         elif event.endswith('Create'):
             # Update the content indexer
             self.controller.package._indexer.element_update(element)
-            l=self.last_created
+            elements = self.last_created
         elif event.endswith('Delete'):
             # Close the edit popups
             for e in [ e for e in self.edit_popups if e.element == element ]:
@@ -1080,12 +1081,12 @@ class AdveneApplication(Gtk.Application):
             return True
         else:
             return True
-        s=config.data.preferences['edition-history-size']
-        if element in l:
-            l.remove(element)
-        l.append(element)
-        if len(l) > s:
-            l.pop(0)
+        s = config.data.preferences['edition-history-size']
+        if element in elements:
+            elements.remove(element)
+        elements.append(element)
+        if len(elements) > s:
+            elements.pop(0)
         return True
 
     def handle_element_delete(self, context, parameters):
@@ -1235,10 +1236,10 @@ class AdveneApplication(Gtk.Application):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l = Gtk.Label(label=title + "\nLeave the first field empty to unconditionnaly replace all contents.\nYou can use special characters \\n or \\t.")
-        l.set_line_wrap(True)
-        l.show()
-        d.vbox.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=title + "\nLeave the first field empty to unconditionnaly replace all contents.\nYou can use special characters \\n or \\t.")
+        label.set_line_wrap(True)
+        label.show()
+        d.vbox.pack_start(label, False, True, 0)
 
         hb = Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Find word") + " "), False, False, 0)
@@ -1313,8 +1314,8 @@ class AdveneApplication(Gtk.Application):
         w = Gtk.Window()
         w.set_title(title)
         v = Gtk.VBox()
-        l = Gtk.Label(label=label % { 'filename': filename } )
-        v.add(l)
+        label = Gtk.Label(label=label % { 'filename': filename } )
+        v.add(label)
 
         pg = Gtk.ProgressBar()
         v.pack_start(pg, False, True, 0)
@@ -1360,7 +1361,7 @@ class AdveneApplication(Gtk.Application):
             args=[]
 
         def media_changed(context, parameters):
-            if config.data.preferences['player-autostart'] and not 'record' in self.controller.player.player_capabilities:
+            if config.data.preferences['player-autostart'] and 'record' not in self.controller.player.player_capabilities:
                 self.controller.queue_action(self.controller.update_status, "start")
                 self.controller.queue_action(self.controller.update_status, "pause")
 
@@ -1427,35 +1428,35 @@ class AdveneApplication(Gtk.Application):
 
     @named_action(name="app.check-for-update")
     def check_for_update(self, *p):
-        timeout=socket.getdefaulttimeout()
+        timeout = socket.getdefaulttimeout()
         try:
             socket.setdefaulttimeout(1)
-            u=urllib.request.urlopen('http://www.advene.org/version.txt')
+            u = urllib.request.urlopen('http://www.advene.org/version.txt')
         except Exception:
             socket.setdefaulttimeout(timeout)
             return
         socket.setdefaulttimeout(timeout)
         try:
-            data=u.read().decode('utf-8')
-        except:
-            data=""
+            data = u.read().decode('utf-8')
+        except Exception:
+            data = ""
         u.close()
         if not data:
             return False
-        info=dict( [ l.split(':') for l in data.splitlines() ] )
+        info = dict(line.split(':') for line in data.splitlines())
         major, minor = info['version'].split('.')
-        major=int(major)
-        minor=int(minor)
-        info['current']=advene.core.version.version
+        major = int(major)
+        minor = int(minor)
+        info['current'] = advene.core.version.version
         if (1000 * major + minor) > (1000 * advene.core.version.major + advene.core.version.minor):
             # An update is available.
-            v=Gtk.VBox()
-            msg=textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s, but you are running version %(current)s.\nYou can download the latest version from the Advene website: http://advene.org/</span>""") % info, 55)
-            l=Gtk.Label()
-            l.set_markup(msg)
+            v = Gtk.VBox()
+            msg = textwrap.fill(_("""<span background="#ff8888" size="large"><b>Advene %(version)s has been released</b> on %(date)s, but you are running version %(current)s.\nYou can download the latest version from the Advene website: http://advene.org/</span>""") % info, 55)
+            label = Gtk.Label()
+            label.set_markup(msg)
             #l.set_line_wrap_mode(True)
-            v.add(l)
-            b=Gtk.Button(_("Go to the website"))
+            v.add(label)
+            b = Gtk.Button(_("Go to the website"))
             def open_site(b):
                 self.controller.open_url('http://www.advene.org/download.html')
                 return True
@@ -1476,17 +1477,17 @@ class AdveneApplication(Gtk.Application):
         element may be AnnotationType, RelationType or Schema
         """
         try:
-            c=self.controller.build_context(here=element)
-            colname=c.evaluateValue(element.getMetaData(config.data.namespace, 'color'))
-            gtk_color=name2color(colname)
-        except:
-            gtk_color=None
+            c = self.controller.build_context(here=element)
+            colname = c.evaluateValue(element.getMetaData(config.data.namespace, 'color'))
+            gtk_color = name2color(colname)
+        except Exception:
+            gtk_color = None
         d = Gtk.ColorSelectionDialog(_("Choose a color"), parent=self.gui.win)
         if gtk_color:
             d.get_color_selection().set_current_color(gtk_color)
-        res=d.run()
+        res = d.run()
         if res == Gtk.ResponseType.OK:
-            col=d.get_color_selection().get_current_color()
+            col = d.get_color_selection().get_current_color()
             element.setMetaData(config.data.namespace, 'color', "string:#%04x%04x%04x" % (col.red,
                                                                                           col.green,
                                                                                           col.blue))
@@ -1498,7 +1499,7 @@ class AdveneApplication(Gtk.Application):
             elif isinstance(element, Schema):
                 self.controller.notify('SchemaEditEnd', schema=element)
         else:
-            col=None
+            col = None
         d.destroy()
         return col
 
@@ -1647,7 +1648,7 @@ class AdveneApplication(Gtk.Application):
 
                     def reg():
                         # If we are already in the current annotation, do not goto it
-                        if not self.controller.player.current_position_value in self.current_annotation.fragment:
+                        if self.controller.player.current_position_value not in self.current_annotation.fragment:
                             self.controller.update_status('seek', self.current_annotation.fragment.begin)
                         self.annotation_loop_rule=self.controller.event_handler.internal_rule (event="AnnotationEnd",
                                                                                                method=action_loop)
@@ -1847,10 +1848,10 @@ class AdveneApplication(Gtk.Application):
         return True
 
     def find_bookmark_view(self):
-        l=[ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
-        if l:
+        views = [ w for w in self.adhoc_views if w.view_id == 'activebookmarks' ]
+        if views:
             # There is at least one open view. Use the latest.
-            a=l[-1]
+            a = views[-1]
             self.make_pane_visible(a._destination)
         else:
             # No existing view. Create one.
@@ -1892,7 +1893,7 @@ class AdveneApplication(Gtk.Application):
     @named_action(name="app.player-play-pause")
     def player_play_pause(self, event=None):
         p = self.controller.player
-        if not p.get_uri() and not 'record' in p.player_capabilities:
+        if not p.get_uri() and 'record' not in p.player_capabilities:
             # No movie file is defined yet. Propose to choose one.
             self.on_b_addfile_clicked()
             return True
@@ -2409,16 +2410,16 @@ class AdveneApplication(Gtk.Application):
         stbv_combo = self.gui.stbv_combo
         if stbv_combo is None:
             return True
-        l=[ helper.TitledElement(value=None, title=_("No active dynamic view")) ]
-        l.extend( [ helper.TitledElement(value=i, title='%s %s %s' % (self.arrow_list[config.data.os],
-                                                                      self.controller.get_title(i),
-                                                                      self.arrow_list[config.data.os]))
-                    for i in self.controller.get_stbv_list() ] )
-        st, i = dialog.generate_list_model([ (i.value, i.title) for i in l ],
+        elements = [ helper.TitledElement(value=None, title=_("No active dynamic view")) ]
+        elements.extend( [ helper.TitledElement(value=i, title='%s %s %s' % (self.arrow_list[config.data.os],
+                                                                             self.controller.get_title(i),
+                                                                             self.arrow_list[config.data.os]))
+                           for i in self.controller.get_stbv_list() ] )
+        st, i = dialog.generate_list_model([ (i.value, i.title) for i in elements ],
                                            active_element=self.controller.current_stbv)
         stbv_combo.set_model(st)
         if i is None:
-            i=st.get_iter_first()
+            i = st.get_iter_first()
         # To ensure that the display is updated
         stbv_combo.set_active(-1)
         stbv_combo.set_active_iter(i)
@@ -2626,10 +2627,10 @@ class AdveneApplication(Gtk.Application):
                                    buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                              Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                              ))
-                    l=Gtk.Label(label=_("Do you wish to restore the %s workspace ?") % name.title)
-                    l.set_line_wrap(True)
-                    l.show()
-                    d.vbox.pack_start(l, False, True, 0)
+                    label = Gtk.Label(label=_("Do you wish to restore the %s workspace ?") % name.title)
+                    label.set_line_wrap(True)
+                    label.show()
+                    d.vbox.pack_start(label, False, True, 0)
 
                     delete_existing_toggle=Gtk.CheckButton(_("Clear the current workspace"))
                     delete_existing_toggle.set_active(True)
@@ -2799,9 +2800,9 @@ class AdveneApplication(Gtk.Application):
     def get_adhoc_view_instance_from_id(self, ident):
         """Return the adhoc view instance matching the identifier.
         """
-        l=[v for v in self.adhoc_views if repr(v) == ident ]
-        if l:
-            return l[0]
+        views = [ v for v in self.adhoc_views if repr(v) == ident ]
+        if views:
+            return views[0]
         else:
             return None
 
@@ -2815,10 +2816,10 @@ class AdveneApplication(Gtk.Application):
 
         If no embedded web browser is present, return False.
         """
-        l=[ v for v in self.adhoc_views if v.view_id == 'htmlview' ]
-        if l:
+        views = [ v for v in self.adhoc_views if v.view_id == 'htmlview' ]
+        if views:
             # We use the first one available.
-            l[0].open_url(url)
+            views[0].open_url(url)
             return True
         else:
             return False
@@ -2983,12 +2984,12 @@ class AdveneApplication(Gtk.Application):
         box.pack_start(image_from_position(self.controller,
                                            position=position,
                                            height=height), False, False, 0)
-        l=Gtk.Label()
+        label = Gtk.Label()
         if color:
-            l.set_markup('<span background="%s">%s</span>' % (color, text))
+            label.set_markup('<span background="%s">%s</span>' % (color, text))
         else:
-            l.set_text(text)
-        box.pack_start(l, False, True, 0)
+            label.set_text(text)
+        box.pack_start(label, False, True, 0)
         return box
 
     def register_viewclass(self, viewclass, name=None):
@@ -3081,10 +3082,10 @@ class AdveneApplication(Gtk.Application):
                 else:
                     return getattr(p, name)
             def _get_dict(self):
-                return dict( (el.id, el) for l in (p.annotations, p.relations,
-                                                   p.schemas,
-                                                   p.annotationTypes, p.relationTypes,
-                                                   p.views, p.queries) for el in l )
+                return dict( (el.id, el) for elements in (p.annotations, p.relations,
+                                                          p.schemas,
+                                                          p.annotationTypes, p.relationTypes,
+                                                          p.views, p.queries) for el in elements )
             __dict__ = property(_get_dict)
 
         if localsdict is None:
@@ -3129,8 +3130,8 @@ class AdveneApplication(Gtk.Application):
         # If we are moving the slider, don't update the display
         #Gtk.threads_enter()
         try:
-            pos=self.controller.update()
-        except:
+            pos = self.controller.update()
+        except Exception:
             logger.exception("Internal exception on video player")
             return True
 
@@ -3213,8 +3214,8 @@ class AdveneApplication(Gtk.Application):
         is_playing = c.player.is_playing()
         self.toolbuttons['create_text_annotation'].set_sensitive(is_playing)
         self.toolbuttons['create_svg_annotation'].set_sensitive(is_playing)
-        for l in ('rewind', 'forward', 'previous_frame', 'next_frame', 'loop'):
-            self.player_toolbar.buttons[l].set_sensitive(is_playing)
+        for label in ('rewind', 'forward', 'previous_frame', 'next_frame', 'loop'):
+            self.player_toolbar.buttons[label].set_sensitive(is_playing)
 
         # Check snapshotter activity
         s = getattr(c.player, 'snapshotter', None)
@@ -3238,19 +3239,21 @@ class AdveneApplication(Gtk.Application):
 
         # Check auto-save
         if config.data.preferences['package-auto-save'] != 'never':
-            t=time.time() * 1000
+            t = time.time() * 1000
             if t - self.last_auto_save > config.data.preferences['package-auto-save-interval']:
                 # Need to save
-                l=[ alias for (alias, p) in self.controller.packages.items() if p._modified and alias != 'advene' ]
-                if l:
+                modified = [ alias
+                             for (alias, p) in self.controller.packages.items()
+                             if p._modified and alias != 'advene' ]
+                if modified:
                     if config.data.preferences['package-auto-save'] == 'always':
-                        c.queue_action(do_save, l)
+                        c.queue_action(do_save, modified)
                     else:
                         # Ask before saving. Use the non-modal dialog
                         # to avoid locking the interface
-                        dialog.message_dialog(label=_("""The package(s) %s are modified.\nSave them now?""") % ", ".join(l),
+                        dialog.message_dialog(label=_("""The package(s) %s are modified.\nSave them now?""") % ", ".join(modified),
                                               icon=Gtk.MessageType.QUESTION,
-                                              callback=lambda: do_save(l))
+                                              callback=lambda: do_save(modified))
                 self.last_auto_save=t
         if config.data.debug and debug_slow_update_hook:
             debug_slow_update_hook(self.controller)
@@ -3258,12 +3261,12 @@ class AdveneApplication(Gtk.Application):
 
     @named_action(name="app.search-string")
     def search_string(self, s: str):
-        if not ' ' in s:
+        if ' ' not in s:
             # Single-word search. Forward to existing note-taking or
             # transcription views.
             # Note: it could maybe be better achieved through a new signal WordSearch
             # which could be handled by the views
-            tr=[ v for v in self.adhoc_views if v.view_id in ('transcribe', 'transcription') ]
+            tr = [ v for v in self.adhoc_views if v.view_id in ('transcribe', 'transcription') ]
             for v in tr:
                 v.highlight_search_forward(s)
         return self.controller.search_string(searched=s,
@@ -3298,10 +3301,10 @@ class AdveneApplication(Gtk.Application):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label(label=text)
-        l.set_line_wrap(True)
-        l.show()
-        d.vbox.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=text)
+        label.set_line_wrap(True)
+        label.show()
+        d.vbox.pack_start(label, False, True, 0)
 
         if create and force_create:
             ats=[]
@@ -3460,10 +3463,10 @@ class AdveneApplication(Gtk.Application):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label(label=text)
-        l.set_line_wrap(True)
-        l.show()
-        d.vbox.pack_start(l, False, True, 0)
+        label=Gtk.Label(label=text)
+        label.set_line_wrap(True)
+        label.show()
+        d.vbox.pack_start(label, False, True, 0)
 
         # Anticipated declaration of some widgets, which need to be
         # updated in the handle_new_type/schema_selection callback.
@@ -3856,7 +3859,7 @@ class AdveneApplication(Gtk.Application):
                 self.log(_("A video file was selected. Pretend that the user selected 'Select a video file'..."))
                 self.controller.set_default_media(filename)
                 return True
-            if not ext in ('.xml', '.azp', '.apl'):
+            if ext not in ('.xml', '.azp', '.apl'):
                 # Does not look like a valid package
                 answer = dialog.yes_no_cancel_popup(_("Unrecognized package extension"), _("The file %s does not look like a valid Advene package. It should have a .azp or .xml extension. Do you want to try to import it instead of opening it as a package?") % filename)
                 if answer == Gtk.ResponseType.YES:
@@ -4418,7 +4421,7 @@ Image cache information: %(imagecache)s
         )) )
         fps = [ 10, 12, 24, 25, 30, 40, 50, 60, 72 ]
         d = config.data.preferences['default-fps']
-        if not d in fps:
+        if d not in fps:
             fps.append(d)
             fps.sort()
         ew.add_option(_("Default FPS"), 'default-fps',
@@ -4472,7 +4475,7 @@ Image cache information: %(imagecache)s
             cache['package-auto-save-interval']=cache['package-auto-save-interval']*1000
             if cache['text-abbreviations'] != config.data.preferences['text-abbreviations']:
                 self.text_abbreviations.clear()
-                self.text_abbreviations.update( dict( l.split(" ", 1) for l in config.data.preferences['text-abbreviations'].splitlines() ) )
+                self.text_abbreviations.update( dict( line.split(" ", 1) for line in config.data.preferences['text-abbreviations'].splitlines() ) )
 
             for k in direct_options:
                 if k in restart_needed_options and config.data.preferences[k] != cache[k]:
@@ -4836,7 +4839,7 @@ Image cache information: %(imagecache)s
 
         This requires that the player has the async-snapshot capability.
         """
-        if not 'async-snapshot' in self.controller.player.player_capabilities:
+        if 'async-snapshot' not in self.controller.player.player_capabilities:
             dialog.message_dialog(_("This video player is not able to grab specific screenshots"))
             return True
         missing = set(a.fragment.begin
@@ -4933,7 +4936,7 @@ if __name__ == '__main__':
     app = AdveneApplication ()
     try:
         app.main(config.data.args)
-    except Exception as e:
+    except Exception:
         e, v, tb = sys.exc_info()
         logger.error(config.data.version_string)
         logger.error("Got exception %s. Stopping services...", str(e))

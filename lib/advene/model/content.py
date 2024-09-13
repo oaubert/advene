@@ -65,16 +65,16 @@ class StructuredContent(dict):
         """
         self.clear()
         self['_all']=data
-        for l in data.splitlines():
-            if not l:
+        for line in data.splitlines():
+            if not line:
                 # Ignore empty lines
                 continue
-            if '=' in l:
-                (k, v) = l.split('=', 1)
+            if '=' in line:
+                (k, v) = line.split('=', 1)
                 self[k] = urllib.parse.unquote(v)
             else:
-                self['_error']=l
-                logger.warning("Syntax error in content: >%s<", l)
+                self['_error'] = line
+                logger.warning("Syntax error in content: >%s<", line)
 
     def unparse(self):
         """Return the encoded version of the dictionary.
@@ -170,7 +170,7 @@ class KeywordList:
         """
         try:
             self._values.remove(kw)
-        except:
+        except Exception:
             pass
         return self._values
 

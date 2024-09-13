@@ -62,15 +62,15 @@ class ElanImporter(GenericImporter):
             return 0
 
     def xml_to_text(self, element):
-        l=[]
+        lines = []
         if isinstance(element, handyxml.HandyXmlWrapper):
-            element=element.node
+            element = element.node
         if element.nodeType is xml.dom.Node.TEXT_NODE:
-            l.append(element.data)
+            lines.append(element.data)
         elif element.nodeType is xml.dom.Node.ELEMENT_NODE:
             for e in element.childNodes:
-                l.append(self.xml_to_text(e))
-        return "".join(l)
+                lines.append(self.xml_to_text(e))
+        return "".join(lines)
 
     def iterator(self, elan):
         valid_id_re = re.compile('[^a-zA-Z_0-9]')

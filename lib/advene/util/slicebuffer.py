@@ -137,7 +137,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     mainloop = gobject.MainLoop()
 
-    files = [ a for a in sys.argv[1:] if not '=' in a ]
+    files = [ a for a in sys.argv[1:] if '=' not in a ]
     params = {}
     for p in [ a for a in sys.argv[1:] if '=' in a ]:
         name, value = p.split('=')
@@ -211,7 +211,7 @@ if __name__ == '__main__':
 
     try:
         mainloop.run()
-    except:
+    except Exception:
         pass
 
     pipe.set_state (gst.STATE_NULL)

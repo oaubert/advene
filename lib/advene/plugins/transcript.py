@@ -66,11 +66,11 @@ class TranscriptImporter(GenericImporter):
         progress=0.01
         self.progress(progress)
 
-        l=root.findall('.//text')
-        if l:
+        texts = root.findall('.//text')
+        if texts:
             self.progress(progress, _("Importing transcript"))
-            incr = 0.5 / len(l)
-            for e in l:
+            incr = 0.5 / len(texts)
+            for e in texts:
                 progress += incr
                 self.progress(progress)
                 begin = int(float(e.attrib['start']) * 1000)

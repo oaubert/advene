@@ -97,13 +97,13 @@ class AnnotationImporter(AdhocView):
             if isinstance(b, Gtk.Button):
                 # Normally, the Gtk.Button contains a Gtk.HBox, which
                 # contains some widgets among which a Gtk.Label
-                l = [ c
-                      for w in b.get_children()
-                      for c in w.get_children()
-                      if isinstance(c, Gtk.Label) ]
-                if l:
+                labels = [ c
+                           for w in b.get_children()
+                           for c in w.get_children()
+                           if isinstance(c, Gtk.Label) ]
+                if labels:
                     # Found the label
-                    l[0].set_text(n)
+                    labels[0].set_text(n)
         model = self.importers.get_model()
         model.clear()
         if n.lower().endswith('.azp'):
@@ -230,7 +230,7 @@ class AnnotationImporter(AdhocView):
         def idle_func():
             try:
                 func(*args, **kw)
-            except:
+            except Exception:
                 logger.error("Error in importer")
             return False
         GObject.idle_add(idle_func)

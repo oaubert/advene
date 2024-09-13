@@ -198,9 +198,9 @@ class WebsiteExporter(GenericExporter):
                 used_overlays.add( (ident, tales) )
                 continue
 
-            l = url.replace(self.controller.get_urlbase(), '')
+            link = url.replace(self.controller.get_urlbase(), '')
 
-            if l.startswith('http:') or l.startswith('https:'):
+            if link.startswith('http:') or link.startswith('https:'):
                 # It is an external url
                 self.url_translation[url] = url
                 continue
@@ -295,7 +295,7 @@ class WebsiteExporter(GenericExporter):
                     self.url_translation[original_url] = "%s#%s" % (output, fragment)
             elif self.video_url and player_re.search(url):
                 m = player_re.search(url)
-                if not 'stbv' in url:
+                if 'stbv' not in url:
                     self.url_translation[original_url] = self.video_player.player_url(m.group(2), m.group(4))
                 else:
                     self.url_translation[original_url] = self.unconverted(url, 'need advene')
@@ -335,11 +335,11 @@ class WebsiteExporter(GenericExporter):
                 continue
             if link != tr:
                 extra=[]
-                attr, l = self.video_player.fix_link(tr)
+                attr, reallink = self.video_player.fix_link(tr)
                 if attr is not None:
                     extra.append(attr)
-                if l is not None:
-                    tr = l
+                if reallink is not None:
+                    tr = reallink
                 if 'unconverted' in tr:
                     extra.append('onClick="return false;"')
                 if fragment is not None:

@@ -119,8 +119,8 @@ class AdhocView:
         """
         self.log(m)
         if hasattr(self, 'statusbar'):
-            context_id=self.statusbar.get_context_id('error')
-            message_id=self.statusbar.push(context_id, m)
+            context_id = self.statusbar.get_context_id('error')
+            message_id = self.statusbar.push(context_id, m)
             # Display the message only 1.5 second
             def undisplay():
                 self.statusbar.pop(context_id)
@@ -128,7 +128,7 @@ class AdhocView:
             GObject.timeout_add(1500, undisplay)
 
     def log(self, msg, level=None):
-        m=": ".join( (self.view_name, msg) )
+        m = ": ".join( (self.view_name, msg) )
         if self.controller:
             self.controller.log(m, level)
         else:
@@ -139,15 +139,15 @@ class AdhocView:
         p=self.widget.get_parent()
         if isinstance(p, Gtk.Notebook):
             # We are in a notebook.
-            l=p.get_tab_label(self.widget)
-            if l is not None:
-                if isinstance(l, Gtk.Label):
-                    l.set_text(label)
-                elif isinstance(l, Gtk.HBox):
+            label = p.get_tab_label(self.widget)
+            if label is not None:
+                if isinstance(label, Gtk.Label):
+                    label.set_text(label)
+                elif isinstance(label, Gtk.HBox):
                     # It may be a HBox with multiple elements. Find the label.
                     # Normally (cf gui.viewbook), the label is in an EventBox
-                    l=l.get_children()[1].get_children()[0]
-                    l.set_text(label)
+                    label = label.get_children()[1].get_children()[0]
+                    label.set_text(label)
         elif isinstance(p, Gtk.VBox):
             # It is a popup window. Set its title.
             p.get_toplevel().set_title(label)
@@ -278,7 +278,7 @@ class AdhocView:
             try:
                 elements = c.evaluateValue(source)
                 self.source = source
-            except:
+            except Exception:
                 logger.error(_("Error in source evaluation %s"), source, exc_info=True)
                 elements = []
         return elements

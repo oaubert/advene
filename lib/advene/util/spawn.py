@@ -127,5 +127,5 @@ class ProcessLauncher:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     args = ('10', )
-    l = ProcessLauncher ('sleep', args=args)
-    logger.info("l = Launcher(%s)", l.program_name)
+    launcher = ProcessLauncher ('sleep', args=args)
+    logger.info("launcher = Launcher(%s)", launcher.program_name)

@@ -72,11 +72,11 @@ class XMLFCPImporter(GenericImporter):
         progress=0.01
         self.progress(progress)
 
-        l=root.findall('.//generatoritem')
-        if l:
+        items = root.findall('.//generatoritem')
+        if items:
             self.progress(progress, _("Importing subtitles"))
-            incr = 0.5 / len(l)
-            for e in l:
+            incr = 0.5 / len(items)
+            for e in items:
                 progress += incr
                 self.progress(progress)
                 invrate = 1000 / int(e.findtext('rate/timebase'))
@@ -90,12 +90,12 @@ class XMLFCPImporter(GenericImporter):
             progress = .5
 
         self.progress(progress, _("Importing clips"))
-        l = root.findall('.//clipitem')
-        if not l:
+        items = root.findall('.//clipitem')
+        if not items:
             self.progress(1.0, label=_("No clip"))
             return
-        incr = 0.48 / len(l)
-        for e in l:
+        incr = 0.48 / len(items)
+        for e in items:
             progress += incr
             self.progress(progress)
             invrate = 1000 / int(e.findtext('rate/timebase'))

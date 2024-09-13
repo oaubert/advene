@@ -146,14 +146,14 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def get_current_bookmark(self):
-        l=[ b for b in self.bookmarks if b.is_current ]
-        if l:
-            return l[0]
+        bookmarks = [ b for b in self.bookmarks if b.is_current ]
+        if bookmarks:
+            return bookmarks[0]
         else:
             return None
 
     def set_current_bookmark(self, cur=None):
-        b=self.get_current_bookmark()
+        b = self.get_current_bookmark()
         if b == cur:
             return
         if b is not None:
@@ -263,19 +263,19 @@ class ActiveBookmarks(AdhocView):
         return True
 
     def update_annotation (self, annotation=None, event=None):
-        l=[w for w in self.bookmarks if w.annotation == annotation ]
-        if l:
-            wid=l[0]
+        widgets = [w for w in self.bookmarks if w.annotation == annotation ]
+        if widgets:
+            wid = widgets[0]
         else:
             return True
         if event == 'AnnotationEditEnd':
             # The annotation was updated. Check if an update is necessary
             if wid.begin != annotation.fragment.begin:
-                wid.begin=annotation.fragment.begin
+                wid.begin = annotation.fragment.begin
             if wid.end != annotation.fragment.end:
-                wid.end=annotation.fragment.end
+                wid.end = annotation.fragment.end
             if wid.content != annotation.content.data:
-                wid.content=annotation.content.data
+                wid.content = annotation.content.data
         elif event == 'AnnotationDelete':
             if wid.begin is not None and wid.end is not None:
                 # Neither bound is None -> the annotation was deleted
@@ -288,11 +288,11 @@ class ActiveBookmarks(AdhocView):
 
         Usually used in DND callbacks, with wid=Gtk.drag_get_source_widget(context)
         """
-        l=[ b
-            for b in self.bookmarks
-            if b.is_widget_in_bookmark(wid) ]
-        if l:
-            return l[0]
+        widgets = [ b
+                    for b in self.bookmarks
+                    if b.is_widget_in_bookmark(wid) ]
+        if widgets:
+            return widgets[0]
         else:
             return None
 
@@ -425,39 +425,39 @@ class ActiveBookmarks(AdhocView):
             return False
 
         def do_complete(b, func):
-            l=[ bo for bo in self.bookmarks if bo.annotation is None ]
+            bookmarks = [ bo for bo in self.bookmarks if bo.annotation is None ]
             if isinstance(func, int):
-                for b in l:
-                    b.end=b.begin+func
+                for b in bookmarks:
+                    b.end = b.begin+func
             elif func == 'user':
-                d=dialog.entry_dialog(title=_("Bookmark duration"),
-                                      text=_("Enter the duration (in ms) to convert bookmarks into annotations"),
-                                      default="2000")
+                d = dialog.entry_dialog(title=_("Bookmark duration"),
+                                        text=_("Enter the duration (in ms) to convert bookmarks into annotations"),
+                                        default="2000")
                 if d is not None:
                     try:
-                        d=int(d)
+                        d = int(d)
                     except ValueError:
                         return
-                    for b in l:
-                        b.end=b.begin+d
+                    for b in bookmarks:
+                        b.end = b.begin+d
             elif func == 'coverage':
-                begin_list=[ b.begin for b in self.bookmarks ]
+                begin_list = [ b.begin for b in self.bookmarks ]
                 begin_list.sort()
-                for b in l:
-                    val=[ v for v in begin_list if v > b.begin ]
+                for b in bookmarks:
+                    val = [ v for v in begin_list if v > b.begin ]
                     if val:
-                        b.end=val[0]
+                        b.end = val[0]
                     else:
-                        b.end=self.controller.cached_duration
+                        b.end = self.controller.cached_duration
 
         def complete(widget):
-            m=Gtk.Menu()
+            m = Gtk.Menu()
             for t, func in (
                     (_("User-specified duration"), 'user'),
                     (_("2s duration"), 2000),
                     (_("Complete coverage"), 'coverage'),
                 ):
-                i=Gtk.MenuItem(t)
+                i = Gtk.MenuItem(t)
                 i.connect('activate', do_complete, func)
                 m.append(i)
             m.show_all()
@@ -467,19 +467,19 @@ class ActiveBookmarks(AdhocView):
         def remove_current(widget):
             """Remove the current bookmark.
             """
-            b=self.get_current_bookmark()
+            b = self.get_current_bookmark()
             if b is not None:
                 self.remove(b)
             return True
 
-        b=get_small_stock_button(Gtk.STOCK_DELETE)
+        b = get_small_stock_button(Gtk.STOCK_DELETE)
         b.set_tooltip_text(_("Drop a bookmark here to remove it from the list"))
         if config.data.os == 'win32':
             # DND on win32 is partially broken: it will not detect
             # ACTION_MOVE only. We have to add ACTION_COPY.
-            flags=Gdk.DragAction.COPY | Gdk.DragAction.MOVE
+            flags = Gdk.DragAction.COPY | Gdk.DragAction.MOVE
         else:
-            flags=Gdk.DragAction.MOVE
+            flags = Gdk.DragAction.MOVE
         b.drag_dest_set(Gtk.DestDefaults.MOTION |
                         Gtk.DestDefaults.HIGHLIGHT |
                         Gtk.DestDefaults.ALL,
@@ -487,25 +487,25 @@ class ActiveBookmarks(AdhocView):
                         flags )
         b.connect('drag-data-received', remove_drag_received)
         b.connect('clicked', remove_current)
-        i=Gtk.ToolItem()
+        i = Gtk.ToolItem()
         i.add(b)
         tb.insert(i, -1)
 
-        b=get_pixmap_toolbutton('set-to-now.png', bookmark_current_time)
+        b = get_pixmap_toolbutton('set-to-now.png', bookmark_current_time)
         b.set_tooltip_text(_("Insert a bookmark for the current video time"))
         tb.insert(b, -1)
 
-        i=Gtk.ToolItem()
-        types=[ (at, self.controller.get_title(at), self.controller.get_element_color(at)) for at in self.controller.package.annotationTypes ]
+        i = Gtk.ToolItem()
+        types = [ (at, self.controller.get_title(at), self.controller.get_element_color(at)) for at in self.controller.package.annotationTypes ]
         types.sort(key=lambda a: a[1])
 
-        sel=dialog.list_selector_widget(members=types)
+        sel = dialog.list_selector_widget(members=types)
         sel.set_tooltip_text(_("Type of the annotations that will be created"))
         i.add(sel)
-        self.chosen_type_selector=sel
-        default=helper.get_id(self.controller.package.annotationTypes, 'annotation')
+        self.chosen_type_selector = sel
+        default = helper.get_id(self.controller.package.annotationTypes, 'annotation')
         if default is None:
-            default=helper.get_id(self.controller.package.annotationTypes, 'active_bookmark')
+            default = helper.get_id(self.controller.package.annotationTypes, 'active_bookmark')
         if default is not None:
             self.chosen_type_selector.set_current_element(default)
         tb.insert(i, -1)
@@ -591,17 +591,17 @@ class ActiveBookmarks(AdhocView):
         def mainbox_drag_received(widget, context, x, y, selection, targetType, time):
             index=None
             if widget == self.mainbox:
-                l=[ b
-                    for b in self.bookmarks
-                    if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
-                if l:
-                    index=self.bookmarks.index(l[0])
+                bookmarks = [ b
+                              for b in self.bookmarks
+                              if y < b.widget.get_allocation().y + b.widget.get_allocation().height  ]
+                if bookmarks:
+                    index = self.bookmarks.index(bookmarks[0])
             if targetType == config.data.target_type['timestamp']:
-                data=decode_drop_parameters(selection.get_data())
-                position=int(data['timestamp'])
-                b=self.append(position, index)
+                data = decode_drop_parameters(selection.get_data())
+                position = int(data['timestamp'])
+                b = self.append(position, index)
                 if 'comment' in data:
-                    b.content=data['comment']
+                    b.content = data['comment']
                 # If the drag originated from our own widgets, remove it.
                 if Gdk.DragAction.MOVE & context.get_actions():
                     self.delete_origin_timestamp(Gtk.drag_get_source_widget(context))
@@ -617,11 +617,11 @@ class ActiveBookmarks(AdhocView):
             elif targetType == config.data.target_type['annotation']:
                 sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 for source in sources:
-                    l=[ b for b in self.bookmarks if b.annotation == source ]
-                    if l:
+                    bookmarks = [ b for b in self.bookmarks if b.annotation == source ]
+                    if bookmarks:
                         # We are dropping from the same view. Reorder
-                        b=l[0]
-                        i=self.bookmarks.index(b)
+                        b = bookmarks[0]
+                        i = self.bookmarks.index(b)
                         self.bookmarks.remove(b)
                         if i < index:
                             self.bookmarks.insert(index - 1, b)
@@ -631,7 +631,7 @@ class ActiveBookmarks(AdhocView):
                             self.bookmarks.append(b)
                     else:
                         # Dropping from another view or copying. Create a bookmark
-                        b=ActiveBookmark(container=self, annotation=source)
+                        b = ActiveBookmark(container=self, annotation=source)
                         if index is None:
                             self.bookmarks.append(b)
                         else:
@@ -1067,9 +1067,9 @@ class ActiveBookmark:
                 self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, color)
         else:
             # Reset the color and the label widget
-            l=self.frame.get_label_widget()
-            if l is not None:
-                l.destroy()
+            label = self.frame.get_label_widget()
+            if label is not None:
+                label.destroy()
             # Reset the textview color
             #self.begin_widget.comment_entry.modify_base(Gtk.StateType.NORMAL, self.default_background_color)
 
@@ -1195,7 +1195,7 @@ class ActiveBookmark:
         self.begin_widget.image.connect('focus-in-event', focus_bookmark)
 
         def extend_image_menu(menu, element):
-            l=[
+            items = [
                 (_("Duplicate bookmark"), lambda i: self.container.duplicate_bookmark(self)),
                 (_("Remove bookmark"), lambda i: self.container.remove(self)),
                 ]
@@ -1205,32 +1205,32 @@ class ActiveBookmark:
                 return True
 
             if self.end is not None:
-                l.append(
+                items.append(
                     (_("Remove begin timestamp"), remove_begin)
                     )
-            for (label, action) in l:
-                i=Gtk.MenuItem(label)
+            for (label, action) in items:
+                i = Gtk.MenuItem(label)
                 i.connect('activate', action)
                 menu.append(i)
             if self.annotation is None:
-                i=Gtk.MenuItem(_("Complete bookmark"))
+                i = Gtk.MenuItem(_("Complete bookmark"))
                 i.connect('activate', lambda i: self.set_end(self.begin + 2000))
                 menu.append(i)
             else:
-                i=Gtk.MenuItem(_("Change type to"))
-                sm=Gtk.Menu()
+                i = Gtk.MenuItem(_("Change type to"))
+                sm = Gtk.Menu()
                 i.set_submenu(sm)
                 menu.append(i)
-                l=[ (t, self.controller.get_title(t))
-                    for t in self.controller.package.annotationTypes
-                    if t != self.annotation.type ]
-                l.sort(key=lambda a: a[1])
-                for (typ, title) in l:
-                    i=Gtk.MenuItem(title, use_underline=False)
+                typeitems = [ (t, self.controller.get_title(t))
+                              for t in self.controller.package.annotationTypes
+                              if t != self.annotation.type ]
+                typeitems.sort(key=lambda a: a[1])
+                for (typ, title) in typeitems:
+                    i = Gtk.MenuItem(title, use_underline=False)
                     i.connect('activate', (lambda i, t: self.transtype(t)), typ)
                     sm.append(i)
             return
-        self.begin_widget.image.extend_popup_menu=extend_image_menu
+        self.begin_widget.image.extend_popup_menu = extend_image_menu
 
         self.begin_widget.comment_entry.set_accepts_tab(False)
 
@@ -1308,10 +1308,10 @@ class ActiveBookmark:
             end=Gtk.Image()
             h.pack_start(end, False, True, 0)
             v.pack_start(h, False, True, 0)
-            l=Gtk.Label()
-            l.set_ellipsize(Pango.EllipsizeMode.END)
-            l.get_style_context().add_class('advene_drag_icon')
-            v.pack_start(l, False, True, 0)
+            label = Gtk.Label()
+            label.set_ellipsize(Pango.EllipsizeMode.END)
+            label.get_style_context().add_class('advene_drag_icon')
+            v.pack_start(label, False, True, 0)
 
             def set_cursor(wid, t=None, precision=None):
                 if t is None:
@@ -1329,7 +1329,7 @@ class ActiveBookmark:
                         begin.set_from_pixbuf(pixbuf)
                         end.hide()
                         padding.hide()
-                        l.set_text(helper.format_time(t))
+                        label.set_text(helper.format_time(t))
                     elif isinstance(t, Annotation):
                         # It can be an annotation
                         begin.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t),
@@ -1339,27 +1339,27 @@ class ActiveBookmark:
                                                           width=config.data.preferences['drag-snapshot-width']))
                         end.show()
                         padding.show()
-                        l.set_text(self.controller.get_title(t))
+                        label.set_text(self.controller.get_title(t))
                 wid._current=t
                 return True
 
             w.add(v)
             w.show_all()
-            w._current=None
+            w._current = None
             w.set_cursor = set_cursor.__get__(w)
             w.set_cursor()
             w.set_size_request(int(2.5 * config.data.preferences['drag-snapshot-width']), -1)
-            widget._icon=w
+            widget._icon = w
             Gtk.drag_set_icon_widget(context, w, 0, 0)
             return True
 
         def _drag_end(widget, context):
             widget._icon.destroy()
-            widget._icon=None
+            widget._icon = None
             return True
 
         def _drag_motion(widget, drag_context, x, y, timestamp):
-            w=Gtk.drag_get_source_widget(drag_context)
+            w = Gtk.drag_get_source_widget(drag_context)
             try:
                 w._icon.set_cursor()
             except AttributeError:

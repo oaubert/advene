@@ -82,8 +82,8 @@ class CutterImporter(GstImporter):
         return True
 
     def setup_importer(self, filename):
-        at = self.ensure_new_type('sound_segment',
-                                  title=_("Sound segment"),
-                                  description=_("Sound segmentation with a threshold of %(threshold)d dB - channel: %(channel)s") % self.__dict__)
+        self.ensure_new_type('sound_segment',
+                             title=_("Sound segment"),
+                             description=_("Sound segmentation with a threshold of %(threshold)d dB - channel: %(channel)s") % self.__dict__)
 
         return "audioconvert ! audiopanorama method=1 panorama=%d ! audioconvert ! cutter threshold-dB=%s run-length=%d" % (self.channel_mapping[self.channel], str(self.threshold), self.min_silence_duration * Gst.MSECOND)

@@ -90,24 +90,24 @@ class TrsImporter(GenericImporter):
                     progress += incr
 
                     try:
-                        s_begin=float(s.get('startTime')) ## 'startTime' is a "Section" required attribute
-                    except:
+                        s_begin = float(s.get('startTime')) ## 'startTime' is a "Section" required attribute
+                    except Exception:
                         logger.error("startTime Conversion", exc_info=True)
                         continue
 
-                    s_begin=int(s_begin*1000)
+                    s_begin = int(s_begin*1000)
 
                     try:
-                        s_end=float(s.get('endTime'))    ## 'endTime' is a "Section" required attribute
-                    except:
+                        s_end = float(s.get('endTime'))    ## 'endTime' is a "Section" required attribute
+                    except Exception:
                         logger.error("endTime Conversion", exc_info=True)
                         continue
 
-                    s_end=int(s_end*1000)
+                    s_end = int(s_end*1000)
 
                     try:
                         typ = s.get('type')              ## 'type' is a "Section" required attribute
-                    except:
+                    except Exception:
                         logger.error("type Conversion", exc_info=True)
                         continue
 
@@ -115,11 +115,11 @@ class TrsImporter(GenericImporter):
                     try :
                         if s.get('topic') is not None:
                             topic = self.topics[s.get('topic')].rstrip('[]')
-                    except AttributeError as KeyError:
+                    except (AttributeError, KeyError):
                         pass
 
 
-                    d={
+                    d = {
                         'type': self.atypes['Section'],
                         'begin': s_begin,
                         'end': s_end,
@@ -131,20 +131,20 @@ class TrsImporter(GenericImporter):
                         for t in s.findall('Turn'):
 
                             try:
-                                t_begin=float(t.get('startTime')) ## 'startTime' is a "Turn" required attribute
-                            except:
+                                t_begin = float(t.get('startTime')) ## 'startTime' is a "Turn" required attribute
+                            except Exception:
                                 logger.error("startTime Conversion", exc_info=True)
                                 continue
 
-                            t_begin=int(t_begin*1000)
+                            t_begin = int(t_begin*1000)
 
                             try:
-                                t_end=float(t.get('endTime'))   ## 'endTime' is a "Turn" required attribute
-                            except:
+                                t_end = float(t.get('endTime'))   ## 'endTime' is a "Turn" required attribute
+                            except Exception:
                                 logger.error("endTime Conversion", exc_info=True)
                                 continue
 
-                            t_end=int(t_end*1000)
+                            t_end = int(t_end*1000)
 
                             speaker = ""   ## 'speaker' is a "Turn" optional attribute
                             try:
@@ -153,7 +153,7 @@ class TrsImporter(GenericImporter):
                             except (AttributeError, KeyError):
                                 pass
 
-                            d={
+                            d = {
                                 'type': self.atypes['Turn'],
                                 'begin': t_begin,
                                 'end': t_end,
@@ -170,7 +170,7 @@ class TrsImporter(GenericImporter):
                                 if elem.tag == "Sync" :
                                     try:
                                         seg_time = float(elem.get('time'))
-                                    except:
+                                    except Exception:
                                         logger.error("time Conversion", exc_info=True)
                                         continue
 
@@ -194,7 +194,7 @@ class TrsImporter(GenericImporter):
                                 elif elem.tag == 'Background':
                                     try:
                                         time = elem.get('time')
-                                    except:
+                                    except Exception:
                                         logger.error("time Conversion", exc_info=True)
                                         continue
 
@@ -211,7 +211,7 @@ class TrsImporter(GenericImporter):
                                             n_type = elem.get('type')
                                         except AttributeError:
                                             continue
-                                        b ={
+                                        b = {
                                             'type': self.atypes['Background'],
                                             'begin': n_begin,
                                             'end': None,
@@ -246,7 +246,7 @@ class TrsImporter(GenericImporter):
                 yield b
 
     def process_file(self, filename):
-        trstree=ETree.parse(filename)
+        trstree = ETree.parse(filename)
         trs = trstree.getroot()
 
         if trs.tag != 'Trans':
@@ -257,12 +257,12 @@ class TrsImporter(GenericImporter):
             self.progress(0.1, _("Creating package"))
             self.init_package(filename=filename, schemaid=None, annotationtypeid=None)
 
-        self.schema=self.create_schema('trs', title="Transcriber converted schema")
+        self.schema = self.create_schema('trs', title="Transcriber converted schema")
 
         # Create the 4 default types : Section, Turn, Transcription, Background
         self.progress(0.3, _("Creating annotation types"))
         for n in ('Section', 'Turn', 'Transcription', 'Background'):
-            self.atypes[n]=self.create_annotation_type(self.schema, n)
+            self.atypes[n] = self.create_annotation_type(self.schema, n)
 
         # Handle heading information
         self.progress(0.4, _("Parsing header information"))

@@ -106,14 +106,14 @@ class AccumulatorPopup(AdhocView):
             hidetime = -1
 
         # Build a titled frame around the widget
-        f=Gtk.Frame()
+        f = Gtk.Frame()
         if isinstance(title, str):
-            hb=Gtk.HBox()
+            hb = Gtk.HBox()
 
-            l=Gtk.Label(label=title)
-            hb.pack_start(l, False, True, 0)
+            label = Gtk.Label(label=title)
+            hb.pack_start(label, False, True, 0)
 
-            b=get_pixmap_button('small_close.png')
+            b = get_pixmap_button('small_close.png')
             b.set_relief(Gtk.ReliefStyle.NONE)
             b.connect('clicked', self.undisplay_cb, widget)
             hb.pack_start(b, False, False, 0)

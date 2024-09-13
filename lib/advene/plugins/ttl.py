@@ -62,35 +62,35 @@ class TTLImporter(GenericImporter):
         return self.package
 
     def iterator(self, fd):
-        progress=0.02
+        progress = 0.02
         in_list = False
         start_time = -1
         propname = ''
         data = ''
-        for l in fd:
-            l=str(l.strip().rstrip(";").strip(), 'latin1')
+        for line in fd:
+            line = str(line.strip().rstrip(";").strip(), 'latin1')
             if self.model is None:
-                if '/modelLDT/' in l:
+                if '/modelLDT/' in line:
                     self.model = 'ldt'
-                elif '/visu/' in l:
+                elif '/visu/' in line:
                     self.model = 'visu'
 
-            m=type_re.search(l)
+            m = type_re.search(line)
             if m:
                 item = { 'type': m.group(1) }
                 continue
 
-            if l.startswith(')'):
+            if line.startswith(')'):
                 # End of list
                 item[propname] = data
                 in_list = False
                 continue
 
             if in_list:
-                data.append(l)
+                data.append(line)
                 continue
 
-            m=prop_re.search(l)
+            m = prop_re.search(line)
             if m:
                 propname = m.group(1).lower()
                 if propname == 'id':
@@ -110,7 +110,7 @@ class TTLImporter(GenericImporter):
 
                 continue
 
-            if l.startswith('.'):
+            if line.startswith('.'):
                 self.progress(progress)
                 progress += .05
 

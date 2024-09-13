@@ -272,15 +272,15 @@ class RelationType(AbstractType,
         e = self._getChild((adveneNS, "member-types"))
         if e is None:
             return []
-        l = []
+        items = []
         for i in e.childNodes:
             if i.nodeType is ELEMENT_NODE:
                 try:
                     uri = i.getAttributeNS (xlinkNS, 'href')
-                    l.append (uri)
-                except:
-                    l.append (None)
-        return tuple (l)
+                    items.append (uri)
+                except Exception:
+                    items.append (None)
+        return tuple (items)
 
     def setHackedMemberTypes (self, membertypes):
         """Update the membertypes of a relationtype.

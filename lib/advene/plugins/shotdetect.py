@@ -74,15 +74,15 @@ class ShotdetectImporter(GenericImporter):
             logger.error("Invalid Shotdetect file format: %s", root.tag)
             return
 
-        progress=0.01
+        progress = 0.01
         self.progress(progress)
 
-        l=root.findall('content/body/shots/shot')
-        if not l:
+        shots = root.findall('content/body/shots/shot')
+        if not shots:
             self.progress(1.0, label=_("No shots"))
             return
-        incr=0.98/len(l)
-        for an in l:
+        incr = 0.98 / len(shots)
+        for an in shots:
             progress += incr
             self.progress(progress)
             yield {

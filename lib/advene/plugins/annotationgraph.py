@@ -83,24 +83,24 @@ class AnnotationGraphImporter(GenericImporter):
             if anchor.attrib['unit'] != 'milliseconds':
                 logger.error("Unhandled anchor unit (%s) Positioning will be wrong.", anchor.attrib['unit'])
             self.anchors[anchor.attrib['id']]=int(anchor.attrib['offset'])
-        ats={}
-        attribs={}
+        ats = {}
+        attribs = {}
 
-        progress=0.01
+        progress = 0.01
         self.progress(progress)
-        l=root.findall('%s/%s' % (tag('AG'), tag('Annotation')))
-        incr=0.98/len(l)
-        for an in l:
+        annotations = root.findall('%s/%s' % (tag('AG'), tag('Annotation')))
+        incr = 0.98/len(annotations)
+        for an in annotations:
             progress += incr
             self.progress(progress)
-            t=an.attrib['type']
-            if not t in ats:
-                ats[t]=self.create_annotation_type (schema, t)
-            at=ats[t]
+            t = an.attrib['type']
+            if t not in ats:
+                ats[t] = self.create_annotation_type (schema, t)
+            at = ats[t]
 
-            attribnames=attribs.setdefault(an.attrib['type'], set())
-            content="\n".join( [ "%s=%s" % (f.attrib['name'], f.text)
-                                 for f in an.findall(str(tag('Feature'))) ] )
+            attribnames = attribs.setdefault(an.attrib['type'], set())
+            content = "\n".join( [ "%s=%s" % (f.attrib['name'], f.text)
+                                   for f in an.findall(str(tag('Feature'))) ] )
             attribnames.update([ f.attrib['name'] for f in an.findall(tag('Feature')) ])
 
             yield {

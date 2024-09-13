@@ -147,19 +147,19 @@ class TreeViewImporter:
                                      False,
                                      'list'])
         for s in p.schemas:
-            srow=store.append(parent=schemasrow,
-                              row=[s,
-                                   s.title or s.id,
-                                   s.id,
-                                   self.is_imported(s),
-                                   s.uri])
+            srow = store.append(parent=schemasrow,
+                                row=[s,
+                                     s.title or s.id,
+                                     s.id,
+                                     self.is_imported(s),
+                                     s.uri])
             for at in s.annotationTypes:
-                atrow=store.append(parent=srow,
-                                   row=[at,
-                                        at.title or at.id,
-                                        at.id,
-                                        self.is_imported(at),
-                                        at.uri])
+                atrow = store.append(parent=srow,
+                                     row=[at,
+                                          at.title or at.id,
+                                          at.id,
+                                          self.is_imported(at),
+                                          at.uri])
                 # Does not work because the model does not
                 # grasp at.annotations for an importer package.
                 # for a in at.annotations:

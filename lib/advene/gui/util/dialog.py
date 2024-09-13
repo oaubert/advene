@@ -155,10 +155,10 @@ def list_selector_widget(members=None,
                 return None
         def set_current_element(combo, el):
             # Find the index of the element
-            l=[ t[0] for t in enumerate(combo.get_model()) if t[1][1] == el ]
-            if l:
+            elements = [ t[0] for t in enumerate(combo.get_model()) if t[1][1] == el ]
+            if elements:
                 # The element is present.
-                combo.set_active(l[0])
+                combo.set_active(elements[0])
             else:
                 combo.set_active_iter(combo.get_model().append( (str(el), el, None) ))
 
@@ -253,9 +253,9 @@ def list_selector(title=None,
                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
 
     if text is not None:
-        l=Gtk.Label(label=text)
-        l.show()
-        d.vbox.add(l)
+        label = Gtk.Label(label=text)
+        label.show()
+        d.vbox.add(label)
 
     if multiple:
         scroll_win = Gtk.ScrolledWindow ()
@@ -387,9 +387,9 @@ def yes_no_cancel_popup(title=None,
     hb.pack_start(i, False, True, 0)
 
     if text is not None:
-        l=Gtk.Label(label=text)
-        l.show()
-        hb.add(l)
+        label = Gtk.Label(label=text)
+        label.show()
+        hb.add(label)
     d.connect('key-press-event', dialog_keypressed_cb)
 
     d.show()
@@ -422,9 +422,9 @@ def entry_dialog(title=None,
                              Gtk.STOCK_OK, Gtk.ResponseType.OK,
                              ))
     if text:
-        l=Gtk.Label(label=text)
-        l.show()
-        d.vbox.add(l)
+        label = Gtk.Label(label=text)
+        label.show()
+        d.vbox.add(label)
 
     e=Gtk.Entry()
     e.show()
@@ -507,21 +507,21 @@ def title_id_widget(element_title=None,
     @type element_id: string
     @return: the widget
     """
-    v=Gtk.Table(rows=2, columns=2)
+    v = Gtk.Table(rows=2, columns=2)
 
-    l=Gtk.Label(label=_("Title"))
-    v.attach(l, 0, 1, 0, 1)
+    label = Gtk.Label(label=_("Title"))
+    v.attach(label, 0, 1, 0, 1)
 
-    title_entry=Gtk.Entry()
+    title_entry = Gtk.Entry()
     title_entry.show()
     if element_title:
         title_entry.set_text(element_title)
     v.attach(title_entry, 1, 2, 0, 1)
 
-    l=Gtk.Label(label=_("Id"))
-    v.attach(l, 0, 1, 1, 2)
+    label = Gtk.Label(label=_("Id"))
+    v.attach(label, 0, 1, 1, 2)
 
-    id_entry=Gtk.Entry()
+    id_entry = Gtk.Entry()
     id_entry.show()
     if element_id:
         id_entry.set_text(element_id)
@@ -533,8 +533,8 @@ def title_id_widget(element_title=None,
 
     title_entry.connect('changed', update_id)
 
-    v.id_entry=id_entry
-    v.title_entry=title_entry
+    v.id_entry = id_entry
+    v.title_entry = title_entry
     return v
 
 def title_id_dialog(title=_("Name the element"),
@@ -565,9 +565,9 @@ def title_id_dialog(title=_("Name the element"),
                              Gtk.STOCK_OK, Gtk.ResponseType.OK,
                              ))
     if text:
-        l=Gtk.Label(label=text)
-        l.show()
-        d.vbox.add(l)
+        label = Gtk.Label(label=text)
+        label.show()
+        d.vbox.add(label)
 
     v=title_id_widget(element_title, element_id)
     d.vbox.pack_start(v, False, True, 0)
@@ -648,9 +648,9 @@ def get_filename(title=_("Open a file"),
     preview_box.add(preview)
 
     if alias:
-        h=Gtk.HBox()
-        l=Gtk.Label(label=_("Alias"))
-        h.add(l)
+        h = Gtk.HBox()
+        label = Gtk.Label(label=_("Alias"))
+        h.add(label)
         alias_entry = Gtk.Entry()
         h.add(alias_entry)
         preview_box.add(h)
@@ -662,7 +662,7 @@ def get_filename(title=_("Open a file"),
         return al
 
     def update_preview(chooser):
-        filename=chooser.get_preview_filename()
+        filename = chooser.get_preview_filename()
         if filename is None:
             return True
         setattr(preview, '_filename', filename)
@@ -673,7 +673,7 @@ def get_filename(title=_("Open a file"),
             chooser.set_preview_widget_active(True)
             if config.data.os == 'win32':
                 # Force resize for win32
-                oldmode=chooser.get_resize_mode()
+                oldmode = chooser.get_resize_mode()
                 try:
                     chooser.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
                 except AttributeError:
@@ -692,27 +692,27 @@ def get_filename(title=_("Open a file"),
         if hasattr(button, '_filename') and button._filename:
             button.set_label(_("Wait..."))
             try:
-                st=helper.get_statistics(button._filename)
+                st = helper.get_statistics(button._filename)
             except AdveneException as e:
-                st=_("Error: %s") % str(e)
+                st = _("Error: %s") % str(e)
             button.set_label(st)
-            button._filename=None
+            button._filename = None
         return True
 
     preview.connect('clicked', do_preview)
 
-    fs=Gtk.FileChooserDialog(title=title,
-                             parent=DEFAULT_PARENT,
-                             action=action,
-                             buttons=( button,
-                                       Gtk.ResponseType.OK,
-                                       Gtk.STOCK_CANCEL,
-                                       Gtk.ResponseType.CANCEL ))
+    fs = Gtk.FileChooserDialog(title=title,
+                               parent=DEFAULT_PARENT,
+                               action=action,
+                               buttons=( button,
+                                         Gtk.ResponseType.OK,
+                                         Gtk.STOCK_CANCEL,
+                                         Gtk.ResponseType.CANCEL ))
     fs.set_preview_widget(preview_box)
     fs.set_select_multiple(multiple)
 
     # filter may be: 'any', 'advene', 'session', 'video'
-    filters={}
+    filters = {}
 
     for name, descr, exts in (
             ('any', _("Any type of file"), ( '*', ) ),
@@ -723,7 +723,7 @@ def get_filename(title=_("Open a file"),
             ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg', '*.aac', '*.m4a', '*.opus')),
             ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
         ):
-        filters[name]=Gtk.FileFilter()
+        filters[name] = Gtk.FileFilter()
         filters[name].set_name(descr)
         for e in exts:
             filters[name].add_pattern(e)
@@ -741,20 +741,20 @@ def get_filename(title=_("Open a file"),
 
     fs.show()
     center_on_mouse(fs)
-    res=fs.run()
-    filename=None
-    al=None
+    res = fs.run()
+    filename = None
+    al = None
     if res == Gtk.ResponseType.OK:
         if multiple:
             filename = fs.get_filenames()
         else:
             filename = fs.get_filename()
         if alias and not multiple:
-            al=alias_entry.get_text()
+            al = alias_entry.get_text()
             if not al:
                 # It may not have been updated, if the user typed the
                 # filename in the entry box.
-                al=generate_alias(filename)
+                al = generate_alias(filename)
             al = re.sub('[^a-zA-Z0-9_]', '_', al)
     fs.destroy()
 
@@ -778,22 +778,22 @@ def get_dirname(title=_("Choose a directory"),
     @return: the directory name
     """
 
-    fs=Gtk.FileChooserDialog(title=title,
-                             parent=DEFAULT_PARENT,
-                             action=action,
-                             buttons=( button,
-                                       Gtk.ResponseType.OK,
-                                       Gtk.STOCK_CANCEL,
-                                       Gtk.ResponseType.CANCEL ))
+    fs = Gtk.FileChooserDialog(title=title,
+                               parent=DEFAULT_PARENT,
+                               action=action,
+                               buttons=( button,
+                                         Gtk.ResponseType.OK,
+                                         Gtk.STOCK_CANCEL,
+                                         Gtk.ResponseType.CANCEL ))
     if default_dir:
         fs.set_current_folder(default_dir)
 
     fs.show()
     center_on_mouse(fs)
-    res=fs.run()
-    dirname=None
+    res = fs.run()
+    dirname = None
     if res == Gtk.ResponseType.OK:
-        dirname=fs.get_filename()
+        dirname = fs.get_filename()
     fs.destroy()
 
     return dirname
@@ -820,33 +820,33 @@ class CategorizedSelector:
                  elements=None, categories=None, current=None,
                  description_getter=None, category_getter=None, callback=None,
                  editable=True):
-        self.title=title
-        self.elements=elements
-        self.categories=categories
-        self.current=current
-        self.description_getter=description_getter
-        self.category_getter=category_getter
-        self.callback=callback
-        self.editable=editable
-        self.button=None
+        self.title = title
+        self.elements = elements
+        self.categories = categories
+        self.current = current
+        self.description_getter = description_getter
+        self.category_getter = category_getter
+        self.callback = callback
+        self.editable = editable
+        self.button = None
 
     def popup_menu(self, *p):
-        m=Gtk.Menu()
+        m = Gtk.Menu()
 
-        i=Gtk.MenuItem(self.title, use_underline=False)
+        i = Gtk.MenuItem(self.title, use_underline=False)
         i.set_sensitive(False)
         m.append(i)
-        i=Gtk.SeparatorMenuItem()
+        i = Gtk.SeparatorMenuItem()
         m.append(i)
 
-        submenu={}
+        submenu = {}
         for c in self.categories:
-            i=Gtk.MenuItem(self.description_getter(c), use_underline=False)
+            i = Gtk.MenuItem(self.description_getter(c), use_underline=False)
             m.append(i)
-            submenu[c]=Gtk.Menu()
+            submenu[c] = Gtk.Menu()
             i.set_submenu(submenu[c])
         for e in self.elements:
-            i=Gtk.MenuItem(self.description_getter(e), use_underline=False)
+            i = Gtk.MenuItem(self.description_getter(e), use_underline=False)
             submenu[self.category_getter(e)].append(i)
             i.connect('activate', lambda menuitem, element: self.update_element(element), e)
         m.show_all()
@@ -858,15 +858,15 @@ class CategorizedSelector:
         """
         if self.button is not None:
             return self.button
-        b=Gtk.Button(self.description_getter(self.current))
+        b = Gtk.Button(self.description_getter(self.current))
         if self.editable:
             b.connect('clicked', lambda w: self.popup_menu())
         b.show()
-        self.button=b
+        self.button = b
         return b
 
     def update_element(self, element=None):
-        self.current=element
+        self.current = element
         if self.button is not None:
             self.button.set_label(self.description_getter(element))
         if self.callback is not None:
@@ -876,7 +876,7 @@ class CategorizedSelector:
 def center_on_mouse(w):
     """Center the given Gtk.Window on the mouse position.
     """
-    root=w.get_toplevel().get_root_window()
+    root = w.get_toplevel().get_root_window()
     (screen, x, y, mod) = root.get_display().get_pointer()
     r = screen.get_monitor_geometry(screen.get_monitor_at_point(x, y))
 

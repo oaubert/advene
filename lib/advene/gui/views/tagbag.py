@@ -71,12 +71,12 @@ class TagBag(AdhocView):
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        l=[ v for (n, v) in arg if n == 'tag' ]
-        if l:
-            tags=l
-        self.tags=tags
+        params = [ v for (n, v) in arg if n == 'tag' ]
+        if params:
+            tags = params
+        self.tags = tags
         if self.tags is None:
-            self.tags=[]
+            self.tags = []
 
         self.button_height=24
         self.mainbox=None
@@ -92,7 +92,7 @@ class TagBag(AdhocView):
 
     def tag_update(self, context, parameters):
         tag=context.evaluateValue('tag')
-        if not tag in self.tags:
+        if tag in self.tags:
             # The tag is not present
             if self.options['display-new-tags']:
                 self.tags.append(tag)
@@ -104,8 +104,8 @@ class TagBag(AdhocView):
         if col is None:
             return True
 
-        l=[ b for b in self.mainbox.get_children() if b.tag == tag ]
-        for b in l:
+        widgets = [ b for b in self.mainbox.get_children() if b.tag == tag ]
+        for b in widgets:
             b.update_widget()
         return True
 
@@ -129,8 +129,8 @@ class TagBag(AdhocView):
                        buttons=( Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                  Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                  ))
-        l=Gtk.Label(label=_("Enter a new tag name and select its color."))
-        d.vbox.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=_("Enter a new tag name and select its color."))
+        d.vbox.pack_start(label, False, True, 0)
 
         hb=Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Name")), False, False, 0)
@@ -160,7 +160,7 @@ class TagBag(AdhocView):
             tag=None
         d.destroy()
 
-        if tag and not tag in self.tags:
+        if tag and tag not in self.tags:
             if not re.match(r'^[\w\d_]+$', tag):
                 dialog.message_dialog(_("The tag contains invalid characters"),
                                       icon=Gtk.MessageType.ERROR)
@@ -226,7 +226,7 @@ class TagBag(AdhocView):
                 color=self.get_element_color(tag)
                 if color:
                     d.get_color_selection().set_current_color(color)
-            except:
+            except Exception:
                 pass
 
             res=d.run()
@@ -283,13 +283,13 @@ class TagBag(AdhocView):
                 sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 for a in sources:
                     for tag in a.tags:
-                        if not tag in self.tags:
+                        if tag not in self.tags:
                             self.tags.append(tag)
                 self.refresh()
             elif targetType == config.data.target_type['tag']:
                 tags=str(selection.get_data(), 'utf8').split(',')
                 for tag in tags:
-                    if not tag in self.tags:
+                    if tag not in self.tags:
                         self.tags.append(tag)
                 self.refresh()
             else:

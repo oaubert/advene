@@ -18,7 +18,7 @@ bDomlette = False
 try:
     from Ft.Xml.Domlette import NonvalidatingReader
     bDomlette = True
-except:
+except Exception:
     pass
 
 # Try to use the optional xml.xpath.

@@ -84,7 +84,7 @@ class TranscriptionView(AdhocView):
         if source is None and 'source' in a:
             source = a['source']
 
-        if not source and not elements is None:
+        if not source and elements is not None:
             # Use whole package
             source = "here/annotations"
 
@@ -121,7 +121,7 @@ class TranscriptionView(AdhocView):
         # Try to determine a default representation
         try:
             t = set(an.type for an in self.model)
-        except:
+        except Exception:
             t = []
         if len(t) == 1:
             # Unique type, the model is homogeneous. Use the
@@ -221,11 +221,11 @@ class TranscriptionView(AdhocView):
                     modified.append(a)
         return modified
 
-    def update_modified(self, l):
+    def update_modified(self, annotations):
         b = self.textview.get_buffer()
         impossible = []
         batch_id = object()
-        for a in l:
+        for a in annotations:
             m = b.get_mark("b_%s" % a.id)
             if not m:
                 break
@@ -253,13 +253,13 @@ class TranscriptionView(AdhocView):
         return True
 
     def validate(self, *p):
-        l = self.check_modified()
-        if l:
+        modified = self.check_modified()
+        if modified:
             if self.options['representation'] and not helper.parsed_representation.match(self.options['representation']):
                 dialog.message_dialog(label=_("Cannot validate the update.\nThe representation pattern is too complex."))
                 return True
             self.ignore_updates = True
-            self.update_modified(l)
+            self.update_modified(modified)
             self.ignore_updates = False
         return True
 
@@ -432,9 +432,9 @@ class TranscriptionView(AdhocView):
             b.insert_with_tags_by_name(b.get_iter_at_mark(b.get_insert()),
                                        text, *tags)
 
-        l = list(self.model)
-        l.sort(key=lambda a: a.fragment.begin)
-        for a in l:
+        annotations = list(self.model)
+        annotations.sort(key=lambda a: a.fragment.begin)
+        for a in annotations:
             if self.options['display-time']:
                 insert_at_cursor_with_tags_by_name("[%s]" % helper.format_time(a.fragment.begin),
                                                    "bound")
@@ -636,7 +636,7 @@ class TranscriptionView(AdhocView):
             return True
 
         if event == 'AnnotationEditEnd':
-            if not annotation in self.model:
+            if annotation not in self.model:
                 return True
             b = self.textview.get_buffer()
             beginmark = b.get_mark("b_%s" % annotation.id)

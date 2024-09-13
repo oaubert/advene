@@ -70,7 +70,7 @@ class AeidonImporter(GenericImporter):
                     project.open_main(filename, encoding='latin1')
                 except UnicodeError:
                     return
-        except:
+        except Exception:
             logger.error("Cannot process file ", exc_info=True)
             return
         p, at = self.init_package(filename=dest,

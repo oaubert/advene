@@ -280,7 +280,7 @@ class GenericViewable(Viewable.withClass('generic')):
         #print "getattr", name
         try:
             return object.__getattribute__ (self, name)
-        except AttributeError as e:
+        except AttributeError:
             return object.__getattribute__ (self, '_o').__getattribute__ (name)
 
 class GenericViewableList(Viewable.withClass('list'), GenericViewable):

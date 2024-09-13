@@ -270,17 +270,17 @@ class HTMLEditor(textview_class, HTMLParser):
         self.html_reset()
         if not isinstance(txt, str):
             # <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-            l=re.findall(r'http-equiv.+content-type.+charset=([\w\d-]+)', txt)
-            if l:
-                charset=l[0]
+            headers = re.findall(r'http-equiv.+content-type.+charset=([\w\d-]+)', txt)
+            if headers:
+                charset = headers[0]
                 logger.warning("Detected %s charset")
             else:
-                charset='utf-8'
+                charset = 'utf-8'
             try:
-                txt=str(txt, charset)
+                txt = str(txt, charset)
             except UnicodeDecodeError:
                 # Fallback to latin1.
-                txt=str(txt, 'latin1')
+                txt = str(txt, 'latin1')
         self.feed(txt)
         for k, v in self.__tags.items():
             if v:
@@ -733,7 +733,7 @@ class HTMLEditor(textview_class, HTMLParser):
                         context.remove(m._startmark)
                     except ValueError:
                         logger.error("Cannot remove start mark for %s", m._endtag)
-                elif hasattr(m, '_tag') and not m._tag in self.__standalone:
+                elif hasattr(m, '_tag') and m._tag not in self.__standalone:
                     context.append(m)
             if i.equal(cursor):
                 break
@@ -874,18 +874,18 @@ class ContextDisplay(Gtk.TreeView):
 
             if parent is None:
                 # Changed the tag name
-                mark._tag=newtext
+                mark._tag = newtext
                 if hasattr(mark, '_endmark'):
                     mark._endmark._endtag=newtext
             else:
                 # Changed an attribute. Regenerate the whole _attr
                 # list
-                l=[]
-                it=model.iter_children(parent)
+                attrs = []
+                it = model.iter_children(parent)
                 while it is not None:
-                    l.append( model.get(it, 1, 2) )
-                    it=model.iter_next(it)
-                mark._attr=l
+                    attrs.append( model.get(it, 1, 2) )
+                    it = model.iter_next(it)
+                mark._attr = attrs
 
             logger.debug("Edited %s %s", mark._tag, mark._attr)
             return False

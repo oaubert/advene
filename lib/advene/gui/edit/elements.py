@@ -161,7 +161,7 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
                     try:
                         if f.get_focus():
                             break
-                    except:
+                    except Exception:
                         continue
                 vbox.disconnect(self.sig)
                 del self.sig
@@ -299,7 +299,7 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
                      self.controller.get_title(self.element))
         try:
             t += " [%s]" % self.element.id
-        except:
+        except Exception:
             pass
         return t
 
@@ -441,12 +441,12 @@ class EditAnnotationPopup (EditElementPopup):
             compare = operator.gt
         else:
             compare = operator.lt
-        l=[a
-           for a in self.element.type.annotations
-           if compare(a.fragment.begin, self.element.fragment.begin) ]
-        l.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
-        if l:
-            a=l[0]
+        annotations = [ a
+                        for a in self.element.type.annotations
+                        if compare(a.fragment.begin, self.element.fragment.begin) ]
+        annotations.sort(key=lambda a: a.fragment.begin, reverse=(direction == -1))
+        if annotations:
+            a = annotations[0]
             self.controller.gui.edit_element(a, destination=getattr(self, '_destination', 'default'))
             # Validate the current one
             self.validate_cb()
@@ -489,9 +489,9 @@ class EditAnnotationPopup (EditElementPopup):
         vbox.pack_start(nb, False, True, 0)
 
         def small_label(t):
-            l=Gtk.Label()
-            l.set_markup('<span size="x-small">%s</span>' % t)
-            return l
+            label = Gtk.Label()
+            label.set_markup('<span size="x-small">%s</span>' % t)
+            return label
 
         def begin_callback(t):
             for c in self.forms:
@@ -1330,9 +1330,9 @@ class EditContentForm(EditForm):
 
         self.mimetypeeditable = (mimetypeeditable
                                  and editable
-                                 and not (self.element.mimetype in
+                                 and self.element.mimetype not in
                                           ('application/x-advene-ruleset',
-                                           'application/x-advene-simplequery')))
+                                           'application/x-advene-simplequery'))
 
     def close(self):
         self.contentform.close()
@@ -1344,7 +1344,7 @@ class EditContentForm(EditForm):
     def get_focus(self):
         try:
             return self.contentform.get_focus()
-        except:
+        except Exception:
             return False
 
     def check_validity(self):
@@ -1384,8 +1384,8 @@ class EditContentForm(EditForm):
 
         if not compact and config.data.preferences['expert-mode']:
             hbox = Gtk.HBox()
-            l=Gtk.Label(label=_("MIME Type"))
-            hbox.pack_start(l, False, True, 0)
+            label = Gtk.Label(label=_("MIME Type"))
+            hbox.pack_start(label, False, True, 0)
 
             mt=self.element.mimetype
             # Is the current value in the predefined list?
@@ -1400,11 +1400,11 @@ class EditContentForm(EditForm):
                 current=data[0]
 
             if self.mimetypeeditable:
-                l=predefined_content_mimetypes
+                members = predefined_content_mimetypes
             else:
-                l=[ current ]
+                members = [ current ]
 
-            self.mimetype=dialog.list_selector_widget(members=l,
+            self.mimetype=dialog.list_selector_widget(members=members,
                                                       preselect=mt,
                                                       entry=self.mimetypeeditable)
 
@@ -1916,43 +1916,43 @@ class EditGenericForm(EditForm):
     def get_view(self, compact=False):
         hbox = Gtk.HBox()
 
-        l=Gtk.Label(label=self.title)
-        hbox.pack_start(l, False, True, 0)
+        label = Gtk.Label(label=self.title)
+        hbox.pack_start(label, False, True, 0)
         if self.sizegroup is not None:
-            self.sizegroup.add_widget(l)
+            self.sizegroup.add_widget(label)
 
-        v=self.getter()
+        v = self.getter()
         if v is None:
-            v=""
+            v = ""
         if self.type == 'mimetype':
             # Is the current value in the predefined list?
-            data=[ tupl
-                   for tupl in predefined_content_mimetypes
-                   if tupl[0] == v ]
+            data = [ tupl
+                     for tupl in predefined_content_mimetypes
+                     if tupl[0] == v ]
             if not data:
                 # Not yet predefined. Add its raw value.
-                current=(v, v)
+                current = (v, v)
                 predefined_content_mimetypes.append(current)
             else:
-                current=data[0]
+                current = data[0]
 
             if self.editable:
-                l=predefined_content_mimetypes
+                members = predefined_content_mimetypes
             else:
-                l=[ current ]
-            self.entry=dialog.list_selector_widget(members=l,
-                                                   preselect=v,
-                                                   entry=self.editable)
+                members = [ current ]
+            self.entry = dialog.list_selector_widget(members=members,
+                                                     preselect=v,
+                                                     entry=self.editable)
         elif self.type == 'boolean':
             self.entry = Gtk.CheckButton()
             self.entry.set_active(v)
 
         elif self.elements:
-            self.entry=dialog.list_selector_widget(members=self.elements,
-                                                   preselect=v,
-                                                   entry=self.editable)
+            self.entry = dialog.list_selector_widget(members=self.elements,
+                                                     preselect=v,
+                                                     entry=self.editable)
         else:
-            self.entry=Gtk.Entry()
+            self.entry = Gtk.Entry()
             self.entry.set_text(v)
             self.entry.set_editable(self.editable)
 
@@ -1967,20 +1967,20 @@ class EditGenericForm(EditForm):
                 # current color is statically defined or empty
                 self.entry.hide()
                 self.entry.set_no_show_all(True)
-            b=Gtk.ColorButton()
+            b = Gtk.ColorButton()
             b.set_use_alpha(False)
 
             if v:
-                c=self.controller.build_context()
+                c = self.controller.build_context()
                 try:
-                    color=c.evaluateValue(v)
-                    gtk_color=Gdk.color_parse(color)
+                    color = c.evaluateValue(v)
+                    gtk_color = Gdk.color_parse(color)
                     b.set_color(gtk_color)
-                except:
+                except Exception:
                     pass
 
             def handle_color(button):
-                col=button.get_color()
+                col = button.get_color()
                 self.entry.set_text("string:#%04x%04x%04x" % (col.red, col.green, col.blue))
                 return True
 
@@ -1992,7 +1992,7 @@ class EditGenericForm(EditForm):
                 """
                 if targetType == config.data.target_type['color']:
                     # The structure consists in 4 unsigned shorts: r, g, b, opacity
-                    (r, g, b, opacity)=struct.unpack('HHHH', selection.get_data())
+                    (r, g, b, opacity) = struct.unpack('HHHH', selection.get_data())
                     self.entry.set_text("string:#%04x%04x%04x" % (r, g, b))
                 return False
 
@@ -2172,11 +2172,9 @@ class EditAttributesForm (EditForm):
             at = model.get_value (it, EditAttributesForm.COLUMN_NAME)
             if at in self.editable:
                 text = model.get_value (it, EditAttributesForm.COLUMN_VALUE)
-                v = None
                 try:
-                    v = self.repr_to_value (at, text)
+                    self.repr_to_value (at, text)
                 except ValueError as e:
-                    v = None
                     invalid.append((at, e))
             it = model.iter_next(it)
         # Display list of invalid attributes

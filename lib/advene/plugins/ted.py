@@ -145,7 +145,7 @@ class TEDImporter(GenericImporter):
             data=f.read()
             f.close()
             data=json.loads(data)
-            if not 'captions' in data:
+            if 'captions' not in data:
                 # Language not present
                 continue
             step=1.0 / len(data['captions'])

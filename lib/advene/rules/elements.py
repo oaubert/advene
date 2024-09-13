@@ -282,7 +282,7 @@ class Condition:
         if node.tag != tag('condition') and node.tag != 'condition':
             raise Exception("Bad invocation of Condition.from_etree")
         self.operator=node.attrib.get('operator', 'value')
-        if not 'lhs' in node.attrib:
+        if 'lhs' not in node.attrib:
             raise Exception("Invalid condition (no left value) in condition %s." % self.operator)
         self.lhs=node.attrib['lhs']
         self.rhs=node.attrib.get('rhs', None)
@@ -560,10 +560,10 @@ class Rule(EtreeMixin):
                                            { 'value': 'and' } ))
 
         if isinstance(self.action, ActionList):
-            l=self.action
+            items = self.action
         else:
-            l=[self.action]
-        for action in l:
+            items = [ self.action ]
+        for action in items:
             rulenode.append(action.to_etree())
         return rulenode
 
@@ -761,10 +761,10 @@ class SimpleQuery(EtreeMixin):
 
         if self.condition is not None:
             if isinstance(self.condition, Condition):
-                l=[self.condition]
+                items = [ self.condition ]
             else:
-                l=self.condition
-            for cond in l:
+                items = self.condition
+            for cond in items:
                 if cond is None:
                     continue
                 qnode.append(cond.to_etree())
@@ -960,9 +960,8 @@ class RegisteredAction:
 
     def as_html(self, action_url):
         r="""<form method="GET" action="%s">""" % action_url
-        l=list(self.parameters.keys())
-        l.sort()
-        for k in l:
+        parameters = sorted(self.parameters.keys())
+        for k in parameters:
             r += """%s: <input name="%s" title="%s" value="%s"/>""" % (k,
                                                                        k,
                                                                        self.parameters[k],

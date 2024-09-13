@@ -432,13 +432,13 @@ def query(target, context):
 
         def _get_query_by_id(self, key):
             try:
-                l=self._target.rootPackage.queries
+                queries = self._target.rootPackage.queries
             except AttributeError:
                 # We are querying an element that has no rootPackage
                 # (a list for instance). So fallback to the context
                 # package global.
-                l=self._context.globals['package'].queries
-            qlist=[ q for q in l if q.id == key ]
+                queries = self._context.globals['package'].queries
+            qlist = [ q for q in queries if q.id == key ]
             if qlist:
                 return qlist[0]
             else:
@@ -494,21 +494,21 @@ def sorted (target, context):
 
     if hasattr(target, 'viewableType') and target.viewableType == 'annotation-list' or (
             isinstance(target, list) and len(target) > 0 and hasattr(target[0], 'fragment')):
-        l=list(target[:])
-        l.sort(key=lambda e: e.fragment.begin)
+        items = list(target[:])
+        items.sort(key=lambda e: e.fragment.begin)
     elif hasattr(target, '__getslice__') and len(target) > 0 and isinstance(target[0], (Annotation,
                                                                                         AbstractNbeFragment,
                                                                                         int,
                                                                                         float,
                                                                                         str)):
-        l = list(target[:])
-        l.sort()
+        items = list(target[:])
+        items.sort()
     elif (hasattr(target, '__getslice__') and len(target) > 0 and hasattr(target[0], 'title')):
-        l=list(target[:])
-        l.sort(key=lambda e: e.title or e.id)
+        items = list(target[:])
+        items.sort(key=lambda e: e.title or e.id)
     else:
-        l=target
-    return l
+        items = target
+    return items
 
 def length(target, context):
     """Return the length of the target.
@@ -638,8 +638,10 @@ def json(target, context):
                     ensure_ascii=False,
                     sort_keys=True,
                     indent=4)
-    except:
-        import pdb; pdb.set_trace()
+    except Exception as e:
+        return dumps({
+            "_ERROR": e.message
+            })
     return ret
 
 def export(target, context):

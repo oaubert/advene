@@ -350,10 +350,10 @@ class Browser(AdhocView):
         self.sw.add_with_viewport(self.hbox)
 
         def name_label(name, label):
-            hb=Gtk.HBox()
-            l=Gtk.Label()
-            l.set_markup("<b>%s :</b> " % name)
-            hb.pack_start(l, False, True, 0)
+            hb = Gtk.HBox()
+            namelabel = Gtk.Label()
+            namelabel.set_markup("<b>%s :</b> " % name)
+            hb.pack_start(namelabel, False, True, 0)
             hb.pack_start(label, False, True, 0)
             return hb
 

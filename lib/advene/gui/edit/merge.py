@@ -86,11 +86,11 @@ class TreeViewMerger:
             GObject.TYPE_STRING,
             )
 
-        for l in self.differ.diff():
-            name, s, d, action, value = l
+        for line in self.differ.diff():
+            name, s, d, action, value = line
             # Note: s and d are normally Advene elements, except for
             # resources for which we have the path.
-            store.append(row=[ l,
+            store.append(row=[ line,
                                labels.setdefault(name, name),
                                "%s %s (%s)" % (helper.get_type(s),
                                                self.controller.get_title(s),
@@ -108,30 +108,30 @@ class TreeViewMerger:
         return True
 
     def build_widget(self):
-        def show_diff(item, l):
-            name, s, d, action, value = l
+        def show_diff(item, difftuple):
+            name, s, d, action, value = difftuple
 
             diff = difflib.Differ()
             b = self.diff_textview.get_buffer()
             b.delete(*b.get_bounds())
 
-            for l in diff.compare((value(d) or "").splitlines(1),
+            for line in diff.compare((value(d) or "").splitlines(1),
                                   (value(s) or "").splitlines(1)):
-                if l.startswith('-'):
-                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, self.minustag)
-                elif l.startswith('+'):
-                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), l, self.plustag)
+                if line.startswith('-'):
+                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), line, self.minustag)
+                elif line.startswith('+'):
+                    b.insert_with_tags(b.get_iter_at_mark(b.get_insert()), line, self.plustag)
                 else:
-                    b.insert_at_cursor(l)
+                    b.insert_at_cursor(line)
             return True
 
-        def build_popup_menu(l):
-            menu=Gtk.Menu()
+        def build_popup_menu(difftuple):
+            menu = Gtk.Menu()
 
-            name, s, d, action, value = l
+            name, s, d, action, value = difftuple
 
             if name != 'new':
-                i=Gtk.MenuItem(_("Current element"))
+                i = Gtk.MenuItem(_("Current element"))
                 m = advene.gui.popup.Menu(d, controller=self.controller, readonly=False)
                 i.set_submenu(m.menu)
                 menu.append(i)
@@ -142,7 +142,7 @@ class TreeViewMerger:
             menu.append(i)
 
             i = Gtk.MenuItem(_("Show diff"))
-            i.connect('activate', show_diff, l)
+            i.connect('activate', show_diff, difftuple)
             menu.append(i)
 
             if config.data.preferences['expert-mode']:
@@ -192,8 +192,8 @@ class TreeViewMerger:
         treeview.connect('button-press-event', tree_view_button_cb)
         def row_activated(treeview, path, column):
             model = treeview.get_model()
-            l = model.get_value(model.get_iter(path), self.COLUMN_ELEMENT)
-            show_diff(l, l)
+            element = model.get_value(model.get_iter(path), self.COLUMN_ELEMENT)
+            show_diff(element, element)
             return True
         treeview.connect('row-activated', row_activated)
         treeview.connect('key-press-event', key_pressed)
@@ -288,10 +288,10 @@ class Merger:
         self.buttonbox = Gtk.HButtonBox()
 
         def validate(b):
-            m=self.mergerview.store
-            for l in m:
-                if l[self.mergerview.COLUMN_APPLY]:
-                    name, s, d, action, value = l[self.mergerview.COLUMN_ELEMENT]
+            m = self.mergerview.store
+            for row in m:
+                if row[self.mergerview.COLUMN_APPLY]:
+                    name, s, d, action, value = row[self.mergerview.COLUMN_ELEMENT]
                     action(s, d)
             self.destpackage._modified = True
             self.controller.notify('PackageActivate', package=self.destpackage)
@@ -299,22 +299,22 @@ class Merger:
             return True
 
         def select_all(b):
-            model=self.mergerview.store
-            for l in model:
-                l[self.mergerview.COLUMN_APPLY] = True
+            model = self.mergerview.store
+            for row in model:
+                row[self.mergerview.COLUMN_APPLY] = True
             return True
 
         def unselect_all(b=None):
-            model=self.mergerview.store
-            for l in model:
-                l[self.mergerview.COLUMN_APPLY] = False
+            model = self.mergerview.store
+            for row in model:
+                row[self.mergerview.COLUMN_APPLY] = False
             return True
 
         def is_all_selected():
             # Every element is selected if there is not unselected element
-            return not [ l
-                         for l in self.mergerview.store
-                         if l[self.mergerview.COLUMN_APPLY] is False ]
+            return not [ row
+                         for row in self.mergerview.store
+                         if row[self.mergerview.COLUMN_APPLY] is False ]
 
         def select_structure(b):
             """Select schemas and types
@@ -322,10 +322,10 @@ class Merger:
             # If everything is selected, then first unselect all
             if is_all_selected():
                 unselect_all()
-            for l in self.mergerview.store:
-                if isinstance(l[self.mergerview.COLUMN_ELEMENT][1],
+            for row in self.mergerview.store:
+                if isinstance(row[self.mergerview.COLUMN_ELEMENT][1],
                               (Schema, AnnotationType, RelationType)):
-                    l[self.mergerview.COLUMN_APPLY] = True
+                    row[self.mergerview.COLUMN_APPLY] = True
             return True
 
         def select_views(b):
@@ -334,10 +334,10 @@ class Merger:
             # If everything is selected, then first unselect all
             if is_all_selected():
                 unselect_all()
-            for l in self.mergerview.store:
-                if isinstance(l[self.mergerview.COLUMN_ELEMENT][1],
+            for row in self.mergerview.store:
+                if isinstance(row[self.mergerview.COLUMN_ELEMENT][1],
                               (View, Query)):
-                    l[self.mergerview.COLUMN_APPLY] = True
+                    row[self.mergerview.COLUMN_APPLY] = True
             return True
 
         def toggle_selection(b):

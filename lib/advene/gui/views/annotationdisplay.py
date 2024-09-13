@@ -209,22 +209,22 @@ class AnnotationDisplay(AdhocView):
         return self.label['contents'].get_buffer().get_modified()
 
     def build_widget(self):
-        v=Gtk.VBox()
+        v = Gtk.VBox()
 
-        self.label={}
-        self.sw={}
+        self.label = {}
+        self.sw = {}
 
-        h=Gtk.HBox()
-        self.label['title']=Gtk.Label()
+        h = Gtk.HBox()
+        self.label['title'] = Gtk.Label()
         h.pack_start(self.label['title'], False, True, 0)
         v.pack_start(h, False, True, 0)
 
-        h=Gtk.HBox()
-        self.label['begin']=Gtk.Label()
+        h = Gtk.HBox()
+        self.label['begin'] = Gtk.Label()
         h.pack_start(self.label['begin'], False, True, 0)
-        l=Gtk.Label(label=' - ')
-        h.pack_start(l, False, True, 0)
-        self.label['end']=Gtk.Label()
+        label = Gtk.Label(label=' - ')
+        h.pack_start(label, False, True, 0)
+        self.label['end'] = Gtk.Label()
         h.pack_start(self.label['end'], False, True, 0)
         v.pack_start(h, False, True, 0)
 
@@ -263,13 +263,13 @@ class AnnotationDisplay(AdhocView):
 
         hbox = Gtk.HBox()
         hbox.pack_start(Gtk.Label(_("Contents")), False, False, 0)
-        ok_button=get_pixmap_button('small_ok.png', handle_ok)
+        ok_button = get_pixmap_button('small_ok.png', handle_ok)
         ok_button.set_relief(Gtk.ReliefStyle.NONE)
         ok_button.set_tooltip_text(_("Validate"))
         ok_button.set_no_show_all(True)
         hbox.pack_start(ok_button, False, True, 0)
 
-        f=Gtk.Frame()
+        f = Gtk.Frame()
         f.set_label_widget(hbox)
 
         def contents_modified(buf):
@@ -280,15 +280,15 @@ class AnnotationDisplay(AdhocView):
                 ok_button.hide()
             return True
 
-        c=self.label['contents']=Gtk.TextView()
+        c = self.label['contents'] = Gtk.TextView()
         c.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
         c.get_buffer().ignore_modified = False
         c.get_buffer().connect('modified-changed', contents_modified)
-        sw=Gtk.ScrolledWindow()
+        sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(c)
         def set_text(widget, t):
-            b=widget.get_buffer()
+            b = widget.get_buffer()
             b.ignore_modified = True
             b.delete(*b.get_bounds())
             b.set_text(t)
@@ -297,10 +297,10 @@ class AnnotationDisplay(AdhocView):
             return True
         c.set_text = set_text.__get__(c)
         def get_text(widget):
-            b=widget.get_buffer()
+            b = widget.get_buffer()
             return b.get_text(*b.get_bounds() + ( False, ))
         c.get_text = get_text.__get__(c)
-        self.sw['contents']=sw
+        self.sw['contents'] = sw
 
         def handle_keypress(widget, event):
             if (event.keyval == Gdk.KEY_Return
@@ -313,19 +313,19 @@ class AnnotationDisplay(AdhocView):
 
         # Hook the completer component
         if hasattr(self.controller.package, '_indexer'):
-            self.completer=Completer(textview=c,
-                                     controller=self.controller,
-                                     element=self.annotation,
-                                     indexer=self.controller.package._indexer)
+            self.completer = Completer(textview=c,
+                                       controller=self.controller,
+                                       element=self.annotation,
+                                       indexer=self.controller.package._indexer)
 
-        image=self.label['imagecontents']=Gtk.Image()
+        image = self.label['imagecontents'] = Gtk.Image()
 
-        swi=Gtk.ScrolledWindow()
+        swi = Gtk.ScrolledWindow()
         swi.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         swi.add_with_viewport(image)
-        self.sw['imagecontents']=swi
+        self.sw['imagecontents'] = swi
 
-        vb=Gtk.VBox()
+        vb = Gtk.VBox()
         vb.add(sw)
         vb.add(swi)
 
@@ -340,7 +340,7 @@ class AnnotationDisplay(AdhocView):
             """Handle the drop of an annotation.
             """
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
+                sources = [ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_annotation(sources[0])
                 return True

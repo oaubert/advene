@@ -21,7 +21,7 @@ try:
     import cv2
     import numpy as np
     missing_modules = False
-except:
+except ImportError:
     missing_modules = True
 
 from advene.util.gstimporter import GstImporter

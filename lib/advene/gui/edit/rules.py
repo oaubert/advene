@@ -79,14 +79,15 @@ class EditRuleSet(EditGeneric):
             if not self.editable:
                 return True
             # Create a new default Rule
-            event=Event("AnnotationBegin")
-            ra=self.catalog.get_action("Message")
-            action=Action(registeredaction=ra, catalog=self.catalog)
+            event = Event("AnnotationBegin")
+            ra = self.catalog.get_action("Message")
+            action = Action(registeredaction=ra, catalog=self.catalog)
             for p in ra.parameters:
                 action.add_parameter(p, ra.defaults.get(p, ''))
             # Find the next rulename index
-            l=[ int(i) for i in re.findall(_('Rule')+r'\s*(\d+)', ''.join(r.name for r in self.model)) ]
-            idx=max(l or [ 0 ] ) + 1
+            indexes = [ int(i)
+                        for i in re.findall(_('Rule')+r'\s*(\d+)', ''.join(r.name for r in self.model)) ]
+            idx = max(indexes or [ 0 ] ) + 1
             rule=Rule(name=_("Rule") + str(idx),
                       event=event,
                       action=action)
@@ -104,36 +105,36 @@ class EditRuleSet(EditGeneric):
             """Remove the currently activated rule."""
             if not self.editable:
                 return True
-            current=self.widget.get_current_page()
-            w=self.widget.get_nth_page(current)
-            l=[edit
-               for edit in self.editlist
-               if edit.get_widget() == w ]
-            if len(l) == 1:
-                edit=l[0]
+            current = self.widget.get_current_page()
+            w = self.widget.get_nth_page(current)
+            elements = [edit
+                       for edit in self.editlist
+                       if edit.get_widget() == w ]
+            if len(elements) == 1:
+                edit = elements[0]
                 self.editlist.remove(edit)
                 self.model.remove(edit.model)
                 self.widget.remove_page(current)
-            elif len(l) > 1:
+            elif len(elements) > 1:
                 logger.error("Error in remove_rule")
             return True
 
-        hb=Gtk.HBox()
+        hb = Gtk.HBox()
 
-        b=Gtk.Button(stock=Gtk.STOCK_ADD)
+        b = Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', add_rule_cb)
         b.set_sensitive(self.editable)
         b.set_tooltip_text(_("Add a new rule"))
         hb.pack_start(b, False, True, 0)
 
-        b=Gtk.Button(stock=Gtk.STOCK_SELECT_COLOR)
+        b = Gtk.Button(stock=Gtk.STOCK_SELECT_COLOR)
         b.set_label(_("Subview"))
         b.connect('clicked', add_subview_cb)
         b.set_sensitive(self.editable)
         b.set_tooltip_text(_("Add a subview list"))
         hb.pack_start(b, False, True, 0)
 
-        b=Gtk.Button(stock=Gtk.STOCK_REMOVE)
+        b = Gtk.Button(stock=Gtk.STOCK_REMOVE)
         b.connect('clicked', remove_rule_cb)
         b.set_sensitive(self.editable)
         b.set_tooltip_text(_("Remove the current rule"))
@@ -151,14 +152,14 @@ class EditRuleSet(EditGeneric):
         if not self.editable:
             return True
         if isinstance(rule, Rule):
-            edit=EditRule(rule, self.catalog, controller=self.controller)
+            edit = EditRule(rule, self.catalog, controller=self.controller)
         elif isinstance(rule, SubviewList):
-            edit=EditSubviewList(rule, controller=self.controller)
+            edit = EditSubviewList(rule, controller=self.controller)
 
-        eb=Gtk.EventBox()
-        l=Gtk.Label(label=rule.name)
-        edit.set_update_label(l)
-        eb.add(l)
+        eb = Gtk.EventBox()
+        label = Gtk.Label(label=rule.name)
+        edit.set_update_label(label)
+        eb.add(label)
 
         eb.connect('drag-data-get', self.drag_sent)
         eb.drag_source_set(Gdk.ModifierType.BUTTON1_MASK,
@@ -167,14 +168,14 @@ class EditRuleSet(EditGeneric):
         eb.show_all()
 
         self.editlist.append(edit)
-        if append and not rule in self.model:
+        if append and rule not in self.model:
             self.model.add_rule(rule)
         self.widget.append_page(edit.get_widget(), eb)
         self.widget.set_current_page(-1)
         return True
 
     def invalid_items(self):
-        i=[]
+        i = []
         for e in self.editlist:
             i.extend(e.invalid_items())
         return i
@@ -197,16 +198,16 @@ class EditRuleSet(EditGeneric):
         if targetType == config.data.target_type['rule']:
             # Get the current rule's content
 
-            current=self.widget.get_current_page()
-            w=self.widget.get_nth_page(current)
-            l=[edit
-               for edit in self.editlist
-               if edit.get_widget() == w ]
-            if len(l) == 1:
-                edit=l[0]
+            current = self.widget.get_current_page()
+            w = self.widget.get_nth_page(current)
+            elements = [edit
+                        for edit in self.editlist
+                        if edit.get_widget() == w ]
+            if len(elements) == 1:
+                edit = elements[0]
                 # We have the model. Convert it to XML
                 selection.set(selection.get_target(), 8, edit.model.xml_repr().encode('utf8'))
-            elif len(l) > 1:
+            elif len(elements) > 1:
                 logger.error("Error in drag")
             return True
 
@@ -216,18 +217,18 @@ class EditRuleSet(EditGeneric):
 
     def drag_received(self, widget, context, x, y, selection, targetType, time):
         if targetType == config.data.target_type['rule']:
-            xml=str(selection.get_data(), 'utf8')
+            xml = str(selection.get_data(), 'utf8')
             if 'subviewlist' in xml:
-                rule=SubviewList()
+                rule = SubviewList()
             else:
-                rule=Rule()
+                rule = Rule()
             rule.from_xml_string(xml, catalog=self.catalog)
 
-            name=rule.name
-            l = [ r for r in self.model if r.name == name ]
-            while l:
+            name = rule.name
+            rules = [ r for r in self.model if r.name == name ]
+            while rules:
                 name = "%s1" % name
-                l = [ r for r in self.model if r.name == name ]
+                rules = [ r for r in self.model if r.name == name ]
             rule.name = name
             self.add_rule(rule)
         else:
@@ -443,9 +444,9 @@ class EditRule(EditGeneric):
         self.editconditionlist=[]
         self.widget=self.build_widget()
 
-    def set_update_label(self, l):
+    def set_update_label(self, label):
         """Specify a label to be updated when the rule name changes"""
-        self.namelabel=l
+        self.namelabel = label
 
     def drag_sent(self, widget, context, selection, targetType, eventTime):
         if targetType == config.data.target_type['rule']:
@@ -893,12 +894,12 @@ class EditAction(EditGeneric):
                 self.model.add_parameter(n, v)
         return True
 
-    def sorted(self, l):
-        """Return a sorted version of the list."""
-        if isinstance(l, dict):
-            res=list(l)
+    def sorted(self, sortable):
+        """Return a sorted copy of the list or dictionary."""
+        if isinstance(sortable, dict):
+            res = list(sortable)
         else:
-            res=l[:]
+            res = sortable[:]
         res.sort()
         return res
 
@@ -977,17 +978,17 @@ class EditAction(EditGeneric):
                 # it is a category
                 return self.catalog.action_categories[element]
 
-        c=self.catalog
-        def expert_filter(l, attr=None):
+        c = self.catalog
+        def expert_filter(values, attr=None):
             if config.data.preferences['expert-mode']:
-                return l
+                return values
             else:
                 expert_categories = ('expert', 'gui', 'state')
                 if attr is None:
                     # No attribute, directly test value
-                    return [ e for e in l if not e in expert_categories ]
+                    return [ e for e in values if e not in expert_categories ]
                 else:
-                    return [ e for e in l if not getattr(e, attr) in expert_categories ]
+                    return [ e for e in values if getattr(e, attr) not in expert_categories ]
 
         self.selector=dialog.CategorizedSelector(title=_("Select an action"),
                                                  elements=expert_filter(sorted(c.actions.values()), 'category'),
@@ -1044,9 +1045,9 @@ class EditSubviewList(EditGeneric):
         self.namelabel=None
         self.widget=self.build_widget()
 
-    def set_update_label(self, l):
+    def set_update_label(self, label):
         """Specify a label to be updated when the rule name changes"""
-        self.namelabel=l
+        self.namelabel = label
 
     def update_name(self, entry):
         if self.namelabel:
@@ -1055,11 +1056,10 @@ class EditSubviewList(EditGeneric):
 
     def refresh(self):
         self.store.clear()
-        l=[ v
-            for v in self.controller.package.views
-            if helper.get_view_type(v) == 'dynamic' ]
-        for v in l:
-
+        dynamic_views = [ v
+                          for v in self.controller.package.views
+                          if helper.get_view_type(v) == 'dynamic' ]
+        for v in dynamic_views:
             self.store.append([ v,
                                 self.controller.get_title(v),
                                 v.id,

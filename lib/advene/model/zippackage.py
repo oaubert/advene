@@ -331,13 +331,13 @@ class ZipPackage:
         @type name: string
         @return: a list of typles (name, mimetype)
         """
-        l=[]
-        tree=ET.parse(name)
+        items = []
+        tree = ET.parse(name)
         for e in tree.getroot():
             if e.tag == ET.QName(MANIFEST, 'file-entry'):
-                l.append( (e.attrib[ET.QName(MANIFEST, 'full-path')],
-                           e.attrib[ET.QName(MANIFEST, 'media-type')]) )
-        return l
+                items.append( (e.attrib[ET.QName(MANIFEST, 'full-path')],
+                               e.attrib[ET.QName(MANIFEST, 'media-type')]) )
+        return items
 
     def close(self):
         """Close the package and remove temporary files.

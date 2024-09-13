@@ -41,12 +41,12 @@ class ScrollerView(AdhocView):
         return False
 
     def display_text(self, text, where=None):
-        l=self.present_label
+        label = self.present_label
         if where == 'past':
-            l=self.past_label
+            label = self.past_label
         elif where == 'future':
-            l=self.future_label
-        l.set_text(text)
+            label = self.future_label
+        label.set_text(text)
         return True
 
     def build_widget(self):
@@ -87,14 +87,14 @@ class ScrollerView(AdhocView):
         v.add(self.future_widget)
 
         def create_label(text, widget):
-            eb=Gtk.EventBox()
-            l=Gtk.Label(label=text)
-            l.set_single_line_mode(False)
-            eb.add(l)
-            l.set_style(style)
+            eb = Gtk.EventBox()
+            label = Gtk.Label(label=text)
+            label.set_single_line_mode(False)
+            eb.add(label)
+            label.set_style(style)
             eb.set_style(style)
             widget.pack_start(eb, True, True, 0)
-            return l
+            return label
 
         self.present_label = create_label('present',
                                           self.present_widget)

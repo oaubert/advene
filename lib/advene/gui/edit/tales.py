@@ -59,9 +59,9 @@ class TALESEntry:
     def text2tales(self, t):
         """Return the TALES expression corresponding to the given text.
         """
-        l=re_tales.findall(t)
-        if l:
-            return l[0]
+        matches = re_tales.findall(t)
+        if matches:
+            return matches[0]
         return 'string:' + t
 
     def tales2text(self, t):

@@ -113,7 +113,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
             w = 1024
         try:
             self.set_size_request(w, h)
-        except:
+        except Exception:
             logger.warning(f"Error in set_size_request {self.element.id}")
 
     def _drag_begin(self, widget, context):
@@ -156,7 +156,7 @@ class GenericColorButtonWidget(Gtk.DrawingArea):
             width = 1024
         try:
             self.set_size_request(width, height)
-        except:
+        except Exception:
             logger.warning(f"Error in set_size_request {self.element.id}")
         #self.get_window().lower()
         return True
@@ -310,33 +310,33 @@ class AnnotationWidget(GenericColorButtonWidget):
         #if config.data.os == 'win32':
         #    return GenericColorButtonWidget._drag_begin(self, widget, context)
         try:
-            widgets=self.container.get_selected_annotation_widgets()
-            if not widget in widgets:
-                widgets=[]
+            widgets = self.container.get_selected_annotation_widgets()
+            if widget not in widgets:
+                widgets = []
         except (AttributeError, RuntimeError):
-            widgets=[]
+            widgets = []
 
-        w=Gtk.Window(Gtk.WindowType.POPUP)
+        w = Gtk.Window(Gtk.WindowType.POPUP)
         w.set_decorated(False)
         # Set white on black background
         w.get_style_context().add_class('advene_drag_icon')
 
-        v=Gtk.VBox()
+        v = Gtk.VBox()
         v.get_style_context().add_class('advene_drag_icon')
-        h=Gtk.HBox()
+        h = Gtk.HBox()
         h.get_style_context().add_class('advene_drag_icon')
-        begin=Gtk.Image()
+        begin = Gtk.Image()
         h.pack_start(begin, False, True, 0)
-        padding=Gtk.HBox()
+        padding = Gtk.HBox()
         # Padding
         h.pack_start(padding, True, True, 0)
-        end=Gtk.Image()
+        end = Gtk.Image()
         h.pack_start(end, False, True, 0)
         v.pack_start(h, False, True, 0)
-        l=Gtk.Label()
-        l.set_ellipsize(Pango.EllipsizeMode.END)
-        l.get_style_context().add_class('advene_drag_icon')
-        v.pack_start(l, False, True, 0)
+        label = Gtk.Label()
+        label.set_ellipsize(Pango.EllipsizeMode.END)
+        label.get_style_context().add_class('advene_drag_icon')
+        v.pack_start(label, False, True, 0)
 
         resize = self.is_resizing()
         def set_cursor(wid, t=None, precision=None):
@@ -360,11 +360,11 @@ class AnnotationWidget(GenericColorButtonWidget):
                     begin.set_from_pixbuf(pixbuf)
                     if resize:
                         end.set_from_pixbuf(resize_pixbuf[resize])
-                        l.set_text(helper.format_time(t))
+                        label.set_text(helper.format_time(t))
                     else:
                         end.hide()
                         padding.hide()
-                        l.set_text(helper.format_time(t))
+                        label.set_text(helper.format_time(t))
                 elif isinstance(t, Annotation):
                     # It can be an annotation
                     begin.set_from_pixbuf(png_to_pixbuf(self.controller.get_snapshot(annotation=t),
@@ -374,10 +374,10 @@ class AnnotationWidget(GenericColorButtonWidget):
                     end.show()
                     padding.show()
                     if widgets:
-                        l.set_text(_("Set of %s annotations") % len(widgets))
+                        label.set_text(_("Set of %s annotations") % len(widgets))
                     else:
-                        l.set_text(self.controller.get_title(t))
-            wid._current=t
+                        label.set_text(self.controller.get_title(t))
+            wid._current = t
             return True
 
         w.add(v)
@@ -400,7 +400,7 @@ class AnnotationWidget(GenericColorButtonWidget):
         if event.keyval == Gdk.KEY_e:
             try:
                 widgets=self.container.get_selected_annotation_widgets()
-                if not widget in widgets:
+                if widget not in widgets:
                     widgets=None
             except (AttributeError, RuntimeError):
                 widgets=None
@@ -412,34 +412,34 @@ class AnnotationWidget(GenericColorButtonWidget):
             return True
         elif event.keyval == Gdk.KEY_h:
             if self.active:
-                event="AnnotationDeactivate"
+                event = "AnnotationDeactivate"
             else:
-                event="AnnotationActivate"
-            self.active=not self.active
+                event = "AnnotationActivate"
+            self.active = not self.active
             self.controller.notify(event, annotation=self.annotation)
             return True
         elif event.keyval == Gdk.KEY_F11:
-            menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+            menu = advene.gui.popup.Menu(annotation, controller=self.controller)
             menu.popup()
             return True
         elif event.keyval == Gdk.KEY_space:
             # Play the annotation
-            c=self.controller
+            c = self.controller
             c.queue_action(c.update_status, status="seek", position=annotation.fragment.begin)
             c.gui.set_current_annotation(annotation)
             return True
         elif event.keyval == Gdk.KEY_Delete or event.keyval == Gdk.KEY_BackSpace:
             # Delete annotation or selection
             try:
-                widgets=self.container.get_selected_annotation_widgets()
-                if not widget in widgets:
-                    widgets=None
+                widgets = self.container.get_selected_annotation_widgets()
+                if widget not in widgets:
+                    widgets = None
             except (AttributeError, RuntimeError):
-                widgets=None
+                widgets = None
             if not widgets:
                 self.controller.delete_element(annotation)
             else:
-                batch_id=object()
+                batch_id = object()
                 for w in widgets:
                     self.controller.delete_element(w.annotation, batch=batch_id)
             return True
@@ -503,8 +503,8 @@ class AnnotationWidget(GenericColorButtonWidget):
             # The annotation contains a list of space-separated values
             # that should be treated as percentage (between 0.0 and
             # 100.0) of the height (FIXME: define a scale somewhere)
-            l=[ v / 100.0 for v in self.annotation.content.parsed() ]
-            s=len(l)
+            values = [ v / 100.0 for v in self.annotation.content.parsed() ]
+            s = len(values)
             if not s:
                 # Nothing to draw
                 return
@@ -512,8 +512,8 @@ class AnnotationWidget(GenericColorButtonWidget):
             if width < s:
                 # There are more samples than available pixels. Downsample the data
                 # FIXME: downsample by picking values or take the mean?
-                l=l[::int(s/width)+1]
-                s=len(l)
+                values = values[::int(s/width)+1]
+                s = len(values)
 
             w = 1.0 * width / s
             c = 0
@@ -522,7 +522,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             if renderer == 'wave':
                 context.set_line_width(w + 1)
                 c = w / 2
-                for v in l:
+                for v in values:
                     if v == 0:
                         context.move_to(int(c), int(height * 0.5))
                         context.line_to(int(c), int(height * 0.5 + 1))
@@ -535,7 +535,7 @@ class AnnotationWidget(GenericColorButtonWidget):
             else:
                 # bar normally
                 context.move_to(0, height)
-                for v in l:
+                for v in values:
                     context.line_to(int(c), int(height * (1 - v)))
                     c += w
                     context.line_to(int(c), int(height * (1 - v)))
@@ -849,23 +849,23 @@ class RelationRepresentation(Gtk.Button):
         self.controller=controller
         self.direction=direction
         super(RelationRepresentation, self).__init__()
-        l=Gtk.Label()
-        self.add(l)
-        l.show()
+        label = Gtk.Label()
+        self.add(label)
+        label.show()
         self.refresh()
         self.connect('button-press-event', self.button_press_handler, relation)
         enable_drag_source(self, self.relation, self.controller)
 
     def refresh(self):
-        l=self.get_children()[0]
-        t='%s %s %s' % (self.arrow[self.direction],
-                        self.controller.get_title(self.relation),
-                        self.arrow[self.direction])
-        color=self.controller.get_element_color(self.relation)
+        label = self.get_children()[0]
+        t = '%s %s %s' % (self.arrow[self.direction],
+                          self.controller.get_title(self.relation),
+                          self.arrow[self.direction])
+        color = self.controller.get_element_color(self.relation)
         if color:
-            l.set_markup('<span background="%s">%s</span>' % (color, t.replace('<', '&lt;')))
+            label.set_markup('<span background="%s">%s</span>' % (color, t.replace('<', '&lt;')))
         else:
-            l.set_text(t)
+            label.set_text(t)
 
     def button_press_handler(self, widget, event, relation):
         if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:

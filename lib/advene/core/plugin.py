@@ -82,7 +82,7 @@ class PluginCollection(list):
     def zip_plugins(self, d):
         """Extract the list of plugins from a .zip file import.
         """
-        if not ('.zip' + os.sep) in d:
+        if ('.zip' + os.sep) not in d:
             return
         (zipname, plugins_dir) = d.split('.zip' + os.sep)
         # Zip files may use / as separator
@@ -112,9 +112,9 @@ class Plugin:
         def get_classes():
             """Return the classes defined in the module.
             """
-            l=[ getattr(self._plugin, n)
-                for n in dir(self._plugin) ]
-            return [ c for c in l if inspect.isclass(c) ]
+            classes = [ getattr(self._plugin, n)
+                        for n in dir(self._plugin) ]
+            return [ c for c in classes if inspect.isclass(c) ]
 
         fullname = os.path.join( directory, fname )
 
@@ -159,6 +159,6 @@ class Plugin:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    l = PluginCollection('plugins')
-    for p in l:
+    plugins = PluginCollection('plugins')
+    for p in plugins:
         logger.warning("%s : %s", p, ",".join([ str(c) for c in p._classes ]))

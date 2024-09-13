@@ -317,14 +317,14 @@ class Package(modeled.Modeled, viewable.Viewable.withClass('package'),
         # Note: we do not use urllib.quote, since it chokes on non-ASCII characters (unicode)
         out += """<statistics:title value="%s" />""" % ((self.title or '').replace('"', '%22') or "")
         out += """<statistics:description value="%s" />""" % ((self.getMetaData(dcNS, 'description') or "").replace('"', '%22') or "")
-        for n, l in ( ('schema', len(self.schemas)),
-                      ('annotation', len(self.annotations)),
-                      ('annotation_type', len(self.annotationTypes)),
-                      ('relation', len(self.relations)),
-                      ('relation_type', len(self.relationTypes)),
-                      ('query', len(self.queries)),
-                      ('view', len(self.views)) ):
-            out += """<statistics:item name="%s" value="%d" />""" % (n, l)
+        for n, count in ( ('schema', len(self.schemas)),
+                          ('annotation', len(self.annotations)),
+                          ('annotation_type', len(self.annotationTypes)),
+                          ('relation', len(self.relations)),
+                          ('relation_type', len(self.relationTypes)),
+                          ('query', len(self.queries)),
+                          ('view', len(self.views)) ):
+            out += """<statistics:item name="%s" value="%d" />""" % (n, count)
         out += """</statistics:statistics>"""
         return out
 
@@ -477,7 +477,7 @@ class Import(modeled.Modeled, _impl.Aliased, metaclass=auto_properties):
                     cached = Package(uri, source=url,
                                      importer=self._getParent())
                     break
-                except:
+                except Exception:
                     pass
 
             if cached is None:

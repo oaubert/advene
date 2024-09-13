@@ -106,22 +106,22 @@ class LogWindow(AdhocView):
 
     def add_data(self, message, position, url=None):
         # Check for identical data already pushed
-        l=[ t
-            for t in self.data
-            if t[2] == message and t[3] == url ]
-        if l:
+        items = [ t
+                  for t in self.data
+                  if t[2] == message and t[3] == url ]
+        if items:
             return True
 
-        hb=Gtk.HBox()
+        hb = Gtk.HBox()
 
-        b=Gtk.Button(message)
+        b = Gtk.Button(message)
         # Make the message left-aligned
         b.get_child().set_alignment(0.0, 0.5)
         b.connect('clicked', self.goto_url, url)
         b.set_tooltip_text(_("Go to %s") % url)
         hb.add(b)
 
-        b=Gtk.Button(helper.format_time(position))
+        b = Gtk.Button(helper.format_time(position))
         b.get_child().set_alignment(0.0, 0.5)
         b.connect('clicked', self.goto_position, position)
         b.set_tooltip_text(_("Go to the given position"))
@@ -136,14 +136,14 @@ class LogWindow(AdhocView):
     def pushURL (self, context, parameters):
         """Log the url and message in a specialized window"""
         if 'message' in parameters:
-            message=context.evaluateValue(parameters['message'])
+            message = context.evaluateValue(parameters['message'])
         else:
             return False
         if 'url' in parameters:
-            url=context.evaluateValue(parameters['url'])
+            url = context.evaluateValue(parameters['url'])
         else:
-            url=None
-        position=context.evaluateValue('player/current_position_value')
+            url = None
+        position = context.evaluateValue('player/current_position_value')
         # We log the given annotation
         self.add_data(message, position, url)
 

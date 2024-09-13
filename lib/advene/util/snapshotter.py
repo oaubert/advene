@@ -120,16 +120,16 @@ class Snapshotter:
             filter_ = Gst.ElementFactory.make("capsfilter", "filter")
             filter_.set_property("caps", caps)
             scale=Gst.ElementFactory.make('videoscale')
-            l=(csp, scale, filter_, pngenc, queue_, sink)
+            elements = (csp, scale, filter_, pngenc, queue_, sink)
         else:
-            l=(csp, pngenc, queue_, sink)
+            elements = (csp, pngenc, queue_, sink)
 
-        for el in l:
+        for el in elements:
             self.videobin.add(el)
-        for src, dst in zip(l, l[1:]):
+        for src, dst in zip(elements, elements[1:]):
             src.link(dst)
         # Keep a reference on all pipeline elements, so that they are not garbage-collected
-        self._elements = l
+        self._elements = elements
 
         self._ghostpad = Gst.GhostPad.new('sink', csp.get_static_pad('sink'))
         self._ghostpad.set_active(True)
@@ -215,14 +215,14 @@ class Snapshotter:
             logger.debug("Snapshotter error when sending event for %d %s. ", t, res)
         return True
 
-    def enqueue(self, *l):
+    def enqueue(self, *timestamps):
         """Enqueue timestamps to capture.
         """
         if not self.active:
             return
-        for t in l:
+        for t in timestamps:
             self.timestamp_queue.put_nowait( (t, t) )
-        logger.debug("----- enqueued elements %s (%d total)", l, self.timestamp_queue.qsize())
+        logger.debug("----- enqueued elements %s (%d total)", timestamps, self.timestamp_queue.qsize())
         self.snapshot_ready.set()
 
     def process_queue(self):
@@ -312,7 +312,7 @@ if __name__ == '__main__':
 
     if sys.argv[2:]:
         # For initialization
-        s.enqueue(0,);
+        s.enqueue(0,)
         # Timestamps have been specified. Non-interactive version.
         s.enqueue( *(int(t) for t in sys.argv[2:]) )
 

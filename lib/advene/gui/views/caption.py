@@ -61,21 +61,21 @@ class CaptionView(AdhocView):
         return True
 
     def build_widget(self):
-        v=Gtk.HBox()
+        v = Gtk.HBox()
 
         v.get_style_context().add_class('advene_caption')
 
         def create_label(text, widget):
-            eb=Gtk.EventBox()
-            l=Gtk.Label(label=text)
-            l.set_single_line_mode(True)
-            eb.add(l)
-            l.get_style_context().add_class('advene_caption')
+            eb = Gtk.EventBox()
+            label = Gtk.Label(label=text)
+            label.set_single_line_mode(True)
+            eb.add(label)
+            label.get_style_context().add_class('advene_caption')
             eb.get_style_context().add_class('advene_caption')
             widget.pack_start(eb, True, True, 0)
-            return l
+            return label
 
-        self.label=create_label('', v)
+        self.label = create_label('', v)
 
         v.show_all()
 
