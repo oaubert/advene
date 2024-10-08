@@ -662,17 +662,15 @@ class Application(Common):
     def current_adhoc(self):
         """Display currently opened adhoc views.
         """
-        res=[]
-        c=self.controller
+        res = []
+        c = self.controller
         if not c.gui:
             res.append(_("""<p>No GUI is available."""))
         else:
             res.append(_("""<p>Opened adhoc views: %s</p>""") % ", ".join([ v.view_name for v in c.gui.adhoc_views]))
             res.append(_("""<p>Available adhoc views:</p><ul>"""))
-            l=list(c.gui.registered_adhoc_views)
-            l.sort()
-            for name in l:
-                view=c.gui.registered_adhoc_views[name]
+            for name in sorted(c.gui.registered_adhoc_views):
+                view = c.gui.registered_adhoc_views[name]
                 try:
                     description=": " + view.tooltip
                 except AttributeError:
