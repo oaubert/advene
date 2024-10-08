@@ -548,3 +548,28 @@ def detect_by_bom(path: str = None, raw: bytes = None, default = None):
             return enc
     return default
 
+# Poor man's magic for images
+# We previously relied on imghdr, removed in python 3.13
+def image_type(data: bytes) -> str | None:
+    """Return the image mimetype or None
+    """
+    out = None
+    magic = data[:4]
+
+    # Code list at https://gist.github.com/leommoore/f9e57ba2aa4bf197ebc5?permalink_comment_id=4111195
+    if magic == b'\xff\xd8\xff\xe0':
+        out = 'image/jpeg'
+    elif magic == b'\x89PNG':
+        out = 'image/png'
+    elif magic == b'GIF8':
+        out = 'image/gif'
+    elif magic == b'RIFF':
+        out = 'image/webp'
+    else:
+        # Not found in signature
+        # Looks for <svg / <SVG in the first 32 chars
+        # It could start by <?xml or even the BOM
+        start = data[:32]
+        if b'<svg' in start or b'<SVG' in start:
+            out = 'image/svg+xml'
+    return out

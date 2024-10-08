@@ -43,7 +43,6 @@ import re
 import urllib.request, urllib.parse, urllib.error
 import html
 import socket
-import imghdr
 
 from gettext import gettext as _
 
@@ -58,6 +57,7 @@ from advene.model.view import View
 from advene.model.resources import Resources
 from advene.model.exception import AdveneException
 import advene.util.helper as helper
+from advene.util.tools import image_type
 
 import simpletal.simpleTAL
 import simpletal.simpleTALES as simpleTALES
@@ -256,24 +256,6 @@ class Common:
         <p>An error occurred:</p>
         %s
         """) % message)
-
-    def image_type (self, o):
-        """Return the image type (mime) of the object.
-
-        This method examines the content of the given object, and
-        returns either a mime-type if it is an image, I{None} if it is
-        not.
-
-        @param o: an object
-        @type o: any
-        @return: the content-type if o is an image, else None
-        @rtype: string
-        """
-        res=imghdr.what (None, bytes(o))
-        if res is not None:
-            return "image/%s" % res
-        else:
-            return None
 
     def display_media_status (self):
         """Display current media status.
@@ -1225,18 +1207,20 @@ class Packages(Common):
         if 'mode' in query:
             displaymode = query['mode']
             del query['mode']
-        if isinstance(objet, bytes) and self.image_type (objet) is not None:
+        if isinstance(objet, bytes) and image_type(objet) is not None:
             displaymode = 'image'
 
         logger.debug("Displaying %s in %s mode", objet, displaymode)
         if displaymode == 'image':
             # Return an image, so build the correct headers
             try:
-                mimetype=expr.contenttype
+                mimetype = expr.contenttype
             except AttributeError:
-                mimetype=self.image_type(objet)
-            cherrypy.response.status=200
-            cherrypy.response.headers['Content-type']=mimetype
+                mimetype = image_type(objet)
+            if not mimetype:
+                mimetype = "application/octet-stream"
+            cherrypy.response.status = 200
+            cherrypy.response.headers['Content-type'] = mimetype
             self.no_cache ()
 
             res.append(bytes(objet))
