@@ -70,7 +70,7 @@ class PluginCollection(list):
                 except (PluginException, OSError):
                     # Silently ignore non-plugin files
                     pass
-                except (ImportError, SyntaxError, AttributeError):
+                except:
                     logger.error("!!!! Cannot load %s plugin", fname, exc_info=True)
 
     def standard_plugins(self, d):
