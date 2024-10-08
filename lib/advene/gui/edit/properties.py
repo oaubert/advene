@@ -670,6 +670,8 @@ class OptionParserGUI(EditWidget):
         self.parse_options(parser)
 
     def parse_options(self, parser):
+        if parser.description:
+            self.add_label(parser.description)
         for o in parser.option_list:
             name = o.get_opt_string().replace('--', '')
             if o.dest and hasattr(self.default, o.dest):
