@@ -88,6 +88,9 @@ class AnnotationTable(AdhocView):
         if elements is None and source:
             elements = self.get_elements_from_source(source)
 
+        if elements is None:
+            # Nothing specified. Consider all annotations of the package.
+            elements = self.controller.package.annotations
         self.elements = elements
         self.options={ 'confirm-time-update': True }
 
@@ -173,7 +176,7 @@ class AnnotationTable(AdhocView):
                                              height=32),
                                self.controller.get_element_color(a),
                                a.ownerPackage.getTitle()
-                               ) + custom(a),
+                                   ) + custom(a),
                              )
         return store
 
@@ -594,9 +597,9 @@ class GenericTable(AdhocView):
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        a=dict(arg)
+        a = dict(arg)
         if source is None and 'source' in a:
-            source=a['source']
+            source = a['source']
 
         if elements is None and source:
             c=self.controller.build_context()
@@ -609,6 +612,8 @@ class GenericTable(AdhocView):
                     'error': str(e) })
                 elements = []
 
+        if elements is None:
+            elements = []
         self.model=self.build_model(elements)
         self.widget = self.build_widget()
 
