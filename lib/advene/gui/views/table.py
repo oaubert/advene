@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
+from gi.repository import GObject
 from gi.repository import Gtk
 import csv
 
@@ -155,7 +156,7 @@ class AnnotationTable(AdhocView):
         else:
             def custom(a):
                 return tuple()
-        args = (object, str, str, str, int, int, str, str, str, GdkPixbuf.Pixbuf, str, str) + custom(None)
+        args = (object, str, str, str, GObject.TYPE_INT64, GObject.TYPE_INT64, str, str, str, GdkPixbuf.Pixbuf, str, str) + custom(None)
         store = Gtk.ListStore(*args)
         for a in elements:
             if isinstance(a, Annotation):
