@@ -110,7 +110,7 @@ class CompletionChecker(FeatureChecker):
     name = "Completions"
     description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords.")
     def build_widget(self):
-        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ))
+        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ) if a is None else ("", ))
         column = self.table.columns['custom0']
         column.props.title = _("Undef. keywords")
         return self.table.widget
@@ -175,7 +175,7 @@ class TypeChecker(FeatureChecker):
     name = "Type"
     description = _("This table presents annotation whose content types does not match their type's content-type")
     def build_widget(self):
-        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, str))
+        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, str) if a is None else ("", ""))
         self.table.columns['custom0'].props.title = 'content mimetype'
         self.table.columns['custom1'].props.title = 'type mimetype'
         return self.table.widget

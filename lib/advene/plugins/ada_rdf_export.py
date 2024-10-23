@@ -269,7 +269,7 @@ class AdAChecker(FeatureChecker):
     name = "AdA syntax"
     description = _("For every annotation type that has predefined keywords, this table displays the annotations that contain unspecified keywords or invalid syntax. Update is not real-time, you need to manually update the view with the button below.")
     def build_widget(self):
-        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ))
+        self.table = AnnotationTable(controller=self.controller, custom_data=lambda a: (str, ) if a is None else ("", ))
         column = self.table.columns['custom0']
         column.props.title = _("Error")
         self.widget = Gtk.VBox()
