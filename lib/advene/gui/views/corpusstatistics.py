@@ -28,7 +28,7 @@ from gi.repository import Gtk
 
 from advene.gui.views import AdhocView
 
-name="Corpus statistics"
+name = "Corpus statistics"
 
 def register(controller):
     controller.register_viewclass(CorpusStatistics)
@@ -36,7 +36,7 @@ def register(controller):
 class CorpusStatistics(AdhocView):
     view_name = _("Corpus statistics")
     view_id = 'corpusstatistics'
-    tooltip=_("Global analyses of multiple packages")
+    tooltip = _("Global analyses of multiple packages")
 
     def __init__(self, controller=None, parameters=None):
         super().__init__(controller=controller)
