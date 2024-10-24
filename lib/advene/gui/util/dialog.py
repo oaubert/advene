@@ -671,16 +671,6 @@ def get_filename(title=_("Open a file"),
             if alias:
                 alias_entry.set_text(generate_alias(filename))
             chooser.set_preview_widget_active(True)
-            if config.data.os == 'win32':
-                # Force resize for win32
-                oldmode = chooser.get_resize_mode()
-                try:
-                    chooser.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
-                except AttributeError:
-                    # May be missing in some old gtk libs
-                    pass
-                chooser.resize_children()
-                chooser.set_resize_mode(oldmode)
         else:
             preview.set_label(_("N/C"))
             if alias:

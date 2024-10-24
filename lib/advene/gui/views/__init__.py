@@ -499,16 +499,10 @@ class AdhocView:
 
         if self.controller and self.controller.gui:
             self.controller.gui.register_view (self)
-            window.cleanup_id=window.connect('destroy', self.controller.gui.close_view_cb, window, self)
+            window.cleanup_id = window.connect('destroy', self.controller.gui.close_view_cb, window, self)
             self.controller.gui.init_window_size(window, self.view_id)
             window.set_icon_list(self.controller.gui.get_icon_list())
 
-        if config.data.os == 'win32':
-            # Force resize for win32
-            oldmode=window.get_resize_mode()
-            window.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
-            window.resize_children()
-            window.set_resize_mode(oldmode)
         return window
 
 class AdhocViewParametersParser:
