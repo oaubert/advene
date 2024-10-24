@@ -40,19 +40,19 @@ from advene.util.tools import first
 from advene.gui.util import dialog, png_to_pixbuf, contextual_drag_begin, contextual_drag_end
 from advene.gui.util.completer import Completer
 
-COLUMN_ELEMENT=0
-COLUMN_CONTENT=1
-COLUMN_TYPE=2
-COLUMN_ID=3
-COLUMN_BEGIN=4
-COLUMN_END=5
-COLUMN_DURATION=6
-COLUMN_BEGIN_FORMATTED=7
-COLUMN_END_FORMATTED=8
-COLUMN_PIXBUF=9
-COLUMN_COLOR=10
-COLUMN_SOURCE_PACKAGE=11
-COLUMN_CUSTOM_FIRST=12
+COLUMN_ELEMENT = 0
+COLUMN_CONTENT = 1
+COLUMN_TYPE = 2
+COLUMN_ID = 3
+COLUMN_BEGIN = 4
+COLUMN_END = 5
+COLUMN_DURATION = 6
+COLUMN_BEGIN_FORMATTED = 7
+COLUMN_END_FORMATTED = 8
+COLUMN_PIXBUF = 9
+COLUMN_COLOR = 10
+COLUMN_SOURCE_PACKAGE = 11
+COLUMN_CUSTOM_FIRST = 12
 
 name="Element tabular view plugin"
 
@@ -63,7 +63,7 @@ def register(controller):
 class AnnotationTable(AdhocView):
     view_name = _("Annotation table view")
     view_id = 'table'
-    tooltip=_("Display annotations in a table")
+    tooltip = _("Display annotations in a table")
 
     def __init__(self, controller=None, parameters=None, custom_data=None, elements=None, source=None):
         """We can initialize the table using either a list of elements, or  a TALES source expression.
@@ -80,9 +80,9 @@ class AnnotationTable(AdhocView):
 
         opt, arg = self.load_parameters(parameters)
         self.options.update(opt)
-        a=dict(arg)
+        a = dict(arg)
         if source is None and 'source' in a:
-            source=a['source']
+            source = a['source']
 
         self.source = source
         if elements is None and source:
@@ -92,7 +92,7 @@ class AnnotationTable(AdhocView):
             # Nothing specified. Consider all annotations of the package.
             elements = self.controller.package.annotations
         self.elements = elements
-        self.options={ 'confirm-time-update': True }
+        self.options = { 'confirm-time-update': True }
 
         self.mouseover_annotation = None
         self.last_edited_path = None
@@ -143,10 +143,10 @@ class AnnotationTable(AdhocView):
         If a selection is active, return only selected elements.
         """
         selection = self.widget.treeview.get_selection()
-        r=selection.count_selected_rows()
+        r = selection.count_selected_rows()
         if r == 0 or r == 1:
             selection.select_all()
-        store, paths=selection.get_selected_rows()
+        store, paths = selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
     def build_model(self, elements, custom_data=None):
@@ -197,10 +197,10 @@ class AnnotationTable(AdhocView):
         """
         if elements is None:
             elements = []
-        model=self.build_model(elements, custom_data)
+        model = self.build_model(elements, custom_data)
         self.widget.treeview.set_model(model)
         self.model = model
-        self.elements=elements
+        self.elements = elements
         if self.last_edited_path is not None:
             # We just edited an annotation. This update must come from
             # it, so let us try to set the cursor position at the next element.
@@ -265,9 +265,9 @@ class AnnotationTable(AdhocView):
 
         tree_view.set_search_equal_func(search_content)
 
-        columns={}
+        columns = {}
 
-        columns['snapshot']=Gtk.TreeViewColumn(_("Snapshot"), Gtk.CellRendererPixbuf(), pixbuf=COLUMN_PIXBUF)
+        columns['snapshot'] = Gtk.TreeViewColumn(_("Snapshot"), Gtk.CellRendererPixbuf(), pixbuf=COLUMN_PIXBUF)
         columns['snapshot'].set_reorderable(True)
         tree_view.append_column(columns['snapshot'])
 
@@ -321,7 +321,7 @@ class AnnotationTable(AdhocView):
                 ('package', _("Package"), COLUMN_SOURCE_PACKAGE)
         ):
             renderer = Gtk.CellRendererText()
-            columns[name]=Gtk.TreeViewColumn(label, renderer, text=col)
+            columns[name] = Gtk.TreeViewColumn(label, renderer, text=col)
             if name == 'content':
                 renderer.connect('editing-started', entry_editing_started)
                 renderer.connect('edited', cell_edited)
@@ -362,7 +362,7 @@ class AnnotationTable(AdhocView):
             selection = tree_view.get_selection ()
             if not selection:
                 return None
-            store, paths=selection.get_selected_rows()
+            store, paths = selection.get_selected_rows()
             return first(store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths)
 
         tree_view.connect('drag-begin', contextual_drag_begin, get_element, self.controller)
@@ -379,12 +379,12 @@ class AnnotationTable(AdhocView):
                 return False
 
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
+                sources = [ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                sources=[ self.controller.package.annotationTypes.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
+                sources = [ self.controller.package.annotationTypes.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources[0].annotations)
                 return True
@@ -408,7 +408,7 @@ class AnnotationTable(AdhocView):
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
         model, paths = treeview.get_selection().get_selected_rows()
 
-        els=[ model[p][COLUMN_ELEMENT] for p in paths ]
+        els = [ model[p][COLUMN_ELEMENT] for p in paths ]
 
         if targetType == config.data.target_type['annotation']:
             selection.set(selection.get_target(), 8, "\n".join( e.uri
@@ -456,26 +456,26 @@ class AnnotationTable(AdhocView):
 
     def csv_export(self, name=None):
         if name is None:
-            name=dialog.get_filename(title=_("Export data to file..."),
-                                     default_file="advene_data.csv",
-                                     action=Gtk.FileChooserAction.SAVE,
-                                     button=Gtk.STOCK_SAVE)
+            name = dialog.get_filename(title=_("Export data to file..."),
+                                       default_file="advene_data.csv",
+                                       action=Gtk.FileChooserAction.SAVE,
+                                       button=Gtk.STOCK_SAVE)
         if name is None:
             return True
         try:
-            f=open(name, 'w', encoding='utf-8')
+            f = open(name, 'w', encoding='utf-8')
         except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
                                               'filename': name,
                                               'error': str(e),
                                           }), icon=Gtk.MessageType.ERROR)
-        w=csv.writer(f)
-        tv=self.widget.treeview
-        store, paths=tv.get_selection().get_selected_rows()
-        source=[ store.get_iter(p) for p in paths ]
+        w = csv.writer(f)
+        tv = self.widget.treeview
+        store, paths = tv.get_selection().get_selected_rows()
+        source = [ store.get_iter(p) for p in paths ]
         if not source:
-            source=tv.get_model()
+            source = tv.get_model()
         w.writerow( (_("id"), _("type"), _("begin"), _("end"), _("content")) )
         for r in source:
             w.writerow( (r[COLUMN_ID], str(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_BEGIN], r[COLUMN_END], str(r[COLUMN_ELEMENT].content.data).encode('utf-8') ) )
@@ -584,14 +584,14 @@ class AnnotationTable(AdhocView):
 class GenericTable(AdhocView):
     view_name = _("Generic table view")
     view_id = 'generictable'
-    tooltip=_("Display Advene elements in a table.")
+    tooltip = _("Display Advene elements in a table.")
 
     def __init__(self, controller=None, parameters=None, elements=None, source=None):
         super(GenericTable, self).__init__(controller=controller)
         self.close_on_package_load = False
         self.contextual_actions = ()
-        self.controller=controller
-        self.elements=elements
+        self.controller = controller
+        self.elements = elements
         self.source = source
         self.options = { }
 
@@ -602,7 +602,7 @@ class GenericTable(AdhocView):
             source = a['source']
 
         if elements is None and source:
-            c=self.controller.build_context()
+            c = self.controller.build_context()
             try:
                 elements = c.evaluateValue(source)
                 self.source = source
@@ -614,7 +614,7 @@ class GenericTable(AdhocView):
 
         if elements is None:
             elements = []
-        self.model=self.build_model(elements)
+        self.model = self.build_model(elements)
         self.widget = self.build_widget()
 
     def get_save_arguments(self):
@@ -630,17 +630,17 @@ class GenericTable(AdhocView):
         If a selection is active, return only selected elements.
         """
         selection = self.widget.treeview.get_selection ()
-        r=selection.count_selected_rows()
+        r = selection.count_selected_rows()
         if r == 0 or r == 1:
             selection.select_all()
-        store, paths=selection.get_selected_rows()
+        store, paths = selection.get_selected_rows()
         return [ store.get_value (store.get_iter(p), COLUMN_ELEMENT) for p in paths ]
 
     def set_elements(self, elements):
-        model=self.build_model(elements)
+        model = self.build_model(elements)
         self.widget.treeview.set_model(model)
         self.model = model
-        self.elements=elements
+        self.elements = elements
 
     def build_model(self, elements):
         """Build the ListStore containing the data.
@@ -657,14 +657,14 @@ class GenericTable(AdhocView):
 
     def csv_export(self, name=None):
         if name is None:
-            name=dialog.get_filename(title=_("Export data to file..."),
-                                     default_file="advene_data.csv",
-                                     action=Gtk.FileChooserAction.SAVE,
-                                     button=Gtk.STOCK_SAVE)
+            name = dialog.get_filename(title=_("Export data to file..."),
+                                       default_file="advene_data.csv",
+                                       action=Gtk.FileChooserAction.SAVE,
+                                       button=Gtk.STOCK_SAVE)
         if name is None:
             return True
         try:
-            f=open(name, 'w', encoding='utf-8')
+            f = open(name, 'w', encoding='utf-8')
         except IOError as e:
             dialog.message_dialog(label=_("Error while exporting data to %(filename)s: %(error)s"
                                           % {
@@ -672,12 +672,12 @@ class GenericTable(AdhocView):
                                               'error': str(e),
                                           }),
                                   icon=Gtk.MessageType.ERROR)
-        w=csv.writer(f)
-        tv=self.widget.treeview
-        store, paths=tv.get_selection().get_selected_rows()
-        source=[ store.get_iter(p) for p in paths ]
+        w = csv.writer(f)
+        tv = self.widget.treeview
+        store, paths = tv.get_selection().get_selected_rows()
+        source = [ store.get_iter(p) for p in paths ]
         if not source:
-            source=tv.get_model()
+            source = tv.get_model()
         w.writerow( (_("Element title"), _("Element type"), _("Element id")) )
         for r in source:
             w.writerow( (str(r[COLUMN_CONTENT]).encode('utf-8'), str(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_ID]) )
@@ -703,12 +703,12 @@ class GenericTable(AdhocView):
 
         tree_view.set_search_equal_func(search_content)
 
-        columns={}
+        columns = {}
         for (name, label, col) in (
                 ('title', _("Title"), COLUMN_CONTENT),
                 ('type', _("Type"), COLUMN_TYPE),
                 ('id', _("Id"), COLUMN_ID) ):
-            columns[name]=Gtk.TreeViewColumn(label, Gtk.CellRendererText(), text=col)
+            columns[name] = Gtk.TreeViewColumn(label, Gtk.CellRendererText(), text=col)
             columns[name].set_reorderable(True)
             columns[name].set_sort_column_id(col)
             tree_view.append_column(columns[name])
@@ -737,12 +737,12 @@ class GenericTable(AdhocView):
                 return False
 
             if targetType == config.data.target_type['annotation']:
-                sources=[ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
+                sources = [ self.controller.package.annotations.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources)
                 return True
             elif targetType == config.data.target_type['annotation-type']:
-                sources=[ self.controller.package.annotationTypes.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
+                sources = [ self.controller.package.annotationTypes.get(uri) for uri in str(selection.get_data(), 'utf8').split('\n') ]
                 if sources:
                     self.set_elements(sources[0].annotations)
                 return True
@@ -813,5 +813,5 @@ class GenericTable(AdhocView):
                     elif button == 2:
                         # Expand all children
                         widget.expand_row(path, True)
-                        retval=True
+                        retval = True
         return retval
