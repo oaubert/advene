@@ -76,7 +76,8 @@ jobs:
 
       - name: "Create Release"
         id: create_release
-        uses: actions/create-release@v1
+        uses: comnoco/create-release-action@v2.0.5
+        #        uses: actions/create-release@v1
         # Do not execute step if we do not have a tag.
         # If we invoke by event trigger, then it
         # will create a refs/heads/master tag which will make a
@@ -144,7 +145,8 @@ jobs:
 
       - name: "Create Release"
         id: create_release
-        uses: actions/create-release@v1
+        uses: comnoco/create-release-action@v2.0.5
+        # uses: actions/create-release@v1
         # Do not execute step if we do not have a tag.
         # If we invoke by event trigger, then it
         # will create a refs/heads/master tag which will make a
