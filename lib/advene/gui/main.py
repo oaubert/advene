@@ -4894,9 +4894,9 @@ Image cache information: %(imagecache)s
             if selection:
                 for filename in selection:
                     self.controller.load_package(uri=str(filename))
-            answer = dialog.message_dialog(_(f"Loaded {len(packages)} packages.\nDo you want to save them as a corpus (.apl) file to get back more easily (advised)?"), icon=Gtk.MessageType.QUESTION)
-            if answer:
-                self.activate_action('app.corpus-save')
+                answer = dialog.message_dialog(_(f"Loaded {len(selection)} packages.\nDo you want to save them as a corpus (.apl) file to load the whole corpus more easily (advised)?"), icon=Gtk.MessageType.QUESTION)
+                if answer:
+                    self.activate_action('app.corpus-save')
 
     @named_action(name="app.corpus-save")
     def on_save_corpus_activate (self, button=None, data=None):
