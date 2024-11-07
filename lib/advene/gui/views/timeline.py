@@ -2268,7 +2268,7 @@ class TimeLine(AdhocView):
             """Lazy-loading of images
             """
             png = self.controller.get_snapshot(position=widget.mark, precision=step/2)
-            widget.timestamp=png.timestamp
+            widget.timestamp = png.timestamp
             widget.set_from_pixbuf(png_to_pixbuf (png, height=max(20, h)))
             widget.valid_screenshot = not png.is_default
             if widget.expose_signal is not None:
@@ -2288,12 +2288,12 @@ class TimeLine(AdhocView):
             # Big enough. Let's display screenshots.
 
             # Evaluate screenshot width.
-            width=int(height * 4.0 / 3) + 5
+            width = int(height * 4.0 / 3) + 5
             step = self.pixel2unit(width)
             t = self.minimum
 
-            self.scale_layout.height=height
-            self.scale_layout.step=step
+            self.scale_layout.height = height
+            self.scale_layout.step = step
 
             u2p=self.unit2pixel
             while t <= self.maximum:
@@ -2302,13 +2302,13 @@ class TimeLine(AdhocView):
                 # Use round_timestamp so that timestamps will exactly
                 # match positions notified with SnasphotUpdate
                 i.mark = self.controller.round_timestamp(t)
-                i.expose_signal=i.connect('draw', display_image, height, step)
+                i.expose_signal = i.connect('draw', display_image, height, step)
                 i.pos = 20
                 # Timestamp of the snapshot currently used. If < 0
                 # (and a large value, since it is after used to get
                 # best approximation through abs(pos - i.timestamp)),
                 # the snapshot is the uninitialized one.
-                i.timestamp=-self.controller.cached_duration
+                i.timestamp = -self.controller.cached_duration
                 i.show()
                 self.scale_layout.put(i, u2p(i.mark, absolute=True), i.pos)
 
@@ -2317,8 +2317,8 @@ class TimeLine(AdhocView):
     def draw_marks (self):
         """Draw marks for stream positioning"""
         u2p = self.unit2pixel
-        # We want marks every 110 pixels
-        step = self.pixel2unit (110)
+        # We want marks every 160 pixels
+        step = self.pixel2unit (160)
         t = self.minimum
 
         font = Pango.FontDescription("sans 10")
@@ -2335,7 +2335,7 @@ class TimeLine(AdhocView):
             self.scale_layout.put (label, x, label.pos)
             t += step
         # Reset current_scale_height to force screenshots redraw
-        self.current_scale_height=0
+        self.current_scale_height = 0
         self.update_scale_height()
 
     def bounds (self):
@@ -2344,8 +2344,8 @@ class TimeLine(AdhocView):
         Return a tuple corresponding to the min and max values of the
         list, in list units.
         """
-        minimum=sys.maxsize
-        maximum=0
+        minimum = sys.maxsize
+        maximum = 0
         annotations = self.get_annotations()
         for a in annotations:
             if a.fragment.begin < minimum:
