@@ -238,3 +238,8 @@ class Resources(metaclass=auto_properties):
                     yield c2
             else:
                 yield c
+
+    def __len__(self):
+        """Return the number of resources
+        """
+        return len(self.keys())

@@ -72,9 +72,9 @@ class Differ:
     """Returns a structure diff of two packages.
     """
     def __init__(self, source=None, destination=None, controller=None):
-        self.source=source
-        self.destination=destination
-        self.controller=controller
+        self.source = source
+        self.destination = destination
+        self.controller = controller
         # translated ids for different elements with the same id.  The
         # key is the id in the source package, the value the (new) id
         # in the destination package.
@@ -99,7 +99,7 @@ class Differ:
     def diff_structure(self):
         """Iterator returning a changelist for all structure elements
 
-        Excluding annotations/realtions.
+        Excluding annotations/relations.
 
         Structure of returned elements:
         (action_name, source_element, dest_element, action)
@@ -110,6 +110,22 @@ class Differ:
                                self.diff_views(),
                                self.diff_queries(),
                                self.diff_resources())
+
+    def diff_stats(self):
+        """Return stats about the diff content
+        """
+        return {
+            'annotation_types': len(self.destination.annotationTypes),
+            'annotation_types_updated': len(set(el[1].id for el in self.diff_annotation_types())),
+            'relation_types': len(self.destination.relationTypes),
+            'relation_types_updated': len(set(el[1].id for el in self.diff_relation_types())),
+            'views': len(self.destination.views),
+            'views_updated': len(set(el[1].id for el in self.diff_views())),
+            'queries': len(self.destination.queries),
+            'queries_updated': len(set(el[1].id for el in self.diff_queries())),
+            'resources': len(self.destination.resources),
+            'resources_updated': len(set(el for el in self.diff_resources())),
+            }
 
     def check_meta(self, s, d, namespace, name):
         if s.getMetaData(namespace, name) != d.getMetaData(namespace, name):
