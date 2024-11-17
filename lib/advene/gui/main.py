@@ -3208,7 +3208,7 @@ class AdveneApplication(Gtk.Application):
                     p.save(name=n)
             return True
 
-        if self.gui.win.get_title().endswith('(*)') ^ c.package._modified:
+        if c.package and self.gui.win.get_title().endswith('(*)') ^ c.package._modified:
             self.update_window_title()
         self.toolbuttons['undo'].set_sensitive(bool(c.undomanager.history))
         is_playing = c.player.is_playing()
@@ -3219,7 +3219,7 @@ class AdveneApplication(Gtk.Application):
 
         # Check snapshotter activity
         s = getattr(c.player, 'snapshotter', None)
-        if s:
+        if c.package and s:
             if s.timestamp_queue.empty():
                 self.snapshotter_monitor_icon.set_state('idle')
                 # Since the snapshotter is idle, check
