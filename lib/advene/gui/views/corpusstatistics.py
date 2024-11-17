@@ -83,7 +83,7 @@ class CorpusStatistics(AdhocView):
         packages_info = "\n".join(package_info(alias) for alias in self.packages)
         self.set_summary(f"""<big><b>Corpus statistics</b></big>
 
-        {len(self.packages)} loaded packages :
+        <b>{len(self.packages)} loaded packages</b>
 {packages_info}
         """)
 
@@ -135,6 +135,9 @@ class CorpusStatistics(AdhocView):
         textview.set_wrap_mode (Gtk.WrapMode.WORD)
         self.summary_textview = textview
         vbox.pack_start(textview, True, True, 0)
+
+        grid = Gtk.Grid()
+        grid.set_column_homogeneous(True)
         return vbox
 
     def add_page(self, label, widget):
