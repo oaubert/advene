@@ -2169,26 +2169,27 @@ class AdveneController:
         # recreate a template package
         pass
 
-    def save_session(self, name=None):
+    def save_session(self, name=None, save_packages=False):
         """Save a session as a package list.
 
-        Note: this does *not* save individual packages, only their
-        list.
+        If save_packages is True, then also save individual packages
         """
 
         def tag(i):
             return ET.QName(config.data.namespace, i)
 
-        root=ET.Element(tag('package-list'))
+        root = ET.Element(tag('package-list'))
         for a, p in self.packages.items():
             if a in ('advene', 'new_pkg'):
                 # Do not write the default or template package
                 continue
-            n=ET.SubElement(root, tag('package'), uri=p.uri, alias=a)
+            n = ET.SubElement(root, tag('package'), uri=p.uri, alias=a)
             if a == self.current_alias:
-                n.attrib['default']=''
+                n.attrib['default'] = ''
+            if save_packages and p._modified:
+                self.save_package(alias=a)
 
-        f=open(name, 'w', encoding='utf-8')
+        f = open(name, 'w', encoding='utf-8')
         helper.indent(root)
         ET.ElementTree(root).write(f, encoding='unicode')
         f.close()
