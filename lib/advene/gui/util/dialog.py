@@ -635,7 +635,7 @@ def get_filename(title=_("Open a file"),
     @type default_file: string
     @param alias: wether to display the alias entry
     @type alias: boolean
-    @param filter: the filename filter ('any', 'advene', 'session', 'video')
+    @param filter: the filename filter ('any', 'advene', 'session', 'corpus', 'video')
     @type filter: string
     @param multiple: allow multiple file selection
     @type multiple: boolean
@@ -709,7 +709,8 @@ def get_filename(title=_("Open a file"),
             ('advene',
              _("Advene files (.xml, .azp, .apl)"),
              ('*.xml', '*.azp', '*.apl')),
-            ('session', _("Advene session (.apl)"), ( '*.apl', ) ),
+            ('corpus', _("Advene corpus (.apl)"), ( '*.apl', ) ),
+            ('session', _("Advene corpus (.apl)"), ( '*.apl', ) ),
             ('audio', _("Audio files"), ('*.wav', '*.mp3', '*.ogg', '*.aac', '*.m4a', '*.opus')),
             ('video', _("Video files"), [ "*%s" % e for e in config.data.video_extensions ])
         ):
