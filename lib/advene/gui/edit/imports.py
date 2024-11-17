@@ -354,14 +354,10 @@ class Importer:
         self.widget=self.build_widget()
 
     def add_package(self, button=None):
-        if config.data.path['data']:
-            d=str(config.data.path['data'])
-        else:
-            d=None
         filename, alias=dialog.get_filename(title=_("Choose the package to import, and its alias"),
                                             action=Gtk.FileChooserAction.OPEN,
                                             button=Gtk.STOCK_OPEN,
-                                            default_dir=d,
+                                            default_dir=config.data.path.get('data'),
                                             alias=True,
                                             filter='advene')
         if not filename:

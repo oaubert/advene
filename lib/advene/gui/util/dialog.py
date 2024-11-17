@@ -725,7 +725,7 @@ def get_filename(title=_("Open a file"),
     fs.connect('key-press-event', dialog_keypressed_cb)
 
     if default_dir:
-        fs.set_current_folder(default_dir)
+        fs.set_current_folder(str(default_dir))
     if default_file:
         fs.set_filename(default_file)
         fs.set_current_name(default_file)

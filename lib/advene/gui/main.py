@@ -3839,16 +3839,11 @@ class AdveneApplication(Gtk.Application):
     def on_open1_activate (self, button=None, data=None, filename=None, corpus=False):
         """Open a file selector to load a package.
         """
-        if config.data.path['data']:
-            d = str(config.data.path['data'])
-        else:
-            d = None
-
         if filename is None:
             filename, alias = dialog.get_filename(title=_("Load a corpus") if corpus else _("Load a package"),
                                                   action=Gtk.FileChooserAction.OPEN,
                                                   button=Gtk.STOCK_OPEN,
-                                                  default_dir=d,
+                                                  default_dir=config.data.path.get('data'),
                                                   alias=True,
                                                   filter='corpus' if corpus else 'advene')
         else:
@@ -3941,14 +3936,10 @@ class AdveneApplication(Gtk.Application):
         if package is None:
             package=self.controller.package
         self.controller.update_package_title()
-        if config.data.path['data']:
-            d=str(config.data.path['data'])
-        else:
-            d=None
         filename=dialog.get_filename(title=_("Save the package %s") % self.controller.get_title(package),
                                      action=Gtk.FileChooserAction.SAVE,
                                      button=Gtk.STOCK_SAVE,
-                                     default_dir=d,
+                                     default_dir=config.data.path.get('data'),
                                      filter='advene')
         if filename:
             (p, ext) = os.path.splitext(filename)
@@ -3996,14 +3987,10 @@ class AdveneApplication(Gtk.Application):
     def on_save_session1_activate (self, button=None, data=None):
         """Save the current session.
         """
-        if config.data.path['data']:
-            d=str(config.data.path['data'])
-        else:
-            d=None
         filename=dialog.get_filename(title=_("Save the session in..."),
                                      action=Gtk.FileChooserAction.SAVE,
                                      button=Gtk.STOCK_SAVE,
-                                     default_dir=d,
+                                     default_dir=config.data.path.get('data'),
                                      filter='session')
         if filename:
             (p, ext) = os.path.splitext(filename)
@@ -4656,14 +4643,10 @@ Image cache information: %(imagecache)s
 
     @named_action(name="app.merge-package")
     def on_merge_package_activate(self, button=None, data=None):
-        if config.data.path['data']:
-            d=str(config.data.path['data'])
-        else:
-            d=None
         filenames = dialog.get_filename(title=_("Select the package to merge"),
                                         action=Gtk.FileChooserAction.OPEN,
                                         button=Gtk.STOCK_OPEN,
-                                        default_dir=d,
+                                        default_dir=config.data.path.get('data'),
                                         multiple=True,
                                         filter='advene')
         if not filenames:
@@ -4707,14 +4690,10 @@ Image cache information: %(imagecache)s
 
     @named_action(name="app.import-package")
     def on_import_package_activate(self, button=None, data=None):
-        if config.data.path['data']:
-            d=str(config.data.path['data'])
-        else:
-            d=None
         filename = dialog.get_filename(title=_("Select the package to import"),
                                        action=Gtk.FileChooserAction.OPEN,
                                        button=Gtk.STOCK_OPEN,
-                                       default_dir=d,
+                                       default_dir=config.data.path.get('data'),
                                        filter='advene')
         if not filename:
             return True
@@ -4913,14 +4892,10 @@ Image cache information: %(imagecache)s
 
         Load structure and views from a template file, and update all loaded packages with it.
         """
-        if config.data.path['data']:
-            d=str(config.data.path['data'])
-        else:
-            d=None
         filenames = dialog.get_filename(title=_("Select the reference template"),
                                         action=Gtk.FileChooserAction.OPEN,
                                         button=Gtk.STOCK_OPEN,
-                                        default_dir=d,
+                                        default_dir=config.data.path.get('data'),
                                         multiple=True,
                                         filter='advene')
         if not filenames:
@@ -4945,14 +4920,10 @@ Image cache information: %(imagecache)s
     def on_save_corpus_activate (self, button=None, data=None):
         """Save the current corpus (session file + individual packages)
         """
-        if config.data.path['data']:
-            d = str(config.data.path['data'])
-        else:
-            d = None
         filename = dialog.get_filename(title=_("Save the corpus in..."),
                                        action=Gtk.FileChooserAction.SAVE,
                                        button=Gtk.STOCK_SAVE,
-                                       default_dir=d,
+                                       default_dir=config.data.path.get('data'),
                                        filter='session')
         if filename:
             (p, ext) = os.path.splitext(filename)
