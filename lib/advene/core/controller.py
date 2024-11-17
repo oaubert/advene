@@ -2202,9 +2202,9 @@ class AdveneController:
         @type name: string
         """
         if alias is None:
-            p=self.package
+            p = self.package
         else:
-            p=self.packages[alias]
+            p = self.packages[alias]
 
         old_uri = urllib.parse.unquote(p.uri)
         if name is None:
@@ -2216,14 +2216,16 @@ class AdveneController:
                                   "tag_colors",
                                   urllib.parse.urlencode(self.package._tag_colors))
 
-        # Check if we know the stream duration. If so, save it as
-        # package metadata
-        d=self.cached_duration
-        if d > 0:
-            p.setMetaData (config.data.namespace,
-                           "duration", str(d))
-
         if p == self.package:
+            # Current package
+
+            # Check if we know the stream duration. If so, save it as
+            # package metadata
+            d = self.cached_duration
+            if d > 0:
+                p.setMetaData (config.data.namespace,
+                               "duration", str(d))
+
             # Set if necessary the mediafile metadata
             if self.get_default_media() == "":
                 uri = self.player.get_uri()
