@@ -3833,21 +3833,21 @@ class AdveneApplication(Gtk.Application):
         self.on_open1_activate(filename=url)
 
     @named_action(name="app.open-dialog")
-    def on_open1_activate (self, button=None, data=None, filename=None):
+    def on_open1_activate (self, button=None, data=None, filename=None, corpus=False):
         """Open a file selector to load a package.
         """
         if config.data.path['data']:
-            d=str(config.data.path['data'])
+            d = str(config.data.path['data'])
         else:
-            d=None
+            d = None
 
         if filename is None:
-            filename, alias=dialog.get_filename(title=_("Load a package"),
-                                                action=Gtk.FileChooserAction.OPEN,
-                                                button=Gtk.STOCK_OPEN,
-                                                default_dir=d,
-                                                alias=True,
-                                                filter='advene')
+            filename, alias = dialog.get_filename(title=_("Load a corpus") if corpus else _("Load a package"),
+                                                  action=Gtk.FileChooserAction.OPEN,
+                                                  button=Gtk.STOCK_OPEN,
+                                                  default_dir=d,
+                                                  alias=True,
+                                                  filter='corpus' if corpus else 'advene')
         else:
             name, ext = os.path.splitext(filename)
             alias = re.sub('[^a-zA-Z0-9_]', '_', os.path.basename(name))
@@ -4873,8 +4873,8 @@ Image cache information: %(imagecache)s
             self.gui.stbv_combo.get_parent().show()
         return True
 
-    @named_action(name="app.corpus-load")
-    def on_corpus_load_activate (self, button=None, data=None):
+    @named_action(name="app.corpus-build")
+    def on_corpus_build_activate (self, button=None, data=None):
         """Load multiple packages from a directory.
         """
         rootdir = dialog.get_dirname(title=_("Directory to recursively search for packages"))
@@ -4897,6 +4897,12 @@ Image cache information: %(imagecache)s
                 answer = dialog.message_dialog(_(f"Loaded {len(selection)} packages.\nDo you want to save them as a corpus (.apl) file to load the whole corpus more easily (advised)?"), icon=Gtk.MessageType.QUESTION)
                 if answer:
                     self.activate_action('app.corpus-save')
+
+    @named_action(name="app.corpus-load")
+    def on_corpus_load_activate (self, button=None, data=None):
+        """Load a corpus
+        """
+        self.on_open1_activate(corpus=True)
 
     @named_action(name="app.corpus-save")
     def on_save_corpus_activate (self, button=None, data=None):
