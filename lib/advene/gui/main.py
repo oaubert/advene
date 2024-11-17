@@ -120,6 +120,7 @@ from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
+from advene.gui.edit.corpusmerge import MultiMerger
 from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -351,8 +352,10 @@ class AdveneApplication(Gtk.Application):
                 ( _("_Select player"), Gio.Menu(), _("Select the player plugin"), "player_select_menu" ),
             ), "", "" ),
             (_("Corpus"), (
+                ( _("Build corpus"), "app.corpus-build", _("Build a corpus by package selection"), "corpus_build" ),
                 ( _("Load corpus"), "app.corpus-load", _("Load a corpus"), "corpus_load" ),
                 ( _("Save corpus"), "app.corpus-save", _("Save all loaded packages"), "corpus_save" ),
+                ( _("Update template in corpus"), "app.corpus-update-template" , _("Update loaded packages with the given template"), "corpus_update_template" ),
                 ( _("Table of annotations"), "app.corpus-annotations", _("Display all annotations in a table"), "corpus_annotations" ),
                 #( _("Corpus analysis"), "app.corpus-analysis", _("Analyse loaded corpus"), "corpus_analysis" ),
                 ( _("Corpus statistics"), "app.corpus-statistics", _("Display statistics about loaded corpus"), "corpus_statistics" ),
@@ -4904,9 +4907,43 @@ Image cache information: %(imagecache)s
         """
         self.on_open1_activate(corpus=True)
 
+    @named_action(name="app.corpus-update-template")
+    def on_corpus_update_template_activate (self, button=None, data=None):
+        """Updating template in loaded corpus packages
+
+        Load structure and views from a template file, and update all loaded packages with it.
+        """
+        if config.data.path['data']:
+            d=str(config.data.path['data'])
+        else:
+            d=None
+        filenames = dialog.get_filename(title=_("Select the reference template"),
+                                        action=Gtk.FileChooserAction.OPEN,
+                                        button=Gtk.STOCK_OPEN,
+                                        default_dir=d,
+                                        multiple=True,
+                                        filter='advene')
+        if not filenames:
+            return True
+
+        if len(filenames) == 1:
+            filename = filenames[0]
+            # Single package - offer interface
+            try:
+                source = Package(uri=helper.path2uri(filename))
+            except Exception as e:
+                msg = "Cannot load %s file: %s" % (filename, str(e))
+                self.log(msg)
+                dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
+                return True
+
+            m = MultiMerger(self.controller, sourcepackage=source, destpackages=self.controller.packages)
+            m.popup()
+            return True
+
     @named_action(name="app.corpus-save")
     def on_save_corpus_activate (self, button=None, data=None):
-        """Save the current corpus
+        """Save the current corpus (session file + individual packages)
         """
         if config.data.path['data']:
             d = str(config.data.path['data'])
@@ -4922,7 +4959,7 @@ Image cache information: %(imagecache)s
             if ext == '':
                 # Add a pertinent extension
                 filename = filename + '.apl'
-            self.controller.save_session (filename)
+            self.controller.save_session(filename, save_packages=True)
             self.log(_("Session saved in %s") % filename)
         return True
 
