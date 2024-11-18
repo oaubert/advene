@@ -32,6 +32,8 @@ from gettext import gettext as _
 import advene.core.config as config
 
 import advene.gui.popup
+from advene.gui.views import AdhocView
+
 from advene.model.schema import Schema, AnnotationType, RelationType
 from advene.model.view import View
 from advene.model.query import Query
@@ -56,18 +58,18 @@ labels = {
 }
 
 class TreeViewMerger:
-    COLUMN_ELEMENT=0
-    COLUMN_ACTION=1
-    COLUMN_ELEMENT_NAME=2
-    COLUMN_APPLY=3
-    COLUMN_ELEMENT_TYPE=4
+    COLUMN_ELEMENT = 0
+    COLUMN_ACTION = 1
+    COLUMN_ELEMENT_NAME = 2
+    COLUMN_APPLY = 3
+    COLUMN_ELEMENT_TYPE = 4
 
     def __init__(self, controller=None, differ=None):
-        self.controller=controller
-        self.differ=differ
+        self.controller = controller
+        self.differ = differ
         self.diff_textview = None
-        self.store=self.build_liststore()
-        self.widget=self.build_widget()
+        self.store = self.build_liststore()
+        self.widget = self.build_widget()
 
     def set_diff_textview(self, tv):
         self.diff_textview = tv
@@ -78,7 +80,7 @@ class TreeViewMerger:
     def build_liststore(self):
         # Store reference to the element, string representation (title and id)
         # and boolean indicating wether it is imported or not
-        store=Gtk.ListStore(
+        store = Gtk.ListStore(
             GObject.TYPE_PYOBJECT,
             GObject.TYPE_STRING,
             GObject.TYPE_STRING,
@@ -174,7 +176,7 @@ class TreeViewMerger:
                         it = model.get_iter(path)
                         node = model.get_value(it, self.COLUMN_ELEMENT)
                         widget.get_selection().select_path (path)
-                        menu=build_popup_menu(node)
+                        menu = build_popup_menu(node)
                         menu.popup_at_pointer(None)
                         retval = True
             return retval
@@ -235,16 +237,26 @@ class TreeViewMerger:
 
         return treeview
 
-class Merger:
-    def __init__(self, controller=None, sourcepackage=None, destpackage=None):
-        self.controller=controller
-        self.sourcepackage=sourcepackage
-        self.destpackage=destpackage
-        self.differ=Differ(sourcepackage, destpackage, self.controller)
-        self.widget=self.build_widget()
+class MergerView(AdhocView):
+    view_name = _("Package merger")
+    view_id = "package_merger"
+
+    def __init__(self, controller=None, parameters=None, sourcepackage=None, destpackage=None):
+        super().__init__(controller=controller)
+        self.controller = controller
+        self.parameters = parameters
+        opt, arg = self.load_parameters(parameters)
+        self.close_on_package_load = False
+        self.contextual_actions = ()
+        self.options = {
+            }
+        self.sourcepackage = sourcepackage
+        self.destpackage = destpackage
+        self.differ = Differ(sourcepackage, destpackage, self.controller)
+        self.widget = self.build_widget()
 
     def build_widget(self):
-        vbox=Gtk.VBox()
+        vbox = Gtk.VBox()
 
         vbox.pack_start(Gtk.Label(_("Merge elements from %(source)s into %(dest)s") % {'source': self.sourcepackage.uri,
                                                                                        'dest': self.destpackage.uri}),
@@ -271,20 +283,6 @@ class Merger:
         vbox.add(content_paned)
         content_paned.set_position(600)
 
-        return vbox
-
-    def popup(self):
-        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
-        window.set_title (_("Package %s") % (self.destpackage.title or _("No title")))
-
-        vbox = Gtk.VBox()
-        window.add (vbox)
-
-        vbox.add (self.widget)
-        if self.controller.gui:
-            self.controller.gui.init_window_size(window, 'merge')
-            window.set_icon_list(self.controller.gui.get_icon_list())
-
         self.buttonbox = Gtk.HButtonBox()
 
         def validate(b):
@@ -295,7 +293,7 @@ class Merger:
                     action(s, d)
             self.destpackage._modified = True
             self.controller.notify('PackageActivate', package=self.destpackage)
-            window.destroy()
+            self.close()
             return True
 
         def select_all(b):
@@ -374,11 +372,11 @@ class Merger:
         self.buttonbox.add (b)
 
         b = Gtk.Button(stock=Gtk.STOCK_CANCEL)
-        b.connect('clicked', lambda b: window.destroy())
+        b.connect('clicked', lambda b: self.close())
         self.buttonbox.add (b)
 
         vbox.pack_start(self.buttonbox, False, True, 0)
 
-        window.show_all()
+        vbox.show_all()
 
-        return window
+        return vbox

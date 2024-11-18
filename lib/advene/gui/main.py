@@ -119,7 +119,7 @@ from advene.gui.edit.rules import EditRuleSet
 from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
-from advene.gui.edit.merge import Merger
+from advene.gui.edit.merge import MergerView
 from advene.gui.edit.corpusmerge import MultiMergerView
 from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
@@ -550,6 +550,7 @@ class AdveneApplication(Gtk.Application):
         # Explicitly register checker view (which is no longer a plugin)
         self.register_viewclass(advene.gui.views.checker.CheckerView)
         self.register_viewclass(MultiMergerView)
+        self.register_viewclass(MergerView)
 
         def update_quicksearch_sources(mi):
             """Display a dialog allowing to edit quicksearch-sources setting.
@@ -4663,8 +4664,7 @@ Image cache information: %(imagecache)s
                 self.log(msg)
                 dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
                 return True
-            m=Merger(self.controller, sourcepackage=source, destpackage=self.controller.package)
-            m.popup()
+            self.open_adhoc_view('package_merger', sourcepackage=source, destpackage=self.controller.package)
             return True
         else:
             # Multiple package merging. No interface yet.
