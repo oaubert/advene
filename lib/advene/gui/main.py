@@ -356,6 +356,7 @@ class AdveneApplication(Gtk.Application):
                 ( _("Load corpus"), "app.corpus-load", _("Load a corpus"), "corpus_load" ),
                 ( _("Save corpus"), "app.corpus-save", _("Save all loaded packages"), "corpus_save" ),
                 ( _("Update template in corpus"), "app.corpus-update-template" , _("Update loaded packages with the given template"), "corpus_update_template" ),
+                ( _("Export corpus as XLSX"), "app.corpus-export" , _("Export loaded packages as XLSX"), "corpus_export" ),
                 ( _("Table of annotations"), "app.corpus-annotations", _("Display all annotations in a table"), "corpus_annotations" ),
                 #( _("Corpus analysis"), "app.corpus-analysis", _("Analyse loaded corpus"), "corpus_analysis" ),
                 ( _("Corpus statistics"), "app.corpus-statistics", _("Display statistics about loaded corpus"), "corpus_statistics" ),
@@ -2395,11 +2396,11 @@ class AdveneApplication(Gtk.Application):
             element = self.controller.package
 
         if isinstance(element, Package):
-            title=_("Export package data")
+            title = _("Export package data")
         elif isinstance(element, AnnotationType):
-            title=_("Export annotation type %s") % self.controller.get_title(element)
+            title = _("Export annotation type %s") % self.controller.get_title(element)
         else:
-            title=_("Export element %s") % self.controller.get_title(element)
+            title = _("Export element %s") % self.controller.get_title(element)
         exporterclass = None
         if filter_id is not None:
             exporterclass = self.controller.get_export_filters(ident=filter_id)
@@ -4932,6 +4933,13 @@ Image cache information: %(imagecache)s
                 filename = filename + '.apl'
             self.controller.save_session(filename, save_packages=True)
             self.log(_("Session saved in %s") % filename)
+        return True
+
+    @named_action(name="app.corpus-export")
+    def on_corpus_export_activate (self, button=None, data=None):
+        """Export the current corpus as XLSX
+        """
+        self.export_element(self.controller.global_package, filter_id='CorpusXlsxExporter')
         return True
 
     @named_action(name="app.corpus-statistics")

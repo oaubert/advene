@@ -133,6 +133,10 @@ class GlobalPackage:
         self.controller = controller
 
     @property
+    def title(self):
+        return "corpus"
+
+    @property
     def package_list(self):
         return [ p
                  for a, p in self.controller.packages.items()
