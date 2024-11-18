@@ -34,6 +34,7 @@ from gi.repository import GObject
 from gettext import gettext as _
 
 from advene.util.merger import Differ
+from advene.gui.views import AdhocView
 
 class TreeViewMultiMerger:
     def __init__(self, controller=None, differs=None):
@@ -115,9 +116,20 @@ class TreeViewMultiMerger:
 
         return treeview
 
-class MultiMerger:
-    def __init__(self, controller=None, sourcepackage=None, destpackages=None):
+class MultiMergerView(AdhocView):
+    view_name = _("MultiMerger")
+    view_id = 'multimerger'
+
+    def __init__(self, controller=None, parameters=None, sourcepackage=None, destpackages=None):
+        super().__init__(controller=controller)
         self.controller = controller
+        self.parameters = parameters
+        opt, arg = self.load_parameters(parameters)
+        self.close_on_package_load = False
+        self.contextual_actions = ()
+        self.options = {
+            }
+
         self.sourcepackage =  sourcepackage
         self.destpackages = destpackages
         self.differs = dict( (alias, Differ(sourcepackage, p, self.controller))
@@ -128,7 +140,7 @@ class MultiMerger:
     def build_widget(self):
         vbox = Gtk.VBox()
 
-        vbox.pack_start(Gtk.Label(_("Here are the things that would get updated by the merging of %(source)s") % {'source': self.sourcepackage.uri }),
+        vbox.pack_start(Gtk.Label(_("Here are the elements that would get updated by the merging of %(source)s") % {'source': self.sourcepackage.uri }),
                         False, False, 0)
 
         def scrolled(widget):
@@ -140,16 +152,6 @@ class MultiMerger:
         self.mergerview = TreeViewMultiMerger(controller=self.controller, differs=self.differs)
 
         vbox.add(scrolled(self.mergerview.widget))
-        return vbox
-
-    def popup(self):
-        window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
-        window.set_title (_("Merging %s into %d packages") % (self.sourcepackage.title,
-                                                              len(self.destpackages)))
-
-        vbox = Gtk.VBox()
-        window.add (vbox)
-        vbox.add (self.widget)
 
         self.buttonbox = Gtk.HButtonBox()
 
@@ -168,11 +170,10 @@ class MultiMerger:
         self.buttonbox.add (b)
 
         b = Gtk.Button(stock=Gtk.STOCK_CANCEL)
-        b.connect('clicked', lambda b: window.destroy())
+        b.connect('clicked', lambda b: self.close())
         self.buttonbox.add (b)
 
         vbox.pack_start(self.buttonbox, False, True, 0)
 
-        window.show_all()
-
-        return window
+        vbox.show_all()
+        return vbox

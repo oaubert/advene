@@ -120,7 +120,7 @@ from advene.gui.edit.dvdselect import DVDSelect
 from advene.gui.edit.elements import get_edit_popup
 from advene.gui.edit.create import CreateElementPopup
 from advene.gui.edit.merge import Merger
-from advene.gui.edit.corpusmerge import MultiMerger
+from advene.gui.edit.corpusmerge import MultiMergerView
 from advene.gui.evaluator import Evaluator
 from advene.gui.views.accumulatorpopup import AccumulatorPopup
 import advene.gui.edit.imports
@@ -549,6 +549,7 @@ class AdveneApplication(Gtk.Application):
                 logger.error("OSerror while trying to load %s plugins" % n)
         # Explicitly register checker view (which is no longer a plugin)
         self.register_viewclass(advene.gui.views.checker.CheckerView)
+        self.register_viewclass(MultiMergerView)
 
         def update_quicksearch_sources(mi):
             """Display a dialog allowing to edit quicksearch-sources setting.
@@ -4912,8 +4913,7 @@ Image cache information: %(imagecache)s
                 dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
                 return True
 
-            m = MultiMerger(self.controller, sourcepackage=source, destpackages=self.controller.packages)
-            m.popup()
+            self.open_adhoc_view('multimerger', sourcepackage=source, destpackages=self.controller.packages)
             return True
 
     @named_action(name="app.corpus-save")
