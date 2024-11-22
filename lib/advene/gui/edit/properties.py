@@ -321,14 +321,12 @@ class EditWidget(Gtk.VBox):
     def add_label(self, label):
 
         lbl = Gtk.Label(label="")
+        lbl.set_halign(Gtk.Align.START)
         lbl.set_markup(label)
         lbl.set_line_wrap(True)
         lbl.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
-        self.__add_line(0, align)
+        self.__add_line(0, lbl)
 
     def add_title(self, label):
 
@@ -347,20 +345,16 @@ class EditWidget(Gtk.VBox):
                       self.CHANGE_CHECKBOX)
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
-        self.__add_line(0, check, align)
+        self.__add_line(0, check, lbl)
 
     def add_entry(self, label, property_name, help, passwd = 0, entries=None):
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         if entries:
             combo = Gtk.ComboBoxText.new_with_entry()
@@ -369,13 +363,13 @@ class EditWidget(Gtk.VBox):
             for e in entries:
                 combo.append_text(e)
             combo.set_tooltip_text(help)
-            self.__add_line(1, combo, align)
+            self.__add_line(1, combo, lbl)
         else:
             combo = None
             entry = Gtk.Entry()
             entry.show()
             entry.set_tooltip_text(help)
-            self.__add_line(1, entry, align)
+            self.__add_line(1, entry, lbl)
 
         if (passwd):
             entry.set_visibility(False)
@@ -393,12 +387,10 @@ class EditWidget(Gtk.VBox):
         callback(button, entry)
         """
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
         entry = Gtk.Entry()
         entry.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         hbox = Gtk.HBox()
         hbox.show()
@@ -408,7 +400,7 @@ class EditWidget(Gtk.VBox):
         hbox.pack_start(b, False, True, 0)
 
         entry.set_tooltip_text(help)
-        self.__add_line(1, hbox, align)
+        self.__add_line(1, hbox, lbl)
 
         value = self.__get_config(property_name)
         entry.set_text(value)
@@ -419,18 +411,16 @@ class EditWidget(Gtk.VBox):
     def add_text(self, label, property_name, help):
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
         sw = Gtk.ScrolledWindow()
         entry = Gtk.TextView()
         sw.add(entry)
         entry.show()
         sw.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         entry.set_tooltip_text(help)
-        self.__add_line(1, align)
+        self.__add_line(1, lbl)
         self.__add_line(1, sw)
 
         value = self.__get_config(property_name)
@@ -441,11 +431,8 @@ class EditWidget(Gtk.VBox):
     def add_spin(self, label, property_name, help, low, up):
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         adjustment = Gtk.Adjustment.new(0, low, up, 1, 1, 0)
         spin_button = Gtk.SpinButton.new(adjustment, 1, 0)
@@ -455,7 +442,7 @@ class EditWidget(Gtk.VBox):
         value = self.__get_config(property_name)
 
         spin_button.set_tooltip_text(help)
-        self.__add_line(1, spin_button, align)
+        self.__add_line(1, spin_button, lbl)
 
         spin_button.set_value(value)
         spin_button.connect('value-changed', self.__on_change, property_name,
@@ -464,11 +451,8 @@ class EditWidget(Gtk.VBox):
     def add_float_spin(self, label, property_name, help, low, up, digits=2):
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         value = self.__get_config(property_name)
 
@@ -479,7 +463,7 @@ class EditWidget(Gtk.VBox):
 
 
         spin_button.set_tooltip_text(help)
-        self.__add_line(1, spin_button, align)
+        self.__add_line(1, spin_button, lbl)
 
         spin_button.set_value(value)
         spin_button.connect('value-changed', self.__on_change, property_name,
@@ -488,11 +472,8 @@ class EditWidget(Gtk.VBox):
     def add_accelerator(self, label, property_name, help):
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         value = self.__get_config(property_name)
 
@@ -504,16 +485,13 @@ class EditWidget(Gtk.VBox):
 
         grabber.set_tooltip_text(help)
         grabber.show_all()
-        self.__add_line(1, grabber, align)
+        self.__add_line(1, grabber, lbl)
 
     def add_option(self, label, property_name, help, options):
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         value = self.__get_config(property_name)
 
@@ -537,7 +515,7 @@ class EditWidget(Gtk.VBox):
 
         combo.set_tooltip_text(help)
         combo.show_all()
-        self.__add_line(1, combo, align)
+        self.__add_line(1, combo, lbl)
 
     def add_file_selector(self, label, property_name, help):
 
@@ -559,10 +537,8 @@ class EditWidget(Gtk.VBox):
             fs.destroy()
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         hbox = Gtk.HBox()
         hbox.show()
@@ -584,7 +560,7 @@ class EditWidget(Gtk.VBox):
 
         entry.set_tooltip_text(help)
         btn.set_tooltip_text(help)
-        self.__add_line(1, hbox, align)
+        self.__add_line(1, hbox, lbl)
 
     def add_dir_selector(self, label, property_name, help):
 
@@ -606,10 +582,8 @@ class EditWidget(Gtk.VBox):
             fs.destroy()
 
         lbl = Gtk.Label(label=label)
+        lbl.set_halign(Gtk.Align.START)
         lbl.show()
-        align = Gtk.Alignment()
-        align.show()
-        align.add(lbl)
 
         hbox = Gtk.HBox()
         hbox.show()
@@ -631,7 +605,7 @@ class EditWidget(Gtk.VBox):
 
         entry.set_tooltip_text(help)
         btn.set_tooltip_text(help)
-        self.__add_line(1, hbox, align)
+        self.__add_line(1, hbox, lbl)
 
     def popup(self):
         d = Gtk.Dialog(title=self.get_name(),
