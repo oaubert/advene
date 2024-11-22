@@ -18,8 +18,9 @@ from advene.gui.actions import menuitem_new
 
 # Copied from https://github.dev/gaphor/gaphor/blob/master/gaphor/ui/recentfiles.py
 class RecentFilesMenu(Gio.Menu):
-    def __init__(self, recent_manager):
+    def __init__(self, recent_manager, filter=None):
         super().__init__()
+        self.filter = filter
 
         self._on_recent_manager_changed(recent_manager)
         # TODO: should unregister if the window is closed.
@@ -36,6 +37,8 @@ class RecentFilesMenu(Gio.Menu):
         APPNAME = GObject.get_application_name()
         for item in recent_manager.get_items():
             if APPNAME in item.get_applications():
+                if self.filter and not self.filter(item):
+                    continue
                 menu_item = menuitem_new(item.get_uri_display(),
                                          "app.open",
                                          item.get_uri())
@@ -76,8 +79,9 @@ def update_package_list (menu, controller):
             label = '  ' + ident
         if p._modified:
             label += _(' (modified)')
-        menu.append_item(menuitem_new(label,
-                                      'app.activate-package',
-                                      ident))
+        item = menuitem_new(label.replace('_', 'ˍ'),
+                            'app.activate-package',
+                            ident)
+        menu.append_item(item)
     return True
 

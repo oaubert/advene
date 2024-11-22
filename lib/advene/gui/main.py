@@ -282,7 +282,10 @@ class AdveneApplication(Gtk.Application):
                 ("", # Empty label -> section (and not submenu)
                  (( _("_New package"), 'app.new-package', _("Create a new package"), 'new'),
                   ( _("_Open package"), 'app.open-dialog', _("Open a package"), 'open' ),
-                  ( _("Open recent"), RecentFilesMenu(Gtk.RecentManager.get_default()), _("Show recently opened packages"), 'open_recent' ),
+                  ( _("Open recent"), RecentFilesMenu(
+                      Gtk.RecentManager.get_default(),
+                      filter=lambda item: item.get_uri().endswith('.azp') or item.get_uri().endswith('.apl')
+                  ), _("Show recently opened packages"), 'open_recent' ),
                   ( _("_Save package") + " [Ctrl-S]", 'app.save', _("Save the package"), 'save' ),
                   ( _("Save package as..."), 'app.save-as', _("Save the package as..."), 'save_as' ),
                   ( _("Close package"), 'app.close', _("Close the package"), 'close' ),
@@ -354,6 +357,10 @@ class AdveneApplication(Gtk.Application):
             (_("Corpus"), (
                 ( _("Build corpus"), "app.corpus-build", _("Build a corpus by package selection"), "corpus_build" ),
                 ( _("Load corpus"), "app.corpus-load", _("Load a corpus"), "corpus_load" ),
+                ( _("Open recent corpuses"), RecentFilesMenu(
+                    Gtk.RecentManager.get_default(),
+                    filter=lambda item: item.get_uri().endswith('.apl')
+                ), _("Show recently opened corpuses"), 'open_recent_corpus' ),
                 ( _("Save corpus"), "app.corpus-save", _("Save all loaded packages"), "corpus_save" ),
                 ( _("Update template in corpus"), "app.corpus-update-template" , _("Update loaded packages with the given template"), "corpus_update_template" ),
                 ( _("Export corpus as XLSX"), "app.corpus-export" , _("Export loaded packages as XLSX"), "corpus_export" ),
