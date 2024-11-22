@@ -206,7 +206,7 @@ class EditNotebook:
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL ))
         d.vbox.add(self.book)
         self.book.show_all()
-        res=d.run()
+        res = d.run()
         d.destroy()
         if res == Gtk.ResponseType.OK:
             return True
@@ -336,18 +336,23 @@ class EditWidget(Gtk.VBox):
 
     def add_checkbox(self, label, property_name, help):
 
-        check = Gtk.CheckButton(label)
+        check = Gtk.CheckButton()
         check.show()
 
         check.set_tooltip_text(help)
-        self.__add_line(1, check)
 
         value = self.__get_config(property_name)
         check.set_active(value)
         check.connect('toggled', self.__on_change, property_name,
                       self.CHANGE_CHECKBOX)
 
+        lbl = Gtk.Label(label=label)
+        lbl.show()
+        align = Gtk.Alignment()
+        align.show()
+        align.add(lbl)
 
+        self.__add_line(0, check, align)
 
     def add_entry(self, label, property_name, help, passwd = 0, entries=None):
 
@@ -364,13 +369,13 @@ class EditWidget(Gtk.VBox):
             for e in entries:
                 combo.append_text(e)
             combo.set_tooltip_text(help)
-            self.__add_line(1, align, combo)
+            self.__add_line(1, combo, align)
         else:
             combo = None
             entry = Gtk.Entry()
             entry.show()
             entry.set_tooltip_text(help)
-            self.__add_line(1, align, entry)
+            self.__add_line(1, entry, align)
 
         if (passwd):
             entry.set_visibility(False)
@@ -403,7 +408,7 @@ class EditWidget(Gtk.VBox):
         hbox.pack_start(b, False, True, 0)
 
         entry.set_tooltip_text(help)
-        self.__add_line(1, align, hbox)
+        self.__add_line(1, hbox, align)
 
         value = self.__get_config(property_name)
         entry.set_text(value)
@@ -450,7 +455,7 @@ class EditWidget(Gtk.VBox):
         value = self.__get_config(property_name)
 
         spin_button.set_tooltip_text(help)
-        self.__add_line(1, align, spin_button)
+        self.__add_line(1, spin_button, align)
 
         spin_button.set_value(value)
         spin_button.connect('value-changed', self.__on_change, property_name,
@@ -474,7 +479,7 @@ class EditWidget(Gtk.VBox):
 
 
         spin_button.set_tooltip_text(help)
-        self.__add_line(1, align, spin_button)
+        self.__add_line(1, spin_button, align)
 
         spin_button.set_value(value)
         spin_button.connect('value-changed', self.__on_change, property_name,
@@ -499,7 +504,7 @@ class EditWidget(Gtk.VBox):
 
         grabber.set_tooltip_text(help)
         grabber.show_all()
-        self.__add_line(1, align, grabber)
+        self.__add_line(1, grabber, align)
 
     def add_option(self, label, property_name, help, options):
 
@@ -512,10 +517,10 @@ class EditWidget(Gtk.VBox):
 
         value = self.__get_config(property_name)
 
-        store=Gtk.ListStore(str, object)
-        active_iter=None
+        store = Gtk.ListStore(str, object)
+        active_iter = None
         for k, v in options.items():
-            i=store.append( ( k, v ) )
+            i = store.append( ( k, v ) )
             if v == value:
                 active_iter=i
 
@@ -532,24 +537,24 @@ class EditWidget(Gtk.VBox):
 
         combo.set_tooltip_text(help)
         combo.show_all()
-        self.__add_line(1, align, combo)
+        self.__add_line(1, combo, align)
 
     def add_file_selector(self, label, property_name, help):
 
         def open_filedialog(self, default_file, entry):
-            fs=Gtk.FileChooserDialog(title=_("Choose a file"),
-                                     parent=None,
-                                     action=Gtk.FileChooserAction.OPEN,
-                                     buttons=( Gtk.STOCK_OPEN,
-                                               Gtk.ResponseType.OK,
-                                               Gtk.STOCK_CANCEL,
-                                               Gtk.ResponseType.CANCEL ))
+            fs = Gtk.FileChooserDialog(title=_("Choose a file"),
+                                       parent=None,
+                                       action=Gtk.FileChooserAction.OPEN,
+                                       buttons=( Gtk.STOCK_OPEN,
+                                                 Gtk.ResponseType.OK,
+                                                 Gtk.STOCK_CANCEL,
+                                                 Gtk.ResponseType.CANCEL ))
             if default_file and os.path.exists(default_file):
                 fs.set_filename(default_file)
-            res=fs.run()
-            filename=None
+            res = fs.run()
+            filename = None
             if res == Gtk.ResponseType.OK:
-                filename=fs.get_filename()
+                filename = fs.get_filename()
                 entry.set_text(filename)
             fs.destroy()
 
@@ -579,24 +584,24 @@ class EditWidget(Gtk.VBox):
 
         entry.set_tooltip_text(help)
         btn.set_tooltip_text(help)
-        self.__add_line(1, align, hbox)
+        self.__add_line(1, hbox, align)
 
     def add_dir_selector(self, label, property_name, help):
 
         def open_filedialog(self, default_file, entry):
-            fs=Gtk.FileChooserDialog(title=_("Choose a directory"),
-                                     parent=None,
-                                     action=Gtk.FileChooserAction.SELECT_FOLDER,
-                                     buttons=( Gtk.STOCK_OPEN,
-                                               Gtk.ResponseType.OK,
-                                               Gtk.STOCK_CANCEL,
-                                               Gtk.ResponseType.CANCEL ))
+            fs = Gtk.FileChooserDialog(title=_("Choose a directory"),
+                                       parent=None,
+                                       action=Gtk.FileChooserAction.SELECT_FOLDER,
+                                       buttons=( Gtk.STOCK_OPEN,
+                                                 Gtk.ResponseType.OK,
+                                                 Gtk.STOCK_CANCEL,
+                                                 Gtk.ResponseType.CANCEL ))
             if default_file:
                 fs.set_filename(default_file)
-            res=fs.run()
-            filename=None
+            res = fs.run()
+            filename = None
             if res == Gtk.ResponseType.OK:
-                filename=fs.get_filename()
+                filename = fs.get_filename()
                 entry.set_text(filename)
             fs.destroy()
 
@@ -626,7 +631,7 @@ class EditWidget(Gtk.VBox):
 
         entry.set_tooltip_text(help)
         btn.set_tooltip_text(help)
-        self.__add_line(1, align, hbox)
+        self.__add_line(1, hbox, align)
 
     def popup(self):
         d = Gtk.Dialog(title=self.get_name(),
@@ -649,7 +654,7 @@ class EditWidget(Gtk.VBox):
         d.connect('key-press-event', dialog_keypressed_cb)
 
         self.show_all()
-        res=d.run()
+        res = d.run()
         d.destroy()
         if res == Gtk.ResponseType.OK:
             return True
@@ -674,6 +679,7 @@ class OptionParserGUI(EditWidget):
             self.add_label(parser.description)
         for o in parser.option_list:
             name = o.get_opt_string().replace('--', '')
+            longname = f"{name} - {o.help}"
             if o.dest and hasattr(self.default, o.dest):
                 val = getattr(self.default, o.dest)
             else:
@@ -681,30 +687,30 @@ class OptionParserGUI(EditWidget):
             # FIXME: should implement store_const, append, count? and (less likely) callback
             if o.action == 'store_true':
                 self.options[o.dest] = val
-                self.add_checkbox(name, o.dest, o.help)
+                self.add_checkbox(longname, o.dest, o.help)
             elif o.action == 'store_false':
                 self.options[o.dest] = not val
-                self.add_checkbox(name, o.dest, o.help)
+                self.add_checkbox(longname, o.dest, o.help)
             elif o.action == 'store':
                 if o.type in ('int', 'long'):
                     self.options[o.dest] = val
-                    self.add_spin(name, o.dest, o.help, -1e300, 1e300)
+                    self.add_spin(longname, o.dest, o.help, -1e300, 1e300)
                 elif o.type == 'string':
                     self.options[o.dest] = val or ""
                     if o.help.endswith('[F]'):
                         # Filename
-                        self.add_file_selector(name, o.dest, o.help)
+                        self.add_file_selector(longname, o.dest, o.help)
                     elif o.help.endswith('[D]'):
                         # Directory
-                        self.add_dir_selector(name, o.dest, o.help)
+                        self.add_dir_selector(longname, o.dest, o.help)
                     else:
-                        self.add_entry(name, o.dest, o.help)
+                        self.add_entry(longname, o.dest, o.help)
                 elif o.type == 'float':
                     self.options[o.dest] = val
-                    self.add_float_spin(name, o.dest, o.help, -sys.maxsize, sys.maxsize, 2)
+                    self.add_float_spin(longname, o.dest, o.help, -sys.maxsize, sys.maxsize, 2)
                 elif o.type == 'choice':
                     self.options[o.dest] = val
-                    self.add_option(name, o.dest, o.help, dict( (c, c) for c in o.choices) )
+                    self.add_option(longname, o.dest, o.help, dict( (c, c) for c in o.choices) )
             else:
                 if name != 'help':
                     logger.info("Ignoring option %s", name)
@@ -723,7 +729,7 @@ def test():
     def get_config(name):
         return val[name]
 
-    ew=EditWidget(set_config, get_config)
+    ew = EditWidget(set_config, get_config)
     ew.set_name("Test")
     ew.add_title("Main values")
     ew.add_entry("Name", "string", "Enter a valid name")
@@ -734,7 +740,7 @@ def test():
                                                             "Fum": "fum" })
     ew.add_file_selector("File", 'filename', "Select a filename")
 
-    res=ew.popup()
+    res = ew.popup()
     if res:
         logger.info("Modified: %s", str(val))
     else:
