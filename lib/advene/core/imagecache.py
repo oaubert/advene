@@ -127,7 +127,7 @@ class ImageCache:
         self.name=None
 
         if framerate is None:
-            framerate = 1 / config.data.prefix['default-fps']
+            framerate = 1 / config.data.preferences['default-fps']
             logger.warning("No framerate given. Using default value %.02f", framerate)
         self.framerate = framerate
 
