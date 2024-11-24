@@ -35,6 +35,7 @@ from gettext import gettext as _
 
 from advene.util.merger import Differ
 from advene.gui.views import AdhocView
+from advene.gui.util import dialog
 
 class TreeViewMultiMerger:
     def __init__(self, controller=None, differs=None):
@@ -128,7 +129,10 @@ class MultiMergerView(AdhocView):
         self.close_on_package_load = False
         self.contextual_actions = ()
         self.options = {
+            'display-result-dialog': False
             }
+        if opt is not None:
+            self.options.update(opt)
 
         self.sourcepackage =  sourcepackage
         self.destpackages = destpackages
@@ -155,14 +159,23 @@ class MultiMergerView(AdhocView):
 
         self.buttonbox = Gtk.HButtonBox()
 
+        updated = {}
         def validate(b):
             for row in self.mergerview.store:
                 if row[self.mergerview.field_column['Apply']]:
                     differ = row[self.mergerview.field_column['Differ']]
                     for name, s, d, action, value in differ.diff_structure():
                         action(s, d)
-                    self.differ.destination._modified = True
-            self.controller.notify('PackageActivate', package=self.destpackage)
+                    differ.destination._modified = True
+                    updated[differ.destination] = updated.get(differ.destination, 0) + 1
+            if self.options.get('display-result-dialog'):
+                # We will display output by alias
+                output = "\n".join(f" - {alias}"
+                                   for alias, p in self.destpackages.items()
+                                   if alias != 'advene' and updated.get(p))
+                message = f"""Elements have been updated. Do not forget to save the corpus.\nHere is a summary of the packages that have been updated.\n{output}"""
+                dialog.message_dialog(message)
+            self.close()
             return True
 
         b = Gtk.Button(stock=Gtk.STOCK_OK)

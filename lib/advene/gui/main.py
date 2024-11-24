@@ -4923,7 +4923,10 @@ Image cache information: %(imagecache)s
                 dialog.message_dialog(msg, icon=Gtk.MessageType.ERROR)
                 return True
 
-            self.open_adhoc_view('multimerger', sourcepackage=source, destpackages=self.controller.packages)
+            self.open_adhoc_view('multimerger',
+                                 sourcepackage=source,
+                                 destpackages=self.controller.packages,
+                                 parameters=({'display-result-dialog': True}, []))
             return True
 
     @named_action(name="app.corpus-save")
