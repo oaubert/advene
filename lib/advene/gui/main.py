@@ -92,6 +92,7 @@ import advene.model.tal.context
 import advene.core.mediacontrol
 import advene.util.helper as helper
 from advene.util.tools import unescape_string, open_in_filebrowser, detect_by_bom, printable
+from advene.core.corpustools import corpus_website_export
 import xml.etree.ElementTree as ET
 
 import advene.util.importer
@@ -364,6 +365,7 @@ class AdveneApplication(Gtk.Application):
                 ( _("Save corpus"), "app.corpus-save", _("Save all loaded packages"), "corpus_save" ),
                 ( _("Update template in corpus"), "app.corpus-update-template" , _("Update loaded packages with the given template"), "corpus_update_template" ),
                 ( _("Export corpus as XLSX"), "app.corpus-export" , _("Export loaded packages as XLSX"), "corpus_export" ),
+                ( _("Export corpus as website"), "app.corpus-website-export" , _("Export loaded packages as website"), "corpus_website_export" ),
                 ( _("Table of annotations"), "app.corpus-annotations", _("Display all annotations in a table"), "corpus_annotations" ),
                 #( _("Corpus analysis"), "app.corpus-analysis", _("Analyse loaded corpus"), "corpus_analysis" ),
                 ( _("Corpus statistics"), "app.corpus-statistics", _("Display statistics about loaded corpus"), "corpus_statistics" ),
@@ -4947,6 +4949,22 @@ Image cache information: %(imagecache)s
         """Export the current corpus as XLSX
         """
         self.export_element(self.controller.global_package, filter_id='CorpusXlsxExporter')
+        return True
+
+    @named_action(name="app.corpus-website-export")
+    def on_corpus_website_export_activate (self, button=None, data=None):
+        """Export the current corpus as a website
+        """
+        packages = [ p
+                     for alias, p in self.controller.packages.items()
+                     if alias != 'advene' ]
+        destination = "/tmp/corpus"
+        output = corpus_website_export(self.controller, destination)
+        logger.info(_(f"Corpus exported to {destination}"))
+        message = _("Data exported to\n%s\nDo you want to open it?") % destination
+        icon =  Gtk.MessageType.QUESTION
+        # Try to open the file
+        open_in_filebrowser(output)
         return True
 
     @named_action(name="app.corpus-statistics")
