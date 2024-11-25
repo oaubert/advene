@@ -72,6 +72,41 @@ class ProxyController:
             return ""
         return mediafile
 
+    def build_context(self, here=None, alias=None, baseurl=None):
+        """Build a context object with additional information.
+
+        The information is cached if no additional parameter (alias,
+        baseurl) is specified.
+        """
+        if here is None:
+            here = self.package
+        if alias is None and baseurl is None:
+            try:
+                c = here._cached_context
+                c.restore()
+                return c
+            except AttributeError:
+                pass
+        if baseurl is None:
+            baseurl=self.get_default_url(root=True, alias=alias)
+        c = advene.model.tal.context.AdveneContext(here,
+                                                   options={
+                                                       'package_url': baseurl,
+                                                       'snapshot': self.package.imagecache,
+                                                       'namespace_prefix': config.data.namespace_prefix,
+                                                       'config': config.data.web,
+                                                       'aliases': self.aliases,
+                                                       'controller': self,
+                                                   })
+        c.addGlobal('package', self.package)
+        c.addGlobal('packages', self.packages)
+        c.addGlobal('player', self.player)
+        for name, method in config.data.global_methods.items():
+            c.addMethod(name, method)
+        # Preserve a copy of globals/locals for later restoring
+        c.checkpoint()
+        return c
+
 def corpus_website_export(controller, destination):
 
     def log(*p):
