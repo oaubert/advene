@@ -108,39 +108,39 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
         # Override the class property with the element type, so that
         # init_window_size can discriminate against different types
         if isinstance(el, View):
-            t=helper.get_view_type(el)
+            t = helper.get_view_type(el)
         else:
-            t=el.__class__.__name__
-        self.view_id="-".join( (EditElementPopup.view_id, t) )
+            t = el.__class__.__name__
+        self.view_id = "-".join( (EditElementPopup.view_id, t) )
         self.vbox = Gtk.VBox ()
         self.vbox.connect('key-press-event', self.key_pressed_cb)
-        self.editable=editable
+        self.editable = editable
         # List of defined forms in the window
         self.forms = []
         if controller and controller.gui:
             controller.gui.register_edit_popup(self)
         # Dictionary of callbacks according to keys
         self.key_cb = {}
-        self._widget=None
+        self._widget = None
         # callback method invoked upon modification/validation.
-        self.callback=None
+        self.callback = None
 
     @property
     def widget(self):
         """Compatibility property to integrate in the AdhocView framework.
         """
         if self._widget is None:
-            vbox=Gtk.VBox()
+            vbox = Gtk.VBox()
 
-            tb=Gtk.Toolbar()
+            tb = Gtk.Toolbar()
             tb.set_style(Gtk.ToolbarStyle.ICONS)
 
-            b=Gtk.ToolButton(Gtk.STOCK_OK)
+            b = Gtk.ToolButton(Gtk.STOCK_OK)
             b.connect('clicked', self.validate_cb)
             b.set_tooltip_text(_("Apply changes and close the edit window"))
             tb.insert(b, -1)
 
-            b=Gtk.ToolButton (Gtk.STOCK_APPLY)
+            b = Gtk.ToolButton (Gtk.STOCK_APPLY)
             b.connect('clicked', self.apply_cb)
             b.set_tooltip_text(_("Apply changes"))
             tb.insert(b, -1)
@@ -168,7 +168,7 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
                 return False
             self.sig = vbox.connect('draw', initial_focus)
 
-            self._widget=vbox
+            self._widget = vbox
 
         return self._widget
 
@@ -245,15 +245,15 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
     def apply_and_open(self, b, *p):
         self.apply_cb(b, None)
         # Open in web browser
-        ctx=self.controller.build_context()
-        url=ctx.evaluateValue('here/absolute_url')
+        ctx = self.controller.build_context()
+        url = ctx.evaluateValue('here/absolute_url')
         self.controller.open_url('/'.join( (url, 'view', self.element.id) ))
         return True
 
     def apply_and_activate(self, b, *p):
         self.apply_cb(b, None)
         self.controller.activate_stbv(self.element)
-        p=self.controller.player
+        p = self.controller.player
         if p.status == p.PauseStatus:
             self.controller.update_status('resume')
         elif p.status == p.PlayingStatus:
@@ -291,7 +291,7 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
 
     def get_title (self):
         """Return the element title."""
-        t="%s %s" % (self.element.viewableClass,
+        t = "%s %s" % (self.element.viewableClass,
                      self.controller.get_title(self.element))
         try:
             t += " [%s]" % self.element.id
@@ -317,22 +317,22 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
         """
         if self.widget.get_parent():
             # The widget is already displayed.
-            w=self.widget.get_toplevel()
+            w = self.widget.get_toplevel()
             w.set_urgency_hint(True)
             return self.element
-        self.callback=callback
+        self.callback = callback
         self.key_cb[Gdk.KEY_Return] = self.validate_cb
         self.key_cb[Gdk.KEY_Escape] = self.close_cb
 
         if hasattr(self.element, 'isImported') and self.element.isImported():
-            self.editable=False
+            self.editable = False
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
-            self.editable=False
+            self.editable = False
 
         if self.editable:
-            title=_("Edit %s") % self.get_title()
+            title = _("Edit %s") % self.get_title()
         else:
-            title=_("View %s (read-only)") % self.get_title()
+            title = _("View %s (read-only)") % self.get_title()
 
         if modal:
             d = Gtk.Dialog(title=title,
@@ -349,12 +349,12 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
             while True:
                 d.show()
                 dialog.center_on_mouse(d)
-                res=d.run()
-                retval=False
+                res = d.run()
+                retval = False
                 if res == Gtk.ResponseType.OK:
-                    retval=self.apply_cb()
+                    retval = self.apply_cb()
                 elif res == Gtk.ResponseType.CANCEL:
-                    retval=True
+                    retval = True
 
                 if retval:
                     d.destroy()
@@ -376,22 +376,22 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
         self.key_cb[Gdk.KEY_Return] = self.validate_cb
         self.key_cb[Gdk.KEY_Escape] = self.close_cb
 
-        self.callback=callback
+        self.callback = callback
         if hasattr(self.element, 'isImported') and self.element.isImported():
-            self.editable=False
+            self.editable = False
         elif hasattr(self.element, 'schema') and self.element.schema.isImported():
-            self.editable=False
+            self.editable = False
 
-        tb=Gtk.Toolbar()
+        tb = Gtk.Toolbar()
         self.extend_toolbar(tb)
         if tb.get_children():
             # There are some items. Display them
-            tb.props.icon_size=Gtk.IconSize.SMALL_TOOLBAR
+            tb.props.icon_size = Gtk.IconSize.SMALL_TOOLBAR
             tb.set_style(Gtk.ToolbarStyle.ICONS)
             self.vbox.pack_start(tb, False, True, 0)
         else:
             tb.destroy()
-        w=self.make_widget (editable=self.editable, compact=True)
+        w = self.make_widget (editable=self.editable, compact=True)
         self.vbox.add (w)
         self._widget = self.vbox
 
@@ -452,36 +452,36 @@ class EditAnnotationPopup (EditElementPopup):
         if tb.get_children():
             tb.insert(Gtk.SeparatorToolItem(), -1)
 
-        b=get_pixmap_toolbutton(Gtk.STOCK_GO_BACK, self.goto, -1)
+        b = get_pixmap_toolbutton(Gtk.STOCK_GO_BACK, self.goto, -1)
         b.set_tooltip_text(_("Apply changes and edit previous annotation of same type"))
         tb.insert(b, -1)
 
-        b=get_pixmap_toolbutton(Gtk.STOCK_GO_FORWARD, self.goto, +1)
+        b = get_pixmap_toolbutton(Gtk.STOCK_GO_FORWARD, self.goto, +1)
         b.set_tooltip_text(_("Apply changes and edit next annotation of same type"))
         tb.insert(b, -1)
 
         def toggle_highlight(b, ann):
             if b.highlight:
-                event="AnnotationActivate"
-                label= _("Unhighlight annotation")
-                b.highlight=False
+                event = "AnnotationActivate"
+                label =  _("Unhighlight annotation")
+                b.highlight = False
             else:
-                event="AnnotationDeactivate"
-                label=_("Highlight annotation")
-                b.highlight=True
+                event = "AnnotationDeactivate"
+                label = _("Highlight annotation")
+                b.highlight = True
                 b.set_tooltip_text(label)
             self.controller.notify(event, annotation=ann)
             return True
 
-        b=get_pixmap_toolbutton('highlight.png', toggle_highlight, self.element)
-        b.highlight=True
+        b = get_pixmap_toolbutton('highlight.png', toggle_highlight, self.element)
+        b.highlight = True
         tb.insert(b, -1)
         return True
 
     def make_widget (self, editable=True, compact=False):
         vbox = Gtk.VBox ()
 
-        nb=Gtk.Notebook()
+        nb = Gtk.Notebook()
         vbox.pack_start(nb, False, True, 0)
 
         def small_label(t):
@@ -562,12 +562,12 @@ class EditRelationPopup (EditElementPopup):
                                                'author': _('Author'),
                                                'date':   _('Date')}
                                        )
-        ex=self.expandable(f.get_view(), _("Metadata"), expanded=False)
+        ex = self.expandable(f.get_view(), _("Metadata"), expanded=False)
         vbox.pack_start(ex, False, True, 0)
 
         def button_press_handler(widget, event, annotation):
             if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
-                menu=advene.gui.popup.Menu(annotation, controller=self.controller)
+                menu = advene.gui.popup.Menu(annotation, controller=self.controller)
                 menu.popup()
                 return True
             if event.button == 1 and event.type == Gdk.EventType._2BUTTON_PRESS:
@@ -760,12 +760,12 @@ class EditPackagePopup (EditElementPopup):
         # appropriate attributes of the package.
         self.controller.set_default_media(element.media,
                                           package=element)
-        d=element.getMetaData (config.data.namespace, "duration")
+        d = element.getMetaData (config.data.namespace, "duration")
         if d:
             try:
-                d=int(d)
+                d = int(d)
             except ValueError:
-                d=0
+                d = 0
             element.cached_duration = d
         else:
             element.cached_duration = 0
@@ -773,9 +773,9 @@ class EditPackagePopup (EditElementPopup):
         return True
 
     def make_widget (self, editable=False, compact=False):
-        vbox=Gtk.VBox()
+        vbox = Gtk.VBox()
 
-        sg=Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
+        sg = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
 
         f = EditAttributeForm(title=_("Title (name)"),
                               element=self.element, name='title',
@@ -884,9 +884,9 @@ class EditSchemaPopup (EditElementPopup):
         return True
 
     def make_widget (self, editable=True, compact=False):
-        vbox=Gtk.VBox()
+        vbox = Gtk.VBox()
 
-        sg=Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
+        sg = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
         f = EditAttributeForm(title=_("Title (name)"),
                               element=self.element, name='title',
                               controller=self.controller,
@@ -964,7 +964,7 @@ class EditAnnotationTypePopup (EditElementPopup):
     def make_widget (self, editable=False, compact=False):
         vbox = Gtk.VBox()
 
-        sg=Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
+        sg = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
 
         f = EditAttributeForm(title=_("Title (name)"),
                               element=self.element, name='title',
@@ -1019,7 +1019,7 @@ class EditAnnotationTypePopup (EditElementPopup):
         self.register_form(f)
         vbox.pack_start(f.get_view(), False, False, 0)
 
-        abox=Gtk.VBox()
+        abox = Gtk.VBox()
         f = EditMetaForm(title=_("Representation"),
                          element=self.element, name='representation',
                          controller=self.controller,
@@ -1083,9 +1083,9 @@ class EditRelationTypePopup (EditElementPopup):
         return True
 
     def make_widget (self, editable=False, compact=False):
-        vbox=Gtk.VBox()
+        vbox = Gtk.VBox()
 
-        sg=Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
+        sg = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
         f = EditAttributeForm(title=_("Title (name)"),
                               element=self.element, name='title',
                               controller=self.controller,
@@ -1118,7 +1118,7 @@ class EditRelationTypePopup (EditElementPopup):
                                        )
         vbox.add(self.expandable(f.get_view(),  _("Metadata"), expanded=False))
 
-        members=[ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
+        members = [ ('#'+at.id, self.controller.get_title(at)) for at in self.controller.package.annotationTypes ]
         members.append( ('', _("Any annotation type")) )
         f = EditElementListForm(
             title=_("Members"),
@@ -1300,8 +1300,8 @@ class ContentHandler(EditForm):
         return 0
 
     def __init__ (self, content, controller=None, **kw):
-        self.element=content
-        self.controller=controller
+        self.element = content
+        self.controller = controller
 
 class EditContentForm(EditForm):
     """Create an edit form for the given content.
@@ -1310,10 +1310,10 @@ class EditContentForm(EditForm):
                   editable=True, mimetypeeditable=True, **kw):
         # self.element is a Content object
         self.element = element
-        self.controller=controller
+        self.controller = controller
 
         # Parent context, sometimes needed
-        self.parent=parent
+        self.parent = parent
         # self.contentform will be an appropriate EditForm
         # (EditTextForm,EditRuleSetForm,...)
         self.contentform = None
@@ -1331,8 +1331,7 @@ class EditContentForm(EditForm):
                                            'application/x-advene-simplequery'))
 
     def close(self):
-        self.contentform.close()
-        return True
+        return self.contentform.close()
 
     def set_editable (self, bool_):
         self.editable = bool_
@@ -1361,6 +1360,7 @@ class EditContentForm(EditForm):
     def get_modified(self):
         # FIXME: more complete tests should be done, but this one
         # covers the main case.
+        logger.info(f"get_modified {__class__} - {self.contentform.get_modified()}")
         return self.contentform.get_modified()
 
     def set_modified(self, b):
@@ -1376,49 +1376,49 @@ class EditContentForm(EditForm):
         vbox = Gtk.VBox()
 
         if self.element.mimetype == 'application/x-advene-ruleset':
-            compact=True
+            compact = True
 
         if not compact and config.data.preferences['expert-mode']:
             hbox = Gtk.HBox()
             label = Gtk.Label(label=_("MIME Type"))
             hbox.pack_start(label, False, True, 0)
 
-            mt=self.element.mimetype
+            mt = self.element.mimetype
             # Is the current value in the predefined list?
-            data=[ tupl
+            data = [ tupl
                    for tupl in predefined_content_mimetypes
                    if tupl[0] == mt ]
             if not data:
                 # Not yet predefined. Add its raw value.
-                current=(mt, mt)
+                current = (mt, mt)
                 predefined_content_mimetypes.append(current)
             else:
-                current=data[0]
+                current = data[0]
 
             if self.mimetypeeditable:
                 members = predefined_content_mimetypes
             else:
                 members = [ current ]
 
-            self.mimetype=dialog.list_selector_widget(members=members,
-                                                      preselect=mt,
-                                                      entry=self.mimetypeeditable)
+            self.mimetype = dialog.list_selector_widget(members=members,
+                                                        preselect=mt,
+                                                        entry=self.mimetypeeditable)
 
             hbox.pack_start(self.mimetype, True, True, 0)
 
             vbox.pack_start(hbox, False, True, 0)
         else:
-            self.mimetype=None
+            self.mimetype = None
 
         handler = config.data.get_content_handler(self.element.mimetype)
         if handler is None:
-            self.contentform=None
+            self.contentform = None
             vbox.add(Gtk.Label(label=_("Error: cannot find a content handler for %s")
                                % self.element.mimetype))
         else:
-            self.contentform=handler(self.element,
-                                     controller=self.controller,
-                                     parent=self.parent)
+            self.contentform = handler(self.element,
+                                       controller=self.controller,
+                                       parent=self.parent)
 
         self.contentform.set_editable(self.editable)
         self.content_handler_widget = self.contentform.get_view(compact=compact)
@@ -1431,20 +1431,20 @@ class TextContentHandler (ContentHandler):
     """
     @staticmethod
     def can_handle(mimetype):
-        res=0
+        res = 0
         if 'text' in mimetype:
-            res=70
+            res = 70
         if 'xml' in mimetype:
-            res=60
+            res = 60
         if mimetype == 'text/plain' or mimetype in config.data.text_mimetypes:
-            res=80
+            res = 80
         return res
 
     def __init__ (self, element, controller=None, parent=None, **kw):
         super().__init__(element, controller)
-        self.parent=parent
+        self.parent = parent
         self.editable = True
-        self.fname=None
+        self.fname = None
         self.view = None
 
     def get_focus(self):
@@ -1503,8 +1503,8 @@ class TextContentHandler (ContentHandler):
         def callback(e):
             if e is not None:
                 if e.startswith('string:'):
-                    e=e.replace('string:', '')
-                b=self.view.get_buffer()
+                    e = e.replace('string:', '')
+                b = self.view.get_buffer()
                 b.insert_at_cursor(str(e))
             return True
         browser = Browser(element=self.element,
@@ -1514,7 +1514,7 @@ class TextContentHandler (ContentHandler):
         return True
 
     def content_set(self, c):
-        b=self.view.get_buffer()
+        b = self.view.get_buffer()
         b.delete(*b.get_bounds ())
         b.set_text(c)
         return True
@@ -1525,40 +1525,40 @@ class TextContentHandler (ContentHandler):
 
     def content_open(self, b=None, fname=None):
         if fname is None:
-            fname=dialog.get_filename(default_file=self.fname)
+            fname = dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
                 with open(fname, 'r', encoding='utf-8') as f:
                     data = "".join(f.readlines())
                     self.content_set(data)
-                    self.fname=fname
+                    self.fname = fname
             except IOError as e:
                 dialog.message_dialog(
                     _("Cannot read the data:\n%s") % str(e),
-                    icon=Gtk.MessageType.ERROR)
+                    icon = Gtk.MessageType.ERROR)
                 return True
         return True
 
     def content_save(self, b=None, fname=None):
         if fname is None:
-            default=None
+            default = None
             if self.parent is not None:
                 try:
-                    default=self.parent.id + '.txt'
+                    default = self.parent.id + '.txt'
                 except AttributeError:
                     pass
-            fname=dialog.get_filename(title=_("Save content to..."),
-                                      action=Gtk.FileChooserAction.SAVE,
-                                      button=Gtk.STOCK_SAVE,
-                                      default_file=default)
+            fname = dialog.get_filename(title=_("Save content to..."),
+                                        action=Gtk.FileChooserAction.SAVE,
+                                        button=Gtk.STOCK_SAVE,
+                                        default_file=default)
         if fname is not None:
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
             try:
-                b=self.view.get_buffer()
+                b = self.view.get_buffer()
                 with open(fname, 'w', encoding='utf-8') as f:
                     f.write(b.get_text(*b.get_bounds() + ( False, )))
-                self.fname=fname
+                self.fname = fname
             except IOError as e:
                 dialog.message_dialog(
                     _("Cannot save the data:\n%s") % str(e),
@@ -1568,39 +1568,39 @@ class TextContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget for editing text attribute."""
-        vbox=Gtk.VBox()
+        vbox = Gtk.VBox()
 
         if not compact:
             tb = self.toolbar = Gtk.Toolbar()
-            vbox.toolbar=tb
+            vbox.toolbar = tb
             tb.set_style(Gtk.ToolbarStyle.ICONS)
 
-            b=Gtk.ToolButton(Gtk.STOCK_OPEN)
+            b = Gtk.ToolButton(Gtk.STOCK_OPEN)
             b.set_tooltip_text(_("Open a file (C-o)"))
             b.connect('clicked', self.content_open)
             tb.insert(b, -1)
 
-            b=Gtk.ToolButton(Gtk.STOCK_SAVE)
+            b = Gtk.ToolButton(Gtk.STOCK_SAVE)
             b.set_tooltip_text(_("Save to a file (C-s)"))
             b.connect('clicked', self.content_save)
             tb.insert(b, -1)
 
-            b=Gtk.ToolButton(Gtk.STOCK_REFRESH)
+            b = Gtk.ToolButton(Gtk.STOCK_REFRESH)
             b.set_tooltip_text(_("Reload the file (C-r)"))
             b.connect('clicked', self.content_reload)
             tb.insert(b, -1)
 
             if config.data.preferences['expert-mode']:
-                b=get_pixmap_toolbutton('browser.png', self.browser_open)
+                b = get_pixmap_toolbutton('browser.png', self.browser_open)
                 b.set_tooltip_text(_("Insert a value from the browser (C-i)"))
                 tb.insert(b, -1)
 
             vbox.pack_start(tb, False, True, 0)
 
         if GtkSource is not None:
-            textview=GtkSource.View.new_with_buffer(GtkSource.Buffer())
-            b=textview.get_buffer()
-            m=GtkSource.LanguageManager.get_default()
+            textview = GtkSource.View.new_with_buffer(GtkSource.Buffer())
+            b = textview.get_buffer()
+            m = GtkSource.LanguageManager.get_default()
             if m:
                 b.set_language(m.guess_language(content_type=self.element.mimetype))
                 b.set_highlight_syntax(True)
@@ -1626,14 +1626,14 @@ class TextContentHandler (ContentHandler):
                     return True
 
                 def undo(b):
-                    b=textview.get_buffer()
+                    b = textview.get_buffer()
                     if b.can_undo():
                         b.undo()
                     undo_cb(b)
                     return True
 
                 def redo(b):
-                    b=textview.get_buffer()
+                    b = textview.get_buffer()
                     if b.can_redo():
                         b.redo()
                     undo_cb(b)
@@ -1652,17 +1652,17 @@ class TextContentHandler (ContentHandler):
         self.view = textview
         self.set_modified(False)
 
-        col=self.controller.get_element_color(self.parent)
+        col = self.controller.get_element_color(self.parent)
         if col is not None:
-            color=name2color(col)
+            color = name2color(col)
             self.view.modify_base(Gtk.StateType.NORMAL, color)
 
         # Hook the completer component
         if hasattr(self.parent.rootPackage, '_indexer'):
-            self.view._completer=Completer(textview=self.view,
-                                           controller=self.controller,
-                                           element=self.parent,
-                                           indexer=self.parent.rootPackage._indexer)
+            self.view._completer = Completer(textview=self.view,
+                                             controller=self.controller,
+                                             element=self.parent,
+                                             indexer=self.parent.rootPackage._indexer)
 
         scroll_win = Gtk.ScrolledWindow ()
         scroll_win.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
@@ -1679,16 +1679,16 @@ class GenericContentHandler (ContentHandler):
     """
     @staticmethod
     def can_handle(mimetype):
-        res=50
+        res = 50
         return res
 
     def __init__ (self, element, controller=None, parent=None, **kw):
         super().__init__(element, controller)
         self.editable = True
-        self.fname=None
+        self.fname = None
         self.view = None
-        self.parent=None
-        self.data=self.element.data
+        self.parent = None
+        self.data = self.element.data
 
     def set_editable (self, boolean):
         self.editable = boolean
@@ -1701,7 +1701,7 @@ class GenericContentHandler (ContentHandler):
     def update_preview(self):
         self.preview.foreach(self.preview.remove)
         if self.element.mimetype.startswith('image/'):
-            i=Gtk.Image()
+            i = Gtk.Image()
             if self.fname is None:
                 # Load the element content
                 loader = GdkPixbuf.PixbufLoader()
@@ -1711,9 +1711,9 @@ class GenericContentHandler (ContentHandler):
                     pixbuf = loader.get_pixbuf ()
                 except GObject.GError:
                     # The PNG data was invalid.
-                    pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
             else:
-                pixbuf=GdkPixbuf.Pixbuf.new_from_file(self.fname)
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.fname)
             i.set_from_pixbuf(pixbuf)
             self.preview.add(i)
             i.show()
@@ -1723,7 +1723,7 @@ class GenericContentHandler (ContentHandler):
         """Update the element fields according to the values in the view."""
         if not self.editable:
             return False
-        self.element.data=self.data
+        self.element.data = self.data
         return True
 
     def key_pressed_cb (self, win, event):
@@ -1741,10 +1741,10 @@ class GenericContentHandler (ContentHandler):
 
     def content_open(self, b=None, fname=None):
         if fname is None:
-            fname=dialog.get_filename(default_file=self.fname)
+            fname = dialog.get_filename(default_file=self.fname)
         if fname is not None:
             try:
-                f=open(fname, 'rb')
+                f = open(fname, 'rb')
             except IOError as e:
                 dialog.message_dialog(
                     _("Cannot read the data:\n%s") % str(e),
@@ -1752,7 +1752,7 @@ class GenericContentHandler (ContentHandler):
                 return True
             self.set_filename(fname)
 
-            size=os.stat(self.fname).st_size
+            size = os.stat(self.fname).st_size
             self.data = f.read(size + 2)
             f.close()
 
@@ -1766,21 +1766,21 @@ class GenericContentHandler (ContentHandler):
 
     def content_save(self, b=None, fname=None):
         if fname is None:
-            default=None
+            default = None
             if self.parent is not None:
                 try:
-                    default=self.parent.id + '.txt'
+                    default = self.parent.id + '.txt'
                 except AttributeError:
                     pass
-            fname=dialog.get_filename(title=_("Save content to..."),
-                                      action=Gtk.FileChooserAction.SAVE,
-                                      button=Gtk.STOCK_SAVE,
-                                      default_file=default)
+            fname = dialog.get_filename(title=_("Save content to..."),
+                                        action=Gtk.FileChooserAction.SAVE,
+                                        button=Gtk.STOCK_SAVE,
+                                        default_file=default)
         if fname is not None:
             if os.path.exists(fname):
                 os.rename(fname, fname + '~')
             try:
-                f=open(fname, 'wb')
+                f = open(fname, 'wb')
                 f.write(self.data)
                 f.close()
             except IOError as e:
@@ -1793,22 +1793,22 @@ class GenericContentHandler (ContentHandler):
 
     def get_view (self, compact=False):
         """Generate a view widget for editing any content (by saving/loading to/from a file)."""
-        vbox=Gtk.VBox()
+        vbox = Gtk.VBox()
 
-        tb=Gtk.Toolbar()
+        tb = Gtk.Toolbar()
         tb.set_style(Gtk.ToolbarStyle.ICONS)
 
-        b=Gtk.ToolButton(Gtk.STOCK_OPEN)
+        b = Gtk.ToolButton(Gtk.STOCK_OPEN)
         b.set_tooltip_text(_("Open a file (C-o)"))
         b.connect('clicked', self.content_open)
         tb.insert(b, -1)
 
-        b=Gtk.ToolButton(Gtk.STOCK_SAVE)
+        b = Gtk.ToolButton(Gtk.STOCK_SAVE)
         b.set_tooltip_text(_('Save to a file (C-s)'))
         b.connect('clicked', self.content_save)
         tb.insert(b, -1)
 
-        b=Gtk.ToolButton(Gtk.STOCK_REFRESH)
+        b = Gtk.ToolButton(Gtk.STOCK_REFRESH)
         b.set_tooltip_text(_('Reload the file (C-r)'))
         b.connect('clicked', self.content_reload)
         tb.insert(b, -1)
@@ -1821,7 +1821,7 @@ class GenericContentHandler (ContentHandler):
         vbox.connect('key-press-event', self.key_pressed_cb)
 
         vbox.pack_start(self.filename_entry, False, True, 0)
-        self.preview=Gtk.VBox()
+        self.preview = Gtk.VBox()
         vbox.pack_start(self.preview, True, True, 0)
         self.update_preview()
         return vbox
@@ -1829,12 +1829,12 @@ config.data.register_content_handler(GenericContentHandler)
 
 class EditFragmentForm(EditForm):
     def __init__(self, element=None, controller=None, editable=True, begin_callback=None):
-        self.begin=None
-        self.end=None
+        self.begin = None
+        self.end = None
         self.element = element
         self.controller = controller
-        self.editable=editable
-        self.begin_callback=begin_callback
+        self.editable = editable
+        self.begin_callback = begin_callback
 
     def check_validity(self):
         if self.begin.value >= self.end.value:
@@ -1845,9 +1845,9 @@ class EditFragmentForm(EditForm):
             return True
 
     def refresh(self):
-        self.begin.value=self.element.begin
+        self.begin.value = self.element.begin
         self.begin.update_display()
-        self.end.value=self.element.end
+        self.end.value = self.element.end
         self.end.update_display()
 
     def update_element(self):
@@ -1855,28 +1855,28 @@ class EditFragmentForm(EditForm):
             return False
         if not self.check_validity():
             return False
-        self.element.begin=self.begin.value
-        self.element.end=self.end.value
+        self.element.begin = self.begin.value
+        self.element.end = self.end.value
         return True
 
     def get_view(self, compact=False):
-        hbox=Gtk.HBox()
+        hbox = Gtk.HBox()
 
-        self.begin=TimeAdjustment(value=self.element.begin,
-                                  controller=self.controller,
-                                  editable=self.editable,
-                                  compact=compact,
-                                  callback=self.begin_callback)
-        f=Gtk.Frame()
+        self.begin = TimeAdjustment(value=self.element.begin,
+                                    controller=self.controller,
+                                    editable=self.editable,
+                                    compact=compact,
+                                    callback=self.begin_callback)
+        f = Gtk.Frame()
         f.set_label(_("Begin"))
         f.add(self.begin.get_widget())
         hbox.pack_start(f, False, True, 0)
 
-        self.end=TimeAdjustment(value=self.element.end,
-                                controller=self.controller,
-                                editable=self.editable,
-                                compact=compact)
-        f=Gtk.Frame()
+        self.end = TimeAdjustment(value=self.element.end,
+                                  controller=self.controller,
+                                  editable=self.editable,
+                                  compact=compact)
+        f = Gtk.Frame()
         f.set_label(_("End"))
         f.add(self.end.get_widget())
         hbox.pack_start(f, False, True, 0)
@@ -1891,19 +1891,19 @@ class EditGenericForm(EditForm):
     def __init__(self, title=None, getter=None, setter=None,
                  controller=None, editable=True, tooltip=None, type=None, elements=None,
                  focus=False, sizegroup=None):
-        self.title=title
-        self.getter=getter
-        self.setter=setter
-        self.controller=controller
-        self.editable=editable
-        self.entry=None
-        self.view=None
-        self.sizegroup=sizegroup
-        self.tooltip=tooltip
-        self.type=type
+        self.title = title
+        self.getter = getter
+        self.setter = setter
+        self.controller = controller
+        self.editable = editable
+        self.entry = None
+        self.view = None
+        self.sizegroup = sizegroup
+        self.tooltip = tooltip
+        self.type = type
         # List of (value, label) items
-        self.elements=elements
-        self.focus=focus
+        self.elements = elements
+        self.focus = focus
 
     def get_focus(self):
         if self.focus:
@@ -2008,9 +2008,9 @@ class EditGenericForm(EditForm):
         return hbox
 
     def refresh(self):
-        v=self.getter()
+        v = self.getter()
         if v is None:
-            v=""
+            v = ""
         if self.type == 'boolean':
             self.entry.set_active(v)
         elif hasattr(self.entry, 'set_current_element'):
@@ -2025,9 +2025,9 @@ class EditGenericForm(EditForm):
         if self.type == 'boolean':
             v = self.entry.get_active()
         elif hasattr(self.entry, 'get_current_element'):
-            v=self.entry.get_current_element()
+            v = self.entry.get_current_element()
         else:
-            v=self.entry.get_text()
+            v = self.entry.get_text()
         self.setter(v)
         return True
 
@@ -2037,8 +2037,8 @@ class EditMetaForm(EditGenericForm):
                  editable=True, tooltip=None, type=None,
                  elements=None,
                  focus=False, sizegroup=None):
-        getter=self.metadata_get_method(element, name, namespaceid, type=type)
-        setter=self.metadata_set_method(element, name, namespaceid, type=type)
+        getter = self.metadata_get_method(element, name, namespaceid, type=type)
+        setter = self.metadata_set_method(element, name, namespaceid, type=type)
         super(EditMetaForm, self).__init__(title=title,
                                            getter=getter,
                                            setter=setter,
@@ -2055,8 +2055,8 @@ class EditAttributeForm(EditGenericForm):
                  controller=None,
                  editable=True, tooltip=None, type=None, elements=None,
                  focus=False, sizegroup=None):
-        getter=lambda: getattr(element, name)
-        setter=lambda v: setattr(element, name, v)
+        getter = lambda: getattr(element, name)
+        setter = lambda v: setattr(element, name, v)
         super(EditAttributeForm, self).__init__(title=title,
                                                 getter=getter,
                                                 setter=setter,
@@ -2070,15 +2070,15 @@ class EditAttributeForm(EditGenericForm):
 
 class EditAttributesForm (EditForm):
     """Creates an edit form for the given element."""
-    COLUMN_LABEL=0
-    COLUMN_VALUE=1
-    COLUMN_NAME=2
-    COLUMN_EDITABLE=3
-    COLUMN_WEIGHT=4
+    COLUMN_LABEL = 0
+    COLUMN_VALUE = 1
+    COLUMN_NAME = 2
+    COLUMN_EDITABLE = 3
+    COLUMN_WEIGHT = 4
 
     def __init__ (self, el, controller=None):
         self.element = el
-        self.controller=controller
+        self.controller = controller
         self.attributes = ()  # Visible attributes
         self.editable = ()    # Editable attributes
         self.labels = {}      # Specific labels for attributes
@@ -2104,12 +2104,12 @@ class EditAttributesForm (EditForm):
         """
         typ = None
         if at in self.types:
-            typ=self.types[at]
+            typ = self.types[at]
         else:
             # No specific type was given. Guess it...
-            e=getattr(self.element, at)
+            e = getattr(self.element, at)
             if isinstance (e, int):
-                typ='int'
+                typ = 'int'
         return typ
 
     def repr_to_value (self, at, v):
@@ -2130,7 +2130,7 @@ class EditAttributesForm (EditForm):
         elif isinstance(v, str):
             val = str(v)
         else:
-            val=v
+            val = v
         return val
 
     def value_to_repr (self, at, v):
@@ -2164,7 +2164,7 @@ class EditAttributesForm (EditForm):
         model.set_value(it, column, self.value_to_repr (at, val))
 
     def check_validity(self):
-        invalid=[]
+        invalid = []
         model = self.view.get_model ()
         it = model.get_iter_first ()
         while it is not None:
@@ -2187,14 +2187,14 @@ class EditAttributesForm (EditForm):
             return True
 
     def refresh(self):
-        model=self.view.get_model()
+        model = self.view.get_model()
         for row in model:
-            at=row[self.COLUMN_NAME]
-            row[self.COLUMN_VALUE]=self.value_to_repr(at, getattr (self.element, at))
+            at = row[self.COLUMN_NAME]
+            row[self.COLUMN_VALUE] = self.value_to_repr(at, getattr (self.element, at))
 
     def update_element (self):
         """Update the element fields according to the values in the view."""
-        invalid=[]
+        invalid = []
         model = self.view.get_model ()
         it = model.get_iter_first ()
         while it is not None:
@@ -2257,9 +2257,9 @@ class EditAttributesForm (EditForm):
         for at in self.attributes:
             editable = at in self.editable
             if at in self.labels:
-                label=self.labels[at]
+                label = self.labels[at]
             else:
-                label=at
+                label = at
 
             it = model.append ()
             model.set(it,
@@ -2276,8 +2276,8 @@ class EditAttributesForm (EditForm):
         return treeview
 
 class EditElementListForm(EditForm):
-    COLUMN_ELEMENT=0
-    COLUMN_LABEL=1
+    COLUMN_ELEMENT = 0
+    COLUMN_LABEL = 1
 
     def __init__(self, title=None, element=None, field=None,
                  members=None, controller=None, editable=True):
@@ -2287,13 +2287,13 @@ class EditElementListForm(EditForm):
         Valid elements are specified in members, which is a list of couples
         (element, label)
         """
-        self.title=title
-        self.model=element
-        self.field=field
-        self.members=members
-        self.controller=controller
-        self.editable=editable
-        self.view=None
+        self.title = title
+        self.model = element
+        self.field = field
+        self.members = members
+        self.controller = controller
+        self.editable = editable
+        self.view = None
 
     def tree_view_button_cb(self, widget=None, event=None):
         retval = False
@@ -2307,7 +2307,7 @@ class EditElementListForm(EditForm):
                 t = widget.get_path_at_pos(x, y)
                 if t is not None:
                     path, col, cx, cy = t
-                    node=model[path][self.COLUMN_ELEMENT]
+                    node = model[path][self.COLUMN_ELEMENT]
                     widget.get_selection().select_path (path)
                     menu = advene.gui.popup.Menu(node, controller=self.controller)
                     menu.popup()
@@ -2315,7 +2315,7 @@ class EditElementListForm(EditForm):
         return retval
 
     def get_representation(self, v):
-        r='???'
+        r = '???'
         for el, label in self.members:
             if el == v:
                 r = label
@@ -2323,7 +2323,7 @@ class EditElementListForm(EditForm):
         return r
 
     def create_store(self):
-        store=Gtk.ListStore(
+        store = Gtk.ListStore(
             GObject.TYPE_PYOBJECT,
             GObject.TYPE_STRING
             )
@@ -2333,29 +2333,29 @@ class EditElementListForm(EditForm):
         return store
 
     def insert_new(self, button=None, treeview=None):
-        element=dialog.list_selector(title=_("Insert an element"),
-                                     text=_("Choose the element to insert."),
-                                     members=self.members,
-                                     controller=self.controller)
+        element = dialog.list_selector(title=_("Insert an element"),
+                                       text=_("Choose the element to insert."),
+                                       members=self.members,
+                                       controller=self.controller)
         if element is not None:
             treeview.get_model().append( [element,
                                           self.get_representation(element) ])
         return True
 
     def delete_current(self, button=None, treeview=None):
-        model, it=treeview.get_selection().get_selected()
+        model, it = treeview.get_selection().get_selected()
         if it is not None:
             model.remove(it)
         return True
 
     def get_view(self, compact=False):
-        vbox=Gtk.VBox()
-        self.store=self.create_store()
+        vbox = Gtk.VBox()
+        self.store = self.create_store()
 
-        treeview=Gtk.TreeView(model=self.store)
+        treeview = Gtk.TreeView(model=self.store)
         treeview.set_reorderable(True)
         treeview.connect('button-press-event', self.tree_view_button_cb)
-        self.treeview=treeview
+        self.treeview = treeview
 
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn(self.title, renderer,
@@ -2364,12 +2364,12 @@ class EditElementListForm(EditForm):
 
         vbox.add(treeview)
 
-        hbox=Gtk.HButtonBox()
-        b=Gtk.Button(stock=Gtk.STOCK_ADD)
+        hbox = Gtk.HButtonBox()
+        b = Gtk.Button(stock=Gtk.STOCK_ADD)
         b.connect('clicked', self.insert_new, treeview)
         hbox.add(b)
 
-        b=Gtk.Button(stock=Gtk.STOCK_REMOVE)
+        b = Gtk.Button(stock=Gtk.STOCK_REMOVE)
         b.connect('clicked', self.delete_current, treeview)
         hbox.add(b)
 
@@ -2380,14 +2380,14 @@ class EditElementListForm(EditForm):
         return vbox
 
     def refresh(self):
-        self.store=self.create_store()
+        self.store = self.create_store()
         self.treeview.set_model(self.store)
 
     def update_element(self):
         if not self.editable:
             return False
         # Rebuild list from self.store
-        elements=[ e[self.COLUMN_ELEMENT] for e in self.store ]
+        elements = [ e[self.COLUMN_ELEMENT] for e in self.store ]
         setattr(self.model, self.field, elements)
         return True
 
@@ -2397,11 +2397,11 @@ class EditTagForm(EditForm):
     def __init__(self, element=None, controller=None, editable=True):
         self.element = element
         self.controller = controller
-        self.view=None
-        self.editable=editable
+        self.view = None
+        self.editable = editable
 
     def check_validity(self):
-        invalid=[ t for t in self.get_current_tags()
+        invalid = [ t for t in self.get_current_tags()
                   if not re.match(r'^[\w\d_]+$', t) ]
         if invalid:
             dialog.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
@@ -2414,7 +2414,7 @@ class EditTagForm(EditForm):
         return self.view.tags
 
     def refresh(self):
-        self.view.tag=self.element.tags
+        self.view.tag = self.element.tags
         self.view.refresh()
 
     def update_element(self):
@@ -2426,9 +2426,9 @@ class EditTagForm(EditForm):
         return True
 
     def get_view(self, compact=False):
-        hb=Gtk.HBox()
+        hb = Gtk.HBox()
         hb.pack_start(Gtk.Label(_("Tags:") + " "), False, False, 0)
-        self.view=TagBag(controller=self.controller, tags=self.element.tags, vertical=False)
+        self.view = TagBag(controller=self.controller, tags=self.element.tags, vertical=False)
         self.view.register_callback(controller=self.controller)
         self.view.widget.connect('destroy', lambda w: self.view.unregister_callback(self.controller))
         hb.add(self.view.widget)
@@ -2440,12 +2440,12 @@ class EditRelationsForm(EditForm):
     def __init__(self, element=None, controller=None, editable=True):
         self.element = element
         self.controller = controller
-        self.view=None
-        self.editable=editable
+        self.view = None
+        self.editable = editable
 
     def check_validity(self):
         # FIXME
-        invalid=[]
+        invalid = []
         if invalid:
             dialog.message_dialog(_("Some tags contain invalid characters: %s") % ", ".join(invalid),
                                   icon=Gtk.MessageType.ERROR)
@@ -2455,24 +2455,24 @@ class EditRelationsForm(EditForm):
 
     def refresh(self):
         self.view.foreach(self.view.remove)
-        col1=Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
-        col2=Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
+        col1 = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
+        col2 = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
         for i, r in enumerate(self.element.relations):
             # Determine the direction
             if r.members[0] == self.element:
-                direction="to"
-                other=r.members[1]
+                direction = "to"
+                other = r.members[1]
             else:
-                direction="from"
-                other=r.members[0]
-            hb=Gtk.HBox()
+                direction = "from"
+                other = r.members[0]
+            hb = Gtk.HBox()
 
-            b=RelationRepresentation(r, controller=self.controller, direction=direction)
+            b = RelationRepresentation(r, controller=self.controller, direction=direction)
             b.set_alignment(0, 0)
             col1.add_widget(b)
             hb.pack_start(b, False, True, 0)
 
-            a=AnnotationRepresentation(other, controller=self.controller)
+            a = AnnotationRepresentation(other, controller=self.controller)
             a.set_alignment(0, 0)
             col2.add_widget(a)
             hb.pack_start(a, False, True, 0)
@@ -2490,6 +2490,6 @@ class EditRelationsForm(EditForm):
         return True
 
     def get_view(self, compact=False):
-        self.view=Gtk.VBox()
+        self.view = Gtk.VBox()
         self.refresh()
         return self.view
