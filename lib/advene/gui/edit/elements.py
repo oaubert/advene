@@ -197,10 +197,6 @@ class EditElementPopup (AdhocView, metaclass=EditPopupClass):
             f.refresh()
 
     def close(self, *p):
-        for f in self.forms:
-            c=getattr(f, 'close', None)
-            if callable(c):
-                c()
         return super(EditElementPopup, self).close(*p)
 
     @staticmethod
