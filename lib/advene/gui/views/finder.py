@@ -838,7 +838,7 @@ class Finder(AdhocView):
     tooltip=_("Column-based package finder")
     def __init__(self, controller=None, parameters=None):
         super(Finder, self).__init__(controller=controller)
-        self.close_on_package_load = False
+        self.close_on_package_load = True
         self.contextual_actions = []
 
         self.package=controller.package
@@ -984,8 +984,9 @@ class Finder(AdhocView):
         return True
 
     def autoscroll_end(self):
-        adj=self.sw.get_hadjustment()
-        adj.set_value(adj.get_upper() - adj.get_page_size())
+        adj = self.sw.get_hadjustment()
+        if adj:
+            adj.set_value(adj.get_upper() - adj.get_page_size())
         return True
 
     def scroll_event(self, widget=None, event=None):
