@@ -499,11 +499,9 @@ class ViewBook(AdhocView):
         if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             # The Control-key is held. Special actions :
             if event.keyval == Gdk.KEY_Page_Up:
-                # Popup the evaluator window
                 self.widget.prev_page()
                 return True
             elif event.keyval == Gdk.KEY_Page_Down:
-                # Popup the evaluator window
                 self.widget.next_page()
                 return True
         return False
