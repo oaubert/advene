@@ -2628,12 +2628,12 @@ class AdveneApplication(Gtk.Application):
         with the given parameters.
         """
         if destination == 'default':
-            destination=config.data.preferences['popup-destination']
+            destination = config.data.preferences['popup-destination']
 
-        view=None
+        view = None
         if isinstance(name, View):
             if name.content.mimetype == 'application/x-advene-workspace-view':
-                tree=ET.parse(name.content.stream)
+                tree = ET.parse(name.content.stream)
 
                 if kw.get('ask', True):
                     d = Gtk.Dialog(title=_("Restoring workspace..."),
@@ -2647,17 +2647,17 @@ class AdveneApplication(Gtk.Application):
                     label.show()
                     d.vbox.pack_start(label, False, True, 0)
 
-                    delete_existing_toggle=Gtk.CheckButton(_("Clear the current workspace"))
+                    delete_existing_toggle = Gtk.CheckButton(_("Clear the current workspace"))
                     delete_existing_toggle.set_active(True)
                     delete_existing_toggle.show()
                     d.vbox.pack_start(delete_existing_toggle, False, True, 0)
 
-                    res=d.run()
-                    clear=delete_existing_toggle.get_active()
+                    res =  d.run()
+                    clear = delete_existing_toggle.get_active()
                     d.destroy()
                 else:
-                    res=Gtk.ResponseType.OK
-                    clear=True
+                    res = Gtk.ResponseType.OK
+                    clear = True
 
                 if res == Gtk.ResponseType.OK:
                     def restore(clr):
@@ -2672,35 +2672,35 @@ class AdveneApplication(Gtk.Application):
                 return None
             # Parse the content, extract the view id
             # Override parameters
-            parameters=name.content
-            p=AdhocViewParametersParser(name.content.stream)
+            parameters = name.content
+            p = AdhocViewParametersParser(name.content.stream)
             if p.view_id:
                 if label is None:
-                    label=name.title
-                name=p.view_id
+                    label = name.title
+                name = p.view_id
             else:
                 self.log(_("Cannot identify the adhoc view %s") % name.id)
                 return None
 
         if name == 'transcription':
-            kwargs={ 'controller': self.controller,
-                     'parameters': parameters }
+            kwargs = { 'controller': self.controller,
+                       'parameters': parameters }
             if 'source' in kw:
-                kwargs['source']=kw['source']
+                kwargs['source'] = kw['source']
             elif 'elements' in kw:
-                kwargs['elements']=kw['elements']
+                kwargs['elements'] = kw['elements']
             elif parameters is not None:
                 # source may be defined in parameters
-                kwargs['source']=None
+                kwargs['source'] = None
             else:
-                at=self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
-                                                create=False)
+                at = self.ask_for_annotation_type(text=_("Choose the annotation type to display as transcription."),
+                                                  create=False)
                 if at is None:
                     return None
                 else:
                     kwargs['source']="here/annotationTypes/%s/annotations/sorted" % at.id
                     if label is None:
-                        label=self.controller.get_title(at)
+                        label = self.controller.get_title(at)
             view = self.registered_adhoc_views[name](**kwargs)
         elif name in ('webbrowser', 'htmlview'):
             if destination is None and HTMLView._engine is not None:
@@ -2708,61 +2708,61 @@ class AdveneApplication(Gtk.Application):
                 view = HTMLView(controller=self.controller)
                 view.open_url(self.controller.get_default_url(alias='advene'))
             elif self.controller.package is not None:
-                m=self.build_utbv_menu()
+                m = self.build_utbv_menu()
                 m.popup_at_pointer(None)
             else:
                 self.log (("No current package"))
         elif name == 'transcribe':
             try:
-                filename=kw['filename']
+                filename = kw['filename']
             except KeyError:
-                filename=None
-            view=self.registered_adhoc_views[name](controller=self.controller, filename=filename, parameters=parameters, **kw)
+                filename = None
+            view = self.registered_adhoc_views[name](controller=self.controller, filename=filename, parameters=parameters, **kw)
         elif name == 'edit':
             try:
-                element=kw['element']
+                element = kw['element']
             except KeyError:
-                element=None
+                element = None
             if element is None:
                 return None
             try:
-                view=get_edit_popup(element, self.controller)
+                view = get_edit_popup(element, self.controller)
             except TypeError:
                 logger.warning(_("Error: unable to find an edit popup for %(element)s") % {
                     'element': str(element) })
-                view=None
+                view = None
             if view is not None and view.widget.get_parent() is not None:
                 # Widget is already displayed. Present it.
                 view.widget.get_toplevel().present()
-                view=None
-            label=_("Editing %s") % self.controller.get_title(element)
+                view = None
+            label = _("Editing %s") % self.controller.get_title(element)
         elif name == 'editaccumulator':
-            view=self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
+            view = self.registered_adhoc_views[name](controller=self.controller, scrollable=True)
             if not self.edit_accumulator:
                 # The first opened accumulator becomes the default one.
-                self.edit_accumulator=view
+                self.edit_accumulator = view
                 def handle_accumulator_close(w):
                     self.edit_accumulator = None
                     return False
                 self.edit_accumulator.widget.connect('destroy', handle_accumulator_close)
         elif name == 'comment':
-            v=self.controller.create_static_view(elements=[])
-            label=_("Comment view (%s)" % time.strftime('%Y%m%d - %H:%M'))
-            v.title=label
-            view=get_edit_popup(v, controller=self.controller)
+            v = self.controller.create_static_view(elements=[])
+            label = _("Comment view (%s)" % time.strftime('%Y%m%d - %H:%M'))
+            v.title = label
+            view = get_edit_popup(v, controller=self.controller)
         elif name in self.registered_adhoc_views:
-            view=self.registered_adhoc_views[name](controller=self.controller,
-                                                   parameters=parameters, **kw)
+            view = self.registered_adhoc_views[name](controller=self.controller,
+                                                     parameters=parameters, **kw)
 
         if view is None:
             return view
         # Store destination and label, used when moving the view
-        view._destination=destination
-        label=str(label or view.view_name)
+        view._destination = destination
+        label = str(label or view.view_name)
         view.set_label(label)
 
         if destination == 'popup':
-            w=view.popup(label=label)
+            w = view.popup(label=label)
             if isinstance(w, Gtk.Window):
                 dialog.center_on_mouse(w)
         elif destination in ('south', 'east', 'west', 'fareast'):
