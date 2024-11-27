@@ -175,6 +175,8 @@ class MultiMergerView(AdhocView):
                                    if alias != 'advene' and updated.get(p))
                 message = f"""Elements have been updated. Do not forget to save the corpus.\nHere is a summary of the packages that have been updated.\n{output}"""
                 dialog.message_dialog(message)
+            # Update the Packages menu
+            self.controller.gui.update_gui()
             self.close()
             return True
 
