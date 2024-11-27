@@ -1451,6 +1451,9 @@ class TextContentHandler (ContentHandler):
         self.view.grab_focus()
         return True
 
+    def close(self):
+        return True
+
     def set_editable (self, boolean):
         self.editable = boolean
 
