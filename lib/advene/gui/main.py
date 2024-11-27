@@ -4961,7 +4961,9 @@ Image cache information: %(imagecache)s
         packages = [ p
                      for alias, p in self.controller.packages.items()
                      if alias != 'advene' ]
-        destination = "/tmp/corpus"
+        destination = dialog.get_dirname(title=_("Select output directory for website export"))
+        if not destination:
+            return True
         output = corpus_website_export(self.controller, destination)
         logger.info(_(f"Corpus exported to {destination}"))
         message = _("Data exported to\n%s\nDo you want to open it?") % destination
