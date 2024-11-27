@@ -3647,7 +3647,7 @@ class AdveneApplication(Gtk.Application):
         return True
 
     def display_textfile(self, path, title=None, viewname=None):
-        w=Gtk.Window()
+        w = Gtk.Window()
         if title is not None:
             w.set_title(title + " - " + path)
         w.set_icon_list(self.get_icon_list())
@@ -3852,10 +3852,18 @@ class AdveneApplication(Gtk.Application):
         """Open a file selector to load a package.
         """
         if filename is None:
+            default_file = None
+            default_dir = config.data.path.get('data')
+            corpus_uri = self.controller.corpus_uri
+            if corpus and corpus_uri:
+                logger.info(f"Setting default file {corpus_uri}")
+                default_file = helper.uri2path(corpus_uri)
+                default_dir = os.path.dirname(default_file)
             filename, alias = dialog.get_filename(title=_("Load a corpus") if corpus else _("Load a package"),
                                                   action=Gtk.FileChooserAction.OPEN,
                                                   button=Gtk.STOCK_OPEN,
-                                                  default_dir=config.data.path.get('data'),
+                                                  default_dir=default_dir,
+                                                  default_file=default_file,
                                                   alias=True,
                                                   filter='corpus' if corpus else 'advene')
         else:
@@ -4933,10 +4941,18 @@ Image cache information: %(imagecache)s
     def on_save_corpus_activate (self, button=None, data=None):
         """Save the current corpus (session file + individual packages)
         """
+        default_dir = config.data.path.get('data')
+        default_file = None
+        corpus_uri = self.controller.corpus_uri
+        if corpus_uri:
+            default_file = helper.uri2path(corpus_uri)
+            default_dir = os.path.dirname(default_file)
+
         filename = dialog.get_filename(title=_("Save the corpus in..."),
                                        action=Gtk.FileChooserAction.SAVE,
                                        button=Gtk.STOCK_SAVE,
-                                       default_dir=config.data.path.get('data'),
+                                       default_dir=default_dir,
+                                       default_file=default_file,
                                        filter='session')
         if filename:
             (p, ext) = os.path.splitext(filename)
@@ -4945,6 +4961,7 @@ Image cache information: %(imagecache)s
                 filename = filename + '.apl'
             self.controller.save_session(filename, save_packages=True)
             self.log(_("Session saved in %s") % filename)
+            self.update_gui()
         return True
 
     @named_action(name="app.corpus-export")
