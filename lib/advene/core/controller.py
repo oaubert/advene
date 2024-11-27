@@ -2184,7 +2184,7 @@ class AdveneController:
 
         root = ET.Element(tag('package-list'))
         for a, p in self.packages.items():
-            if a in ('advene', 'new_pkg'):
+            if a in ('advene', 'new_pkg') or p.isTemplate():
                 # Do not write the default or template package
                 continue
             n = ET.SubElement(root, tag('package'), uri=p.uri, alias=a)
