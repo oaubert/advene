@@ -178,6 +178,8 @@ class AdveneController:
       - L{package} : the currently active package
       - L{packages} : a dict of loaded packages, indexed by their alias
 
+      - L{corpus_uri} : the URI of the current corpus, if one was loaded
+
       - L{active_annotations} : the currently active annotations
       - L{player} : the player (X{advene.core.mediacontrol.Player} instance)
       - L{event_handler} : the event handler
@@ -237,6 +239,9 @@ class AdveneController:
         # Reverse mapping indexed by package
         self.aliases = {}
         self.current_alias = None
+
+        # Corpus URI if defined
+        self._corpus_uri = None
 
         # Imagecache indexed by media
         self.imagecache = {}
@@ -1972,8 +1977,8 @@ class AdveneController:
             def tag(i):
                 return ET.QName(config.data.namespace, i)
 
-            tree=ET.parse(urlopen(uri))
-            root=tree.getroot()
+            tree = ET.parse(urlopen(uri))
+            root = tree.getroot()
             if root.tag != tag('package-list'):
                 raise Exception('Invalid XML element for session: ' + root.tag)
             default_alias=None
@@ -1984,10 +1989,11 @@ class AdveneController:
                     d='default' in node.attrib
                     self.load_package(u, a, activate=False)
                     if d:
-                        default_alias=a
+                        default_alias = a
                 if not default_alias:
                     # If no default package was specified, use the last one
-                    default_alias=a
+                    default_alias = a
+            self.corpus_uri = uri
             if activate:
                 self.activate_package(default_alias)
             return
@@ -2197,7 +2203,17 @@ class AdveneController:
         helper.indent(root)
         ET.ElementTree(root).write(f, encoding='unicode')
         f.close()
+
+        self.corpus_uri = name
         return True
+
+    @property
+    def corpus_uri(self):
+        return self._corpus_uri
+
+    @corpus_uri.setter
+    def corpus_uri(self, value):
+        self._corpus_uri = value
 
     def save_package (self, name=None, alias=None):
         """Save the package (current or specified)
