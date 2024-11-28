@@ -47,6 +47,7 @@
 ../lib/advene/gui/edit/exporter.py
 ../lib/advene/gui/edit/imports.py
 ../lib/advene/gui/edit/shapewidget.py
+../lib/advene/gui/edit/corpusmerge.py
 ../lib/advene/gui/edit/importer.py
 ../lib/advene/gui/edit/dvdselect.py
 ../lib/advene/gui/edit/merge.py
@@ -78,6 +79,7 @@
 ../lib/advene/plugins/aeidon_import.py
 ../lib/advene/plugins/anvil.py
 ../lib/advene/plugins/dtmfdetector.py
+../lib/advene/plugins/corpusxlsxexporter.py
 ../lib/advene/plugins/fcp.py
 ../lib/advene/plugins/vian_import.py
 ../lib/advene/plugins/hpi.py
