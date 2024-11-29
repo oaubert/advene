@@ -40,6 +40,12 @@ function build_pacman {
 }
 
 function build_pip {
+    eval "$("${MINGW_ROOT}"/bin/pipx ensurepath)"
+    pip "$@"
+}
+
+function build_pipx {
+    eval "$("${MINGW_ROOT}"/bin/pipx ensurepath)"
     "${MINGW_ROOT}"/bin/pipx "$@"
 }
 
@@ -122,12 +128,12 @@ function install_deps {
     # Try to install CherryPy's wheel because it has a bug that prevents source building:
     # https://github.com/Lucretiel/autocommand/issues/28
     # https://github.com/Lucretiel/autocommand/issues/32
-    build_pip install --pip-args='--only-binary=":all:"' CherryPy
+    build_pipx install --pip-args='--only-binary=":all:"' CherryPy
 
 #    PIP_REQUIREMENTS="\
 #"
 #    # shellcheck disable=SC2046
-#    build_pip install --no-binary ":all:" \
+#    build_pipx install --no-binary ":all:" \
 #        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr "\\n" " ")
 
     # transitive dependencies which we don't need
@@ -149,7 +155,10 @@ function install_advene {
 
     (cd "${REPO_CLONE}" && git checkout "$1") || exit 1
 
-    build_pip install "${REPO_CLONE}"
+    build_pipx install "${REPO_CLONE}"
+
+    # Make sure the local env paths handled by pipx are set
+    eval "$("${MINGW_ROOT}"/bin/pipx ensurepath)"
 
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
@@ -159,7 +168,8 @@ function install_advene {
         "${ADVENE_VERSION}" "${MINGW_ROOT}"/bin
 
     ADVENE_VERSION_DESC="$ADVENE_VERSION"
-    local GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
+    local GIT_DESCRIBE
+    GIT_DESCRIBE=$(git describe --always | sed -e 's/release\///')
     ADVENE_VERSION_DESC="$ADVENE_VERSION-r$GIT_DESCRIBE"
 
     echo "build='${ADVENE_VERSION_DESC}'" >> "${REPO_CLONE}/lib/advene/core/version.py"
