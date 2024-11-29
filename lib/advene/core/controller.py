@@ -1947,7 +1947,7 @@ class AdveneController:
                     color = self.get_element_color(container)
         return color
 
-    def load_package (self, uri=None, alias=None, activate=True):
+    def load_package (self, uri=None, alias=None, activate=True, template=None):
         """Load a package.
 
         This method is esp. used as a callback for webserver. If called
@@ -1962,11 +1962,13 @@ class AdveneController:
         uri = helper.path2uri(uri)
         if uri is None or uri == "":
             try:
+                if template is None:
+                    template = config.data.advenefile(config.data.templates['basic'])
                 self.package = Package (uri="new_pkg",
-                                        source=config.data.advenefile(config.data.templatefilename))
+                                        source=template)
             except Exception:
                 logger.error(_("Cannot find the template package %(filename)s")
-                             % {'filename': config.data.advenefile(config.data.templatefilename)}, exc_info=True)
+                             % {'filename': template}, exc_info=True)
 
                 alias='new_pkg'
                 self.package = Package (alias, source=None)
@@ -2864,7 +2866,7 @@ class AdveneController:
         """Automatically merge admin views from template package.
         """
         template = Package (uri="new_pkg",
-                            source=config.data.advenefile(config.data.templatefilename))
+                            source=config.data.advenefile(config.data.templates['basic']))
         differ = Differ(template, self.package)
         diff = list(differ.diff())
         counter = { 'update_content': 0,

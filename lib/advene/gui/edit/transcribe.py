@@ -1309,7 +1309,7 @@ if __name__ == "__main__":
     #controller.package = Package (uri=sys.argv[1])
     config.data.path['resources']= Path('/usr/local/src/advene-project/share')
     controller.package = Package (uri="new_pkg",
-                                  source=config.data.advenefile(config.data.templatefilename))
+                                  source=config.data.advenefile(config.data.templates['basic']))
 
     transcription = TranscriptionEdit(controller=controller)
 

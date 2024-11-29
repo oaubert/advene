@@ -103,7 +103,7 @@ class Config:
 
     @ivar namespace: the XML namespace for Advene extensions.
 
-    @ivar templatefilename: the filename for the XML template file
+    @ivar templates: dict (alias, filename) for the template files
 
     @ivar preferences: the GUI preferences
     @type preferences: dict
@@ -217,7 +217,11 @@ class Config:
         self.namespace = "http://experience.univ-lyon1.fr/advene/ns/advenetool"
 
         # These files are stored in the resources directory
-        self.templatefilename = "template.azp"
+        self.templates = {
+            'basic': "template.azp",
+            'remind': "remind-template.azp",
+            'ada': "ada-template.azp"
+        }
 
         # Generic options
         # They are automatically saved across sessions

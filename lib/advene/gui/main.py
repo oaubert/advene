@@ -281,7 +281,12 @@ class AdveneApplication(Gtk.Application):
         self.menu_definition=(
             (_("_File"), (
                 ("", # Empty label -> section (and not submenu)
-                 (( _("_New package"), 'app.new-package', _("Create a new package"), 'new'),
+                 (( _("_New package"), (
+                     ( _("Standard template"), 'app.new-package', _("Create a new package with the standard template"), 'new-basic'),
+                     ( _("REMIND template"), 'app.new-package-remind', _("Create a new package with the REMIND template"), 'new-remind'),
+                     ( _("AdA template"), 'app.new-package-ada', _("Create a new package with the AdA template"), 'new-ada')
+                 ),
+                    "", ""),
                   ( _("_Open package"), 'app.open-dialog', _("Open a package"), 'open' ),
                   ( _("Open recent"), RecentFilesMenu(
                       Gtk.RecentManager.get_default(),
@@ -3805,13 +3810,24 @@ class AdveneApplication(Gtk.Application):
     def on_new1_activate (self, button=None, data=None):
         """New package. Erase the current one.
         """
-        if 'new_pkg' in self.controller.packages:
-            # An unsaved template package already exists.
-            # Ask to save it first.
-            dialog.message_dialog(_("An unsaved template package exists\nSave it first."))
-        else:
-            self.set_busy_cursor(True)
-            self.controller.load_package ()
+        self.set_busy_cursor(True)
+        self.controller.load_package ()
+        return True
+
+    @named_action(name="app.new-package-remind")
+    def on_new_remind_activate (self, button=None, data=None):
+        """New package with REMIND template.
+        """
+        self.set_busy_cursor(True)
+        self.controller.load_package (template=config.data.advenefile(config.data.templates['remind']))
+        return True
+
+    @named_action(name="app.new-package-ada")
+    def on_new_ada_activate (self, button=None, data=None):
+        """New package with AdA template.
+        """
+        self.set_busy_cursor(True)
+        self.controller.load_package (template=config.data.advenefile(config.data.templates['ada']))
         return True
 
     @named_action(name="app.close")
