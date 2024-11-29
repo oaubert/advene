@@ -40,12 +40,12 @@ function build_pacman {
 }
 
 function build_pip {
-    eval "$("${MINGW_ROOT}"/bin/pipx ensurepath)"
+    eval $("${MINGW_ROOT}"/bin/pipx ensurepath)
     pip "$@"
 }
 
 function build_pipx {
-    eval "$("${MINGW_ROOT}"/bin/pipx ensurepath)"
+    eval $("${MINGW_ROOT}"/bin/pipx ensurepath)
     "${MINGW_ROOT}"/bin/pipx "$@"
 }
 
@@ -158,7 +158,7 @@ function install_advene {
     build_pipx install "${REPO_CLONE}"
 
     # Make sure the local env paths handled by pipx are set
-    eval "$("${MINGW_ROOT}"/bin/pipx ensurepath)"
+    eval $("${MINGW_ROOT}"/bin/pipx ensurepath)
 
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
