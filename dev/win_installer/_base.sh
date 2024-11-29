@@ -40,7 +40,7 @@ function build_pacman {
 }
 
 function build_pip {
-    "${MINGW_ROOT}"/bin/python3.exe -m pip "$@"
+    "${MINGW_ROOT}"/bin/pipx "$@"
 }
 
 function build_python {
@@ -96,6 +96,7 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-python-gobject \
         "${MINGW_PACKAGE_PREFIX}"-python-cairo \
         "${MINGW_PACKAGE_PREFIX}"-python-pip \
+        "${MINGW_PACKAGE_PREFIX}"-python-pipx \
         "${MINGW_PACKAGE_PREFIX}"-libsoup3 \
         "${MINGW_PACKAGE_PREFIX}"-gstreamer \
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-base \
@@ -104,6 +105,7 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-ugly \
         "${MINGW_PACKAGE_PREFIX}"-gst-plugin-gtk \
         "${MINGW_PACKAGE_PREFIX}"-gst-libav \
+        "${MINGW_PACKAGE_PREFIX}"-python-openpyxl \
         "${MINGW_PACKAGE_PREFIX}"-python-certifi \
         "${MINGW_PACKAGE_PREFIX}"-python-pytest \
         "${MINGW_PACKAGE_PREFIX}"-python-coverage \
