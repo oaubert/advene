@@ -40,13 +40,7 @@ function build_pacman {
 }
 
 function build_pip {
-    eval $("${MINGW_ROOT}"/bin/pipx ensurepath)
-    pip "$@"
-}
-
-function build_pipx {
-    eval $("${MINGW_ROOT}"/bin/pipx ensurepath)
-    "${MINGW_ROOT}"/bin/pipx "$@"
+    "${MINGW_ROOT}"/bin/python3.exe -m pip "$@"
 }
 
 function build_python {
@@ -102,7 +96,6 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-python-gobject \
         "${MINGW_PACKAGE_PREFIX}"-python-cairo \
         "${MINGW_PACKAGE_PREFIX}"-python-pip \
-        "${MINGW_PACKAGE_PREFIX}"-python-pipx \
         "${MINGW_PACKAGE_PREFIX}"-libsoup3 \
         "${MINGW_PACKAGE_PREFIX}"-gstreamer \
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-base \
@@ -128,13 +121,7 @@ function install_deps {
     # Try to install CherryPy's wheel because it has a bug that prevents source building:
     # https://github.com/Lucretiel/autocommand/issues/28
     # https://github.com/Lucretiel/autocommand/issues/32
-    build_pipx install --pip-args='--only-binary=":all:"' CherryPy
-
-#    PIP_REQUIREMENTS="\
-#"
-#    # shellcheck disable=SC2046
-#    build_pipx install --no-binary ":all:" \
-#        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr "\\n" " ")
+    build_pip install --only-binary=":all:" CherryPy
 
     # transitive dependencies which we don't need
     build_pacman --noconfirm -Rdds \
@@ -155,10 +142,7 @@ function install_advene {
 
     (cd "${REPO_CLONE}" && git checkout "$1") || exit 1
 
-    build_pipx install "${REPO_CLONE}"
-
-    # Make sure the local env paths handled by pipx are set
-    eval $("${MINGW_ROOT}"/bin/pipx ensurepath)
+    build_pip install "${REPO_CLONE}"
 
     ADVENE_VERSION=$(MSYSTEM="" build_python -c \
 	    "import sys; sys.path.insert(0, 'lib'); import advene.core.version; sys.stdout.write(advene.core.version.version)")
