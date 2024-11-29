@@ -2405,7 +2405,7 @@ class AdveneApplication(Gtk.Application):
         return True
 
     @named_action(name="app.export-package")
-    def export_element(self, element=None, filter_id=None):
+    def export_element(self, element=None, filter_id=None, filename=None):
         if element is None:
             element = self.controller.package
 
@@ -2418,7 +2418,7 @@ class AdveneApplication(Gtk.Application):
         exporterclass = None
         if filter_id is not None:
             exporterclass = self.controller.get_export_filters(ident=filter_id)
-        self.open_adhoc_view('exporterview', title=title, source=element, exporterclass=exporterclass)
+        self.open_adhoc_view('exporterview', title=title, source=element, exporterclass=exporterclass, filename=filename)
         return True
 
     arrow_list={ 'linux': '\u25b8',
@@ -4984,7 +4984,11 @@ Image cache information: %(imagecache)s
     def on_corpus_export_activate (self, button=None, data=None):
         """Export the current corpus as XLSX
         """
-        self.export_element(self.controller.global_package, filter_id='CorpusXlsxExporter')
+        # Build filename from the corpus filename (if available)
+        filename = None
+        if self.controller.corpus_uri:
+            filename = helper.uri2path(self.controller.corpus_uri).replace('.apl', '.xlsx')
+        self.export_element(self.controller.global_package, filter_id='CorpusXlsxExporter', filename=filename)
         return True
 
     @named_action(name="app.corpus-website-export")
