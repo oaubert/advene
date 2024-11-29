@@ -1,13 +1,18 @@
 name: Advene dev testing workflow
+# Run packaging on dev branches, to test without publishing
+# It can be run on dev (both OS), dev_windows (windows only) or dev_mac (mac only)
 
 on:
   push:
     branches:
       - dev
+      - dev_windows
+      - dev_mac
 
 jobs:
   windows:
     runs-on: windows-latest
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/dev_windows'
     strategy:
       fail-fast: true
 
@@ -70,6 +75,7 @@ jobs:
 
   macos:
     runs-on: macos-latest
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/dev_mac'
     env:
       ACTIONS_STEP_DEBUG: true
     steps:
