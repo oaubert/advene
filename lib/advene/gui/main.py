@@ -4930,7 +4930,7 @@ Image cache information: %(imagecache)s
         filenames = dialog.get_filename(title=_("Select the reference template"),
                                         action=Gtk.FileChooserAction.OPEN,
                                         button=Gtk.STOCK_OPEN,
-                                        default_dir=config.data.path.get('data'),
+                                        default_dir=config.data.path.get('resources'),
                                         multiple=True,
                                         filter='advene')
         if not filenames:
