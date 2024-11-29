@@ -105,11 +105,13 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-gst-plugins-ugly \
         "${MINGW_PACKAGE_PREFIX}"-gst-plugin-gtk \
         "${MINGW_PACKAGE_PREFIX}"-gst-libav \
-        "${MINGW_PACKAGE_PREFIX}"-python-openpyxl \
         "${MINGW_PACKAGE_PREFIX}"-python-certifi \
+        "${MINGW_PACKAGE_PREFIX}"-python-openpyxl \
         "${MINGW_PACKAGE_PREFIX}"-python-pytest \
         "${MINGW_PACKAGE_PREFIX}"-python-coverage \
         "${MINGW_PACKAGE_PREFIX}"-python-mutagen \
+        "${MINGW_PACKAGE_PREFIX}"-python-rdflib \
+        "${MINGW_PACKAGE_PREFIX}"-python-requests \
         busybox \
         "${MINGW_PACKAGE_PREFIX}"-gst-editing-services \
         "${MINGW_PACKAGE_PREFIX}"-libsrtp \
@@ -117,22 +119,16 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-python-setuptools \
         "${MINGW_PACKAGE_PREFIX}"-python-pillow \
 
-    # Update PIP
-    build_pip install --upgrade pip
-
-    PIP_REQUIREMENTS="\
-rdflib
-requests
-"
-
     # Try to install autocommand's wheel because it has a bug that prevents source building:
     # https://github.com/Lucretiel/autocommand/issues/28
     # https://github.com/Lucretiel/autocommand/issues/32
     build_pip install --only-binary ":all:" autocommand CherryPy
 
-    # shellcheck disable=SC2046
-    build_pip install --no-binary ":all:" \
-        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr "\\n" " ")
+#    PIP_REQUIREMENTS="\
+#"
+#    # shellcheck disable=SC2046
+#    build_pip install --no-binary ":all:" \
+#        --force-reinstall $(echo "$PIP_REQUIREMENTS" | tr "\\n" " ")
 
     # transitive dependencies which we don't need
     build_pacman --noconfirm -Rdds \
