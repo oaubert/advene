@@ -119,10 +119,10 @@ function install_deps {
         "${MINGW_PACKAGE_PREFIX}"-python-setuptools \
         "${MINGW_PACKAGE_PREFIX}"-python-pillow \
 
-    # Try to install autocommand's wheel because it has a bug that prevents source building:
+    # Try to install CherryPy's wheel because it has a bug that prevents source building:
     # https://github.com/Lucretiel/autocommand/issues/28
     # https://github.com/Lucretiel/autocommand/issues/32
-    build_pip install --only-binary ":all:" autocommand CherryPy
+    build_pip install --pip-args='--only-binary=":all:"' CherryPy
 
 #    PIP_REQUIREMENTS="\
 #"
