@@ -638,9 +638,9 @@ class AdveneController:
         """
         return [ helper.TitledElement(expression, label)
                  for (label, expression) in [ (_("Annotations in current package"), "all_annotations"),
-                                              (_("Annotations in all packages"), "global_annotations") ] + [
-                                                  (_("Annotations of type %s") % self.get_title(at),
-                                                   'here/annotationTypes/%s/annotations' % at.id)
+                                              (_("Corpus annotations"), "global_annotations") ] + [
+                                                (_("Annotations of type %s") % self.get_title(at),
+                                                 'here/annotationTypes/%s/annotations' % at.id)
                                                   for at in self.package.annotationTypes ] + [
                                                           (_("Views"), 'here/views'), (_("Tags"), 'tags'), (_("Ids"), 'ids')
                                                   ]
