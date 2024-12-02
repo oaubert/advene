@@ -404,7 +404,25 @@ class AnnotationTable(AdhocView):
 
         sw.treeview = tree_view
 
-        return sw
+        vbox = Gtk.VBox()
+
+        controls = Gtk.HBox()
+
+        entry = Gtk.Entry()
+        entry.set_placeholder_text(_("Search annotations..."))
+        tree_view.set_search_entry(entry)
+        controls.add(entry)
+
+        b = Gtk.ToolButton(_("Export"))
+        b.set_tooltip_text(_("Export data as CSV"))
+        b.connect('clicked', lambda b: self.csv_export())
+        b.set_icon_name('document-send')
+        controls.add(b)
+
+        vbox.pack_start(controls, False, False, 0)
+        vbox.add(sw)
+        vbox.treeview = tree_view
+        return vbox
 
     def drag_data_get_cb(self, treeview, context, selection, targetType, timestamp):
         model, paths = treeview.get_selection().get_selected_rows()
