@@ -52,7 +52,8 @@ COLUMN_END_FORMATTED = 8
 COLUMN_PIXBUF = 9
 COLUMN_COLOR = 10
 COLUMN_SOURCE_PACKAGE = 11
-COLUMN_CUSTOM_FIRST = 12
+COLUMN_FILTER = 12
+COLUMN_CUSTOM_FIRST = 13
 
 name="Element tabular view plugin"
 
@@ -97,6 +98,7 @@ class AnnotationTable(AdhocView):
         self.mouseover_annotation = None
         self.last_edited_path = None
 
+        self.filter = ""
         self.model = self.build_model(elements, custom_data)
         self.widget = self.build_widget(custom_data)
 
@@ -159,10 +161,11 @@ class AnnotationTable(AdhocView):
         else:
             def custom(a):
                 return tuple()
-        args = (object, str, str, str, GObject.TYPE_INT64, GObject.TYPE_INT64, str, str, str, GdkPixbuf.Pixbuf, str, str) + custom(None)
+        args = (object, str, str, str, GObject.TYPE_INT64, GObject.TYPE_INT64, str, str, str, GdkPixbuf.Pixbuf, str, str, str) + custom(None)
         store = Gtk.ListStore(*args)
         for a in elements:
             if isinstance(a, Annotation):
+                filter_text = f"{self.controller.get_title(a)} {self.controller.get_title(a.type)}".lower()
                 store.append( (a,
                                self.controller.get_title(a),
                                self.controller.get_title(a.type),
@@ -175,8 +178,9 @@ class AnnotationTable(AdhocView):
                                png_to_pixbuf(self.controller.get_snapshot(annotation=a),
                                              height=32),
                                self.controller.get_element_color(a),
-                               a.ownerPackage.getTitle()
-                                   ) + custom(a),
+                               a.ownerPackage.getTitle(),
+                               filter_text
+                               ) + custom(a)
                              )
         return store
 
@@ -244,8 +248,17 @@ class AnnotationTable(AdhocView):
             self.mouseover_annotation = None
         return False
 
+    def apply_filter(self, model, iter, data):
+        return not self.filter or self.filter in model[iter][COLUMN_FILTER]
+
+    def update_filter(self):
+        self.filter = self.filter_entry.get_text().lower()
+        self.filtered_model.refilter()
+
     def build_widget(self, custom_data=None):
-        tree_view = Gtk.TreeView(self.model)
+        self.filtered_model = self.model.filter_new()
+        self.filtered_model.set_visible_func(self.apply_filter)
+        tree_view = Gtk.TreeView(self.filtered_model)
 
         select = tree_view.get_selection()
         select.set_mode(Gtk.SelectionMode.MULTIPLE)
@@ -409,9 +422,11 @@ class AnnotationTable(AdhocView):
         controls = Gtk.HBox()
 
         entry = Gtk.Entry()
-        entry.set_placeholder_text(_("Search annotations..."))
+        entry.set_placeholder_text(_("Filter annotations..."))
         tree_view.set_search_entry(entry)
+        entry.connect("changed", lambda e: self.update_filter())
         controls.add(entry)
+        self.filter_entry = entry
 
         b = Gtk.ToolButton(_("Export"))
         b.set_tooltip_text(_("Export data as CSV"))
@@ -492,7 +507,7 @@ class AnnotationTable(AdhocView):
         w = csv.writer(f)
         tv = self.widget.treeview
         store, paths = tv.get_selection().get_selected_rows()
-        source = [ store.get_iter(p) for p in paths ]
+        source = [ store[p] for p in paths ]
         if not source:
             source = tv.get_model()
         w.writerow( (_("id"), _("type"), _("begin"), _("end"), _("content")) )
