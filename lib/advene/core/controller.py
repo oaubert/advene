@@ -827,6 +827,7 @@ class AdveneController:
                                                      'controller': self,
                                                  })
         c.addGlobal('package', self.package)
+        c.addGlobal('corpus', self.global_package)
         c.addGlobal('packages', self.packages)
         c.addGlobal('player', self.player)
         for name, method in config.data.global_methods.items():
