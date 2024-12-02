@@ -344,8 +344,9 @@ class AnnotationTable(AdhocView):
             columns[name].set_sizing(Gtk.TreeViewColumnSizing.FIXED)
             columns[name].set_resizable(True)
             columns[name].set_min_width(40)
+            columns[name].set_reorderable(True)
         columns['content'].set_expand(True)
-        columns['content'].set_max_width(800)
+        columns['content'].set_max_width(600)
 
         # Allow user classes to tweak behaviour
         self.columns = columns
