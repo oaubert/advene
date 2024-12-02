@@ -287,16 +287,26 @@ class ViewBook(AdhocView):
                             and ET.parse(v.content.stream).getroot().attrib['id'] == name ]
 
                 if name in ('transcription', 'table'):
-                    menu=Gtk.Menu()
-                    i=Gtk.MenuItem(_("Open a new %s for...") % _(name))
+                    menu = Gtk.Menu()
+                    i = Gtk.MenuItem(_("Open a new %s for...") % _(name))
                     menu.append(i)
-                    sm=Gtk.Menu()
+                    sm = Gtk.Menu()
                     i.set_submenu(sm)
                     for at in self.controller.package.annotationTypes:
-                        title=self.controller.get_title(at, max_size=40)
-                        i=Gtk.MenuItem(title, use_underline=False)
+                        title = self.controller.get_title(at, max_size=40)
+                        i = Gtk.MenuItem(title, use_underline=False)
                         i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotationTypes/%s/annotations/sorted" % at.id, title)
                         sm.append(i)
+                    title = _("All annotations")
+                    i = Gtk.MenuItem(title)
+                    i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotations/sorted", title)
+                    sm.append(i)
+
+                    title = _("All corpus annotations")
+                    i = Gtk.MenuItem(title)
+                    i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "corpus/annotations/sorted", title)
+                    sm.append(i)
+
                 elif saved:
                     menu=Gtk.Menu()
                     if name == 'comment':
