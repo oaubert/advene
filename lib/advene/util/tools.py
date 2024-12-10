@@ -460,7 +460,7 @@ def clamp(x, minimum, maximum):
     """
     return max(minimum, min(x, maximum))
 
-def path2uri(p):
+def path2uri(p) -> str:
     if p == "" or p is None:
         return p
     u = urlparse(p)
@@ -471,9 +471,9 @@ def path2uri(p):
         ret = Path(p).absolute().as_uri()
     return ret
 
-def uri2path(uri):
-    if uri == "":
-        return uri
+def uri2path(uri) -> str:
+    if uri == "" or uri is None:
+        return ""
     if sys.platform == 'win32':
         uri = uri.replace('\\', '/')
         if re.search('^[A-Za-z]:', uri):
