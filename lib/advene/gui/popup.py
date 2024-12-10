@@ -85,13 +85,13 @@ class Menu:
 
     def create_element(self, widget, elementtype=None, parent=None):
         if elementtype == 'staticview':
-            elementtype=View
-            mimetype='text/html'
+            elementtype = View
+            mimetype = 'text/html'
         elif elementtype == 'dynamicview':
-            elementtype=View
-            mimetype='application/x-advene-ruleset'
+            elementtype = View
+            mimetype = 'application/x-advene-ruleset'
         else:
-            mimetype=None
+            mimetype = None
         cr = self.controller.gui.create_element_popup(type_=elementtype,
                                                       parent=parent,
                                                       controller=self.controller,
@@ -103,12 +103,12 @@ class Menu:
         if id_ is None:
             # Generate the id_
             basename = os.path.basename(filename)
-            id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
-        size=os.stat(filename).st_size
-        f=open(filename, 'rb')
-        parent[id_]=f.read(size + 2)
+            id_ = re.sub('[^a-zA-Z0-9_.]', '_', basename)
+        size = os.stat(filename).st_size
+        f = open(filename, 'rb')
+        parent[id_] = f.read(size + 2)
         f.close()
-        el=parent[id_]
+        el = parent[id_]
         self.controller.notify('ResourceCreate',
                                resource=el)
         return el
@@ -117,9 +117,9 @@ class Menu:
         if id_ is None:
             # Generate the id_
             basename = os.path.basename(dirname)
-            id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
+            id_ = re.sub('[^a-zA-Z0-9_.]', '_', basename)
         parent[id_] = parent.DIRECTORY_TYPE
-        el=parent[id_]
+        el = parent[id_]
         self.controller.notify('ResourceCreate',
                                resource=el)
         for n in os.listdir(dirname):
@@ -133,11 +133,11 @@ class Menu:
     def insert_resource_data(self, widget, parent=None, title=None, filter=None):
         if title is None:
             title = _("Choose the file to insert")
-        filename=dialog.get_filename(title=title, filter=filter)
+        filename = dialog.get_filename(title=title, filter=filter)
         if filename is None:
             return True
         basename = os.path.basename(filename)
-        id_=re.sub('[^a-zA-Z0-9_.]', '_', basename)
+        id_ = re.sub('[^a-zA-Z0-9_.]', '_', basename)
         if id_ != basename:
             while True:
                 id_ = dialog.entry_dialog(title=_("Select a valid identifier"),
@@ -156,7 +156,7 @@ class Menu:
         return True
 
     def insert_resource_directory(self, widget, parent=None):
-        dirname=dialog.get_dirname(title=_("Choose the directory to insert"))
+        dirname = dialog.get_dirname(title=_("Choose the directory to insert"))
         if dirname is None:
             return True
 
@@ -171,9 +171,9 @@ class Menu:
         self.controller.gui.open_adhoc_view('importerview', message=_("Apply %s") % importer.name, display_unlikely=False, importerclass=importer, source_type=annotationtype)
 
     def popup_get_offset(self):
-        offset=dialog.entry_dialog(title='Enter an offset',
-                                   text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
-                                   default="0")
+        offset = dialog.entry_dialog(title='Enter an offset',
+                                    text=_("Give the offset to use\non specified element.\nIt is in ms and can be\neither positive or negative."),
+                                     default="0")
         if offset is not None:
             return int(offset)
         else:
@@ -216,7 +216,7 @@ class Menu:
         return True
 
     def delete_elements (self, widget, el, elements):
-        batch_id=object()
+        batch_id = object()
         if isinstance(el, (AnnotationType, RelationType)):
             for e in elements:
                 self.controller.delete_element(e, batch=batch_id)
@@ -300,7 +300,7 @@ class Menu:
         if hasattr(element, 'viewableType'):
             self.make_bundle_menu(element, menu)
 
-        specific_builder={
+        specific_builder = {
             Annotation: self.make_annotation_menu,
             Relation: self.make_relation_menu,
             AnnotationType: self.make_annotationtype_menu,
@@ -437,7 +437,7 @@ class Menu:
     def common_submenu(self, element):
         """Build the common submenu for all elements.
         """
-        submenu=Gtk.Menu()
+        submenu = Gtk.Menu()
         def add_item(*p, **kw):
             self.add_menuitem(submenu, *p, **kw)
 
@@ -448,8 +448,8 @@ class Menu:
             add_item(_("Query"), self.query_element, element)
 
         def open_in_browser(i, v):
-            c=self.controller.build_context(here=element)
-            url=c.evaluateValue('here/absolute_url')
+            c = self.controller.build_context(here=element)
+            url = c.evaluateValue('here/absolute_url')
             self.controller.open_url(url)
             return True
         add_item(_("Open in web browser"), open_in_browser, element)
@@ -478,7 +478,7 @@ class Menu:
 
     def activate_submenu(self, element):
         """Build an "activate" submenu for the given annotation"""
-        submenu=Gtk.Menu()
+        submenu = Gtk.Menu()
         def add_item(*p, **kw):
             self.add_menuitem(submenu, *p, **kw)
 
@@ -517,14 +517,14 @@ class Menu:
                 return False
             if len(items) == 1:
                 # Only 1 elements, do not use an intermediary menu
-                m=Menu(element=items[0], controller=self.controller)
+                m = Menu(element=items[0], controller=self.controller)
                 for c in m.menu.get_children():
                     m.menu.remove(c)
                     submenu.append(c)
             else:
                 for i in items:
-                    item=Gtk.MenuItem(self.get_title(i), use_underline=False)
-                    m=Menu(element=i, controller=self.controller)
+                    item = Gtk.MenuItem(self.get_title(i), use_underline = False)
+                    m = Menu(element=i, controller=self.controller)
                     item.set_submenu(m.menu)
                     submenu.append(item)
             submenu.show_all()
@@ -568,22 +568,22 @@ class Menu:
             return False
 
         if element.relations:
-            i=Gtk.MenuItem(_("Related annotations"), use_underline=False)
-            submenu=Gtk.Menu()
+            i = Gtk.MenuItem(_("Related annotations"), use_underline=False)
+            submenu = Gtk.Menu()
             i.set_submenu(submenu)
             submenu.connect('map', build_related, element)
             menu.append(i)
 
             if element.incomingRelations:
-                i=Gtk.MenuItem(_("Incoming relations"), use_underline=False)
-                submenu=Gtk.Menu()
+                i = Gtk.MenuItem(_("Incoming relations"), use_underline=False)
+                submenu = Gtk.Menu()
                 i.set_submenu(submenu)
                 submenu.connect('map', build_submenu, element, element.incomingRelations)
                 menu.append(i)
 
             if element.outgoingRelations:
-                i=Gtk.MenuItem(_("Outgoing relations"), use_underline=False)
-                submenu=Gtk.Menu()
+                i = Gtk.MenuItem(_("Outgoing relations"), use_underline=False)
+                submenu = Gtk.Menu()
                 i.set_submenu(submenu)
                 submenu.connect('map', build_submenu, element, element.outgoingRelations)
                 menu.append(i)
@@ -611,8 +611,8 @@ class Menu:
         add_item(element.content.data)
         add_item(_('Members:'))
         for a in element.members:
-            item=Gtk.MenuItem(self.get_title(a), use_underline=False)
-            m=Menu(element=a, controller=self.controller)
+            item = Gtk.MenuItem(self.get_title(a), use_underline=False)
+            m = Menu(element=a, controller=self.controller)
             item.set_submenu(m.menu)
             menu.append(item)
         return
@@ -686,37 +686,37 @@ class Menu:
     def create_dynamic_view(self, at):
         """Create a caption dynamic view for the given annotation-type.
         """
-        p=self.controller.package
-        ident='v_caption_%s' % at.id
+        p = self.controller.package
+        ident = 'v_caption_%s' % at.id
         if p.get_element_by_id(ident) is not None:
             dialog.message_dialog(_("A caption dynamic view for %s already seems to exist.") % self.get_title(at))
             return True
-        v=p.createView(
+        v = p.createView(
             ident=ident,
             author=config.data.userid,
             date=helper.get_timestamp(),
             clazz='package',
             content_mimetype='application/x-advene-ruleset'
             )
-        v.title=_("Caption %s annotations") % self.get_title(at)
+        v.title = _("Caption %s annotations") % self.get_title(at)
 
         # Build the ruleset
-        r=RuleSet()
-        catalog=self.controller.event_handler.catalog
+        r = RuleSet()
+        catalog = self.controller.event_handler.catalog
 
-        ra=catalog.get_action("AnnotationCaption")
-        action=Action(registeredaction=ra, catalog=catalog)
+        ra = catalog.get_action("AnnotationCaption")
+        action = Action(registeredaction=ra, catalog=catalog)
         action.add_parameter('message', 'annotation/content/data')
 
-        rule=Rule(name=_("Caption the annotation"),
-                  event=Event("AnnotationBegin"),
-                  condition=Condition(lhs='annotation/type/id',
-                                      operator='equals',
-                                      rhs='string:%s' % at.id),
-                  action=action)
+        rule = Rule(name=_("Caption the annotation"),
+                    event=Event("AnnotationBegin"),
+                    condition=Condition(lhs='annotation/type/id',
+                                        operator='equals',
+                                        rhs='string:%s' % at.id),
+                    action=action)
         r.add_rule(rule)
 
-        v.content.data=r.xml_repr()
+        v.content.data = r.xml_repr()
 
         p.views.append(v)
         self.controller.notify('ViewCreate', view=v)
@@ -727,7 +727,7 @@ class Menu:
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
         def create_static(at):
-            v=self.controller.create_static_view([ at ])
+            v = self.controller.create_static_view([ at ])
             self.controller.gui.edit_element(v)
             return True
         add_item(_('Create a comment view'), lambda i: create_static(element))
@@ -777,14 +777,14 @@ class Menu:
         ra = catalog.get_action("PlayerGoto")
         action = Action(registeredaction=ra, catalog=catalog)
         action.add_parameter('position', 'annotation/typedRelatedOut/%s/first/fragment/begin' % rt.id)
-        rule=Rule(name=_("Follow the relation"),
-                  event=Event("AnnotationEnd"),
-                  condition=Condition(lhs='annotation/typedRelatedOut/%s' % rt.id,
-                                      operator='value'),
-                  action=action)
+        rule = Rule(name=_("Follow the relation"),
+                    event=Event("AnnotationEnd"),
+                    condition=Condition(lhs='annotation/typedRelatedOut/%s' % rt.id,
+                                        operator='value'),
+                    action=action)
         r.add_rule(rule)
 
-        v.content.data=r.xml_repr()
+        v.content.data = r.xml_repr()
 
         p.views.append(v)
         self.controller.notify('ViewCreate', view=v)
@@ -818,30 +818,30 @@ class Menu:
                 self.controller.log(_('Exception in query: %s') % str(e))
             return True
 
-        m=Gtk.MenuItem(_('Apply query on...'))
+        m = Gtk.MenuItem(_('Apply query on...'))
         menu.append(m)
-        sm=Gtk.Menu()
+        sm = Gtk.Menu()
         m.set_submenu(sm)
         for (expr, label) in (
                 ('package', _('the package')),
                 ('package/annotations', _('all annotations of the package')),
                 ('package/annotations/first', _('the first annotation of the package')),
         ):
-            i=Gtk.MenuItem(label)
+            i = Gtk.MenuItem(label)
             i.connect('activate', try_query, expr)
             sm.append(i)
         return
 
     def make_view_menu(self, element, menu):
         def open_in_browser(i, v):
-            c=self.controller.build_context()
-            url=c.evaluateValue('here/view/%s/absolute_url' % v.id)
+            c = self.controller.build_context()
+            url = c.evaluateValue('here/view/%s/absolute_url' % v.id)
             self.controller.open_url(url)
             return True
 
         def add_item(*p, **kw):
             self.add_menuitem(menu, *p, **kw)
-        t=helper.get_view_type(element)
+        t = helper.get_view_type(element)
         if t == 'dynamic':
             add_item(_('Activate view'), self.activate_stbv, element)
         elif t == 'adhoc':
