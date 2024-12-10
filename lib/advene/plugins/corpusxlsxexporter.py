@@ -73,7 +73,7 @@ class CorpusXlsxExporter(GenericExporter):
                                      help=_("Create 1 tab per package"))
         self.optionparser.add_option("-g", "--global",
                                      action="store_true", dest="sheet_global", default=self.sheet_global,
-                                     help=_("Create 1 global sheet with all annotation"))
+                                     help=_("Create 1 global sheet with all annotations"))
 
     @classmethod
     def is_valid_for(cls, expr):
