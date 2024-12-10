@@ -278,7 +278,7 @@ class Menu:
         def add_item(*p, **kw):
             return self.add_menuitem(menu, *p, **kw)
 
-        title=add_item(self.get_title(element))
+        title = add_item(self.get_title(element))
 
         if hasattr(element, 'id') or isinstance(element, Package):
             title.set_submenu(self.common_submenu(element))
@@ -290,7 +290,7 @@ class Menu:
         add_item("")
 
         try:
-            i=element.id
+            i = element.id
             add_item(_("Copy id %s") % i,
                      self.copy_id,
                      element)
@@ -865,7 +865,7 @@ class Menu:
             # Global actions on all annotations
             add_item(_('Offset all annotations'), self.offset_element, element.rootPackage)
             add_item(_("Search/replace content in all annotations"), self.search_replace_content, element.rootPackage)
-            add_item(_("Display all annotations as a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.rootPackage.annotations, source='here/annotations'))
-            add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element.rootPackage)
+            add_item(_("Display all annotations as a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.rootPackage.annotations, source='here/rootPackage/annotations'))
+            add_item(_('%d annotations(s) - statistics') % len(element.rootPackage.annotations), self.display_stats, element.rootPackage)
 
         return
