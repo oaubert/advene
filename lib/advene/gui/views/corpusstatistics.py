@@ -23,11 +23,16 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
+import csv
+import os
+
 from gi.repository import GObject
 from gi.repository import Gtk
 
+from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 from advene.gui.views.table import AnnotationTable
+from advene.util.tools import open_in_filebrowser
 
 name = "Corpus statistics"
 
@@ -60,6 +65,7 @@ class CorpusStatistics(AdhocView):
                      package_alias=GObject.TYPE_STRING,
                      id=GObject.TYPE_STRING,
                      title=GObject.TYPE_STRING,
+                     color=GObject.TYPE_STRING,
                      relation_count=GObject.TYPE_INT,
                      annotation_count=GObject.TYPE_INT)
 
@@ -73,6 +79,7 @@ class CorpusStatistics(AdhocView):
                                    alias,
                                    rt.id,
                                    self.controller.get_title(rt),
+                                   self.controller.get_element_color(rt),
                                    len(rt.relations),
                                    len(rt.annotations)
                                   ])
@@ -87,6 +94,7 @@ class CorpusStatistics(AdhocView):
 
         # Store reference to the element (at), source package alias, string representation (title)
         store = Gtk.ListStore(*model.values())
+        store.column = dict((alias, index) for (index, alias) in enumerate(model.keys()))
 
         for alias, package in self.packages.items():
             for annotationtype in package.annotationTypes:
@@ -111,6 +119,69 @@ class CorpusStatistics(AdhocView):
 {packages_info}
         """)
 
+    def build_annotation_type_table(self):
+        rows = self.controller.global_package.annotation_types_by_title_stats()
+
+        def csv_export():
+            filename = dialog.get_filename(title=_("Give the CSV output filename"),
+                                           default_dir=self.controller.global_package.dir,
+                                           action=Gtk.FileChooserAction.SAVE,
+                                           button=Gtk.STOCK_SAVE)
+            if filename:
+                if os.path.exists(filename):
+                    dialog.message_dialog(_(f"Output file {filename} already exists. Remove it before proceeding."))
+                    return
+                with open(filename, mode="w", encoding="utf-8") as file:
+                   writer = csv.writer(file)
+                   writer.writerows(rows)
+                message = _("Data exported to\n%s\nDo you want to open it?") % filename
+                icon =  Gtk.MessageType.QUESTION
+                if dialog.message_dialog(message, icon=icon) and icon ==  Gtk.MessageType.QUESTION:
+                    # Try to open the file
+                    open_in_filebrowser(filename)
+
+        vbox = Gtk.VBox()
+
+        controls = Gtk.HBox()
+        controls.set_hexpand(False)
+        controls.set_halign(Gtk.Align.START)
+
+        b = Gtk.ToolButton(_("Export"))
+        b.set_tooltip_text(_("Export data as CSV"))
+        b.connect('clicked', lambda b: csv_export())
+        b.set_icon_name('document-send')
+        controls.add(b)
+        vbox.pack_start(controls, False, False, 0)
+
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        vbox.add(scrolled_window)
+
+        # Create a Gtk.Grid
+        grid = Gtk.Grid()
+        grid.set_row_spacing(5)
+        grid.set_column_spacing(10)
+
+        for row_index, row in enumerate(rows):
+            for col_index, text in enumerate(row):
+                label = Gtk.Label()
+                label.set_selectable(True)  # Enable text selection
+                label.set_hexpand(True)
+                if row_index == 0:
+                    # Header -> bold
+                    label.set_markup(f"<b>{text}</b>")
+                elif text is None:
+                    label.set_markup("<i>N/A</i>")
+                else:
+                    label.set_text(str(text))
+                label.set_hexpand(True)
+                label.set_halign(Gtk.Align.FILL)
+                grid.attach(label, col_index, row_index, 1, 1)
+
+        # Add the grid to the scrolled window
+        scrolled_window.add(grid)
+        return vbox
+
     def build_relationtype_table(self, callback=None):
         store = self.relationtypes_liststore()
         tree_view = Gtk.TreeView(store)
@@ -125,6 +196,7 @@ class CorpusStatistics(AdhocView):
                 ('annotations', _("Annotations"), store.column['annotation_count']) ):
             columns[name] = Gtk.TreeViewColumn(label,
                 Gtk.CellRendererText(),
+                cell_background=store.column['color'],
                 text=col)
             columns[name].set_reorderable(True)
             columns[name].set_sort_column_id(col)
@@ -166,7 +238,7 @@ class CorpusStatistics(AdhocView):
         explorer.set_position(400)
         return explorer
 
-    def build_annotation_type_table(self):
+    def build_annotation_type_list(self):
         tree_view = Gtk.TreeView(self.annotationtypes_liststore())
         select = tree_view.get_selection()
         select.set_mode(Gtk.SelectionMode.MULTIPLE)
