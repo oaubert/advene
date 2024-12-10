@@ -297,7 +297,7 @@ class ViewBook(AdhocView):
                         i = Gtk.MenuItem(title, use_underline=False)
                         i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotationTypes/%s/annotations/sorted" % at.id, title)
                         sm.append(i)
-                    title = _("All annotations")
+                    title = _("All package annotations")
                     i = Gtk.MenuItem(title)
                     i.connect('activate', lambda i, s, t: self.controller.gui.open_adhoc_view(name, source=s, label=t, destination=self.location), "here/annotations/sorted", title)
                     sm.append(i)
