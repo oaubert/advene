@@ -1,3 +1,25 @@
+advene (3.15) unstable; urgency=medium
+
+   The corpus management features and template integration have been
+   developped thanks to funding from the LARSH laboratory (UPHF) in order
+   to instrument the REMIND method.
+
+  * Direct integration of specialized templates for REMIND method and AdA methodology
+
+  * Corpus management features (i.e. multi-package)
+    - ability to load/save corpuses, build a corpus by recursive search of packages in a directory
+    - display corpus statistics, with aggregated information
+    - configurable Xlsx export of corpus data
+    - website export of whole corpus
+    - merge a template in a whole corpus
+
+  * Table view:
+    - export CSV export as toolbar icon, and make columns reorderable
+    - filter data
+    - when opening the table view, add options to display all package annotations or all corpus annotations
+
+ --
+
 advene (3.14) unstable; urgency=medium
 
   * or should we say the 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482 release?
