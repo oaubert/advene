@@ -2894,7 +2894,7 @@ class AdveneController:
         return out
 
     def website_export(self, destination='/tmp/n', views=None, max_depth=3, progress_callback=None, video_url=None):
-        exporter=WebsiteExporter(self, destination, views, max_depth, progress_callback, video_url)
+        exporter = WebsiteExporter(self, destination, views, max_depth, progress_callback, video_url)
         # FIXME
         exporter.website_export()
         return True
