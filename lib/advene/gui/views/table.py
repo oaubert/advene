@@ -420,6 +420,8 @@ class AnnotationTable(AdhocView):
         vbox = Gtk.VBox()
 
         controls = Gtk.HBox()
+        controls.set_hexpand(False)
+        controls.set_halign(Gtk.Align.START)
 
         entry = Gtk.Entry()
         entry.set_placeholder_text(_("Filter annotations..."))
