@@ -131,16 +131,49 @@ class GlobalPackage:
     """
     def __init__(self, controller):
         self.controller = controller
+        self._title = "corpus"
+
+    def annotation_types_by_title_stats(self):
+        at_titles = list(set(self.controller.get_title(at)
+                             for at in self.annotationTypes))
+        rows = [ [ "package_alias", *at_titles ] ]
+        for (a, p) in self.package_dict.items():
+            # Build a mapping dictionary
+            title2at = dict( (self.controller.get_title(at), at)
+                              for at in p.annotationTypes )
+            counts = [ (len(title2at[title].annotations) if title2at.get(title) else None)
+                       for title in at_titles ]
+            rows.append([ a, *counts ])
+        return rows
 
     @property
     def title(self):
-        return "corpus"
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+
+    @property
+    def dir(self):
+        return str(Path(helper.uri2path(self.uri)).parent)
+
+    @property
+    def uri(self):
+        return self.controller.corpus_uri
 
     @property
     def package_list(self):
         return [ p
                  for a, p in self.controller.packages.items()
                  if a != 'advene' ]
+
+    @property
+    def package_dict(self):
+        return dict( (a, p)
+                     for a, p in self.controller.packages.items()
+                     if a != 'advene' )
+
     @property
     def annotations(self):
         for p in self.package_list:
@@ -2216,6 +2249,9 @@ class AdveneController:
 
     @corpus_uri.setter
     def corpus_uri(self, value):
+        # Update global_package title
+        p = Path(value)
+        
         self._corpus_uri = value
 
     def save_package (self, name=None, alias=None):
