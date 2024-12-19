@@ -101,6 +101,7 @@ class AnnotationTable(AdhocView):
         self.filter = ""
         self.model = self.build_model(elements, custom_data)
         self.widget = self.build_widget(custom_data)
+        self.update_label()
 
         self.registered_rules.append( controller.event_handler.internal_rule (event="SnapshotUpdate",
                                                                               method=self.update_snapshot)
@@ -254,6 +255,12 @@ class AnnotationTable(AdhocView):
     def update_filter(self):
         self.filter = self.filter_entry.get_text().lower()
         self.filtered_model.refilter()
+        self.update_label()
+
+    def update_label(self):
+        count = self.filtered_model.iter_n_children()
+        total = self.filtered_model.get_model().iter_n_children()
+        self.controls_label.set_text(_(f"{count} / {total} annotations"))
 
     def build_widget(self, custom_data=None):
         self.filtered_model = self.model.filter_new()
@@ -435,6 +442,10 @@ class AnnotationTable(AdhocView):
         b.connect('clicked', lambda b: self.csv_export())
         b.set_icon_name('document-send')
         controls.add(b)
+
+        label = Gtk.Label()
+        controls.add(label)
+        self.controls_label = label
 
         vbox.pack_start(controls, False, False, 0)
         vbox.add(sw)
