@@ -178,7 +178,7 @@ class CorpusXlsxExporter(GenericExporter):
 
         # Create 1 sheet per relation type (label)
         if self.sheet_by_relationtype:
-            rt_titles = set(rt.title for rt in self.controller.global_package.annotationTypes)
+            rt_titles = set(rt.title for rt in self.controller.global_package.relationTypes)
             for rt_title in sorted(rt_titles):
                 sheet = book.create_sheet(rt_title)
                 save_annotations(sheet, (a
