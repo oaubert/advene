@@ -56,6 +56,7 @@ class CorpusXlsxExporter(GenericExporter):
     def __init__(self, controller=None, source=None, callback=None):
         super().__init__(controller, source, callback)
         self.sheet_global = True
+        self.sheet_relationtypes_summary = False
         self.sheet_by_package = False
         self.sheet_by_annotationtype = True
         self.sheet_by_relationtype = False
@@ -71,6 +72,9 @@ class CorpusXlsxExporter(GenericExporter):
         self.optionparser.add_option("-p", "--packages",
                                      action="store_true", dest="sheet_by_package", default=self.sheet_by_package,
                                      help=_("Create 1 tab per package"))
+        self.optionparser.add_option("-s", "--relation-types-summary",
+                                     action="store_true", dest="sheet_relationtypes_summary", default=self.sheet_relationtypes_summary,
+                                     help=_("Create a tab with relation types summaries"))
         self.optionparser.add_option("-g", "--global",
                                      action="store_true", dest="sheet_global", default=self.sheet_global,
                                      help=_("Create 1 global sheet with all annotations"))
@@ -153,6 +157,37 @@ class CorpusXlsxExporter(GenericExporter):
         if self.sheet_global:
             sheet = book.create_sheet('Global')
             save_annotations(sheet, sorted(self.controller.global_package.annotations))
+
+        # Add a relations sheets
+        # A single sheet - For each package, 1 row per relation, 1 column by annotation type
+        if self.sheet_relationtypes_summary:
+            sheet = book.create_sheet("Relation types")
+            at_titles = set()
+            # First pass to determine used annotation types
+            for p in self.controller.global_package.package_list:
+                for rt in p.relationTypes:
+                    # Update the available annotation types titles
+                    at_titles.update(a.type.title for a in rt.annotations)
+            sheet.append([ 'Package', 'Package title', 'Relation type title', 'Summary', *list(at_titles) ])
+            for alias, p in self.controller.global_package.package_dict.items():
+                for rt in p.relationTypes:
+                    # Build the content for each annotation type title (concatenate annotations)
+                    annotations = rt.annotations
+                    if annotations:
+                        contents = dict((at_title, "\n".join(self.controller.get_title(a)
+                                                             for a in annotations
+                                                             if a.type.title == at_title
+                                                             ))
+                                        for at_title in at_titles)
+                        summary = " - ".join(self.controller.get_title(a)
+                                             for a in annotations
+                                             # FIXME: not very generic - find a better way to generate summary
+                                             if a.type.title != 'Verbalisations')
+                        sheet.append([ alias,
+                                       p.title,
+                                       self.controller.get_title(rt),
+                                       summary,
+                                       *(contents.get(at_title, "") for at_title in at_titles)])
 
         # Create 1 sheet per package
         if self.sheet_by_package:
