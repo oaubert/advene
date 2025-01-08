@@ -369,6 +369,7 @@ class AdveneApplication(Gtk.Application):
                 ), _("Show recently opened corpuses"), 'open_recent_corpus' ),
                 ( _("Save corpus"), "app.corpus-save", _("Save all loaded packages"), "corpus_save" ),
                 ( _("Update template in corpus"), "app.corpus-update-template" , _("Update loaded packages with the given template"), "corpus_update_template" ),
+                ( _("Corpus _actions"), 'app.corpus_actions', "", "corpus_actions" ),
                 ( _("Export corpus as XLSX"), "app.corpus-export" , _("Export loaded packages as XLSX"), "corpus_export" ),
                 ( _("Export corpus as website"), "app.corpus-website-export" , _("Export loaded packages as website"), "corpus_website_export" ),
                 ( _("Table of annotations"), "app.corpus-annotations", _("Display all annotations in a table"), "corpus_annotations" ),
@@ -5020,6 +5021,12 @@ Image cache information: %(imagecache)s
         """Display all corpus annotations
         """
         self.open_adhoc_view('table', source='global_annotations', label="Corpus annotations")
+
+    @named_action(name="app.corpus_actions")
+    def on_corpus_actions_activate (self, button=None, data=None):
+        menu = advene.gui.popup.Menu(self.controller.global_package, controller=self.controller)
+        menu.popup()
+        return True
 
 if __name__ == '__main__':
     app = AdveneApplication ()

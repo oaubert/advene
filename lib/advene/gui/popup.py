@@ -28,6 +28,7 @@ import os
 from gettext import gettext as _
 
 import advene.core.config as config
+from advene.core.controller import GlobalPackage
 
 from advene.model.package import Package
 from advene.model.annotation import Annotation, Relation
@@ -195,6 +196,9 @@ class Menu:
         elif isinstance(el, Package):
             elements = el.annotations
             title = _("Replace content in all annotations")
+        elif isinstance(el, GlobalPackage):
+            elements = list(el.annotations)
+            title = _("Replace content in all corpus annotations")
         self.controller.gui.search_replace_dialog(elements, title=title)
         return True
 
@@ -311,6 +315,7 @@ class Menu:
             Query: self.make_query_menu,
             Resources: self.make_resources_menu,
             ResourceData: self.make_resourcedata_menu,
+            GlobalPackage: self.make_corpus_menu
             }
 
         for t, method in specific_builder.items():
@@ -325,7 +330,8 @@ class Menu:
 
         element can be either the package, or an annotation type.
         """
-        self.controller.gui.display_statistics(el.annotations, label=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(el))
+        self.controller.gui.display_statistics(list(el.annotations),
+                                               label=_("<b>Statistics about %s</b>\n\n") % self.controller.get_title(el))
         return True
 
     def renumber_annotations(self, m, at):
@@ -634,6 +640,17 @@ class Menu:
         #add_item(_('Create a new relation...'), self.create_element, Relation, element)
         add_item(_('Create a new schema...'), self.create_element, Schema, element)
         add_item(_('Create a new query...'), self.create_element, Query, element)
+        return
+
+    def make_corpus_menu(self, element, menu):
+        def add_item(*p, **kw):
+            self.add_menuitem(menu, *p, **kw)
+        if self.readonly:
+            return
+        add_item(_('%d annotations(s) - statistics') % len(list(element.annotations)), self.display_stats, element)
+        add_item(_('Offset all annotations'), self.offset_element, element)
+        add_item(_("Search/replace content in all annotations"), self.search_replace_content, element)
+        add_item(_("Display all annotations as a table"), lambda i: self.controller.gui.open_adhoc_view('table', elements=element.annotations, source='corpus/annotations'))
         return
 
     def make_resources_menu(self, element, menu):
