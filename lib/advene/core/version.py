@@ -19,8 +19,8 @@
 """Versioning information.
 """
 
-version='3.14'
-date='20240826'
+version='3.15'
+date='20250108'
 major,minor=[ int(s) for s in version.split('.') ]
 
 if __name__ == '__main__':
