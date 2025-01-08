@@ -267,7 +267,7 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:335 ../lib/advene/gui/main.py:3384
+#: ../lib/advene/gui/main.py:335 ../lib/advene/gui/main.py:3385
 #: ../lib/advene/gui/views/timeline.py:3759
 #: ../lib/advene/gui/views/timeline.py:3771 ../lib/advene/util/helper.py:284
 msgid "Schema"
@@ -278,7 +278,7 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:337 ../lib/advene/gui/popup.py:448
+#: ../lib/advene/gui/main.py:337 ../lib/advene/gui/popup.py:454
 #: ../lib/advene/util/helper.py:288
 msgid "Query"
 msgstr ""
@@ -339,7 +339,7 @@ msgstr ""
 msgid "Open python evaluator window"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:350 ../lib/advene/gui/main.py:4622
+#: ../lib/advene/gui/main.py:350 ../lib/advene/gui/main.py:4623
 msgid "Webserver log"
 msgstr ""
 
@@ -431,7 +431,7 @@ msgstr ""
 msgid "Load corpus"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:365 ../lib/advene/gui/main.py:3878
+#: ../lib/advene/gui/main.py:365 ../lib/advene/gui/main.py:3879
 msgid "Load a corpus"
 msgstr ""
 
@@ -460,323 +460,327 @@ msgid "Update loaded packages with the given template"
 msgstr ""
 
 #: ../lib/advene/gui/main.py:372
+msgid "Corpus _actions"
+msgstr ""
+
+#: ../lib/advene/gui/main.py:373
 msgid "Export corpus as XLSX"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:372
+#: ../lib/advene/gui/main.py:373
 msgid "Export loaded packages as XLSX"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:373
+#: ../lib/advene/gui/main.py:374
 msgid "Export corpus as website"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:373
+#: ../lib/advene/gui/main.py:374
 msgid "Export loaded packages as website"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:374
+#: ../lib/advene/gui/main.py:375
 msgid "Table of annotations"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:374
+#: ../lib/advene/gui/main.py:375
 msgid "Display all annotations in a table"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:376 ../lib/advene/gui/views/corpusstatistics.py:43
+#: ../lib/advene/gui/main.py:377 ../lib/advene/gui/views/corpusstatistics.py:44
 msgid "Corpus statistics"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:376
+#: ../lib/advene/gui/main.py:377
 msgid "Display statistics about loaded corpus"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:378
+#: ../lib/advene/gui/main.py:379
 msgid "Packages"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:379
+#: ../lib/advene/gui/main.py:380
 msgid "_Help"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:380
+#: ../lib/advene/gui/main.py:381
 msgid "Help"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:381
+#: ../lib/advene/gui/main.py:382
 msgid "Get support"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:382
+#: ../lib/advene/gui/main.py:383
 msgid "Check for updates"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:383
+#: ../lib/advene/gui/main.py:384
 msgid "Display shortcuts"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:384
+#: ../lib/advene/gui/main.py:385
 msgid "Display logfile"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:384
+#: ../lib/advene/gui/main.py:385
 msgid "Display log messages"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:385
+#: ../lib/advene/gui/main.py:386
 msgid "Open logfile folder"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:385
+#: ../lib/advene/gui/main.py:386
 msgid ""
 "Display logfile folder. It can help when sending the advene.log file by e-"
 "mail."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:386
+#: ../lib/advene/gui/main.py:387
 msgid "_About"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:432
+#: ../lib/advene/gui/main.py:433
 msgid "Open a package file"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:433
+#: ../lib/advene/gui/main.py:434
 msgid "Save the current package"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:434
+#: ../lib/advene/gui/main.py:435
 msgid "Save the package with a new name"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:435
+#: ../lib/advene/gui/main.py:436
 msgid "Open video file..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:436
+#: ../lib/advene/gui/main.py:437
 msgid "Open DVD"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:438
+#: ../lib/advene/gui/main.py:439
 #: ../lib/advene/gui/plugins/shotvalidation.py:266
 #: ../lib/advene/gui/plugins/htmlcontenhandler.py:809
 #: ../lib/advene/gui/edit/transcribe.py:1194
 msgid "Undo"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:440
+#: ../lib/advene/gui/main.py:441
 msgid "Create a text annotation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:441
+#: ../lib/advene/gui/main.py:442
 msgid "Create a graphical annotation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:447
+#: ../lib/advene/gui/main.py:448
 msgid "List recently opened packages"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:478
+#: ../lib/advene/gui/main.py:479
 msgid "Snapshotter activity"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:480
+#: ../lib/advene/gui/main.py:481
 #, python-format
 msgid "%d queued requests"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:481
+#: ../lib/advene/gui/main.py:482
 msgid "Cancel all requests"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:486
+#: ../lib/advene/gui/main.py:487
 msgid "No snapshotter"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:508
+#: ../lib/advene/gui/main.py:509
 msgid "No snapshotting activity"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:512
+#: ../lib/advene/gui/main.py:513
 msgid "Snapshotting"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:528
+#: ../lib/advene/gui/main.py:529
 msgid "Display application log messages"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:573
+#: ../lib/advene/gui/main.py:574
 msgid "Quicksearch lists"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:579
+#: ../lib/advene/gui/main.py:580
 msgid "Please specify the lists of elements to be searched."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:603
+#: ../lib/advene/gui/main.py:604
 #, python-format
 msgid ""
 "Searching on %s.\n"
 "Left click to launch the search, right-click to set the quicksearch options"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:604
+#: ../lib/advene/gui/main.py:605
 #, python-format
 msgid "String to search in %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:610
+#: ../lib/advene/gui/main.py:611
 #: ../lib/advene/gui/views/interactivequery.py:410
 msgid "String to search"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:618
+#: ../lib/advene/gui/main.py:619
 msgid "Launch search"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:623
+#: ../lib/advene/gui/main.py:624
 msgid "Ignore case"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:628
+#: ../lib/advene/gui/main.py:629
 msgid "Searched elements"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:712 ../lib/advene/gui/views/timeline.py:139
+#: ../lib/advene/gui/main.py:713 ../lib/advene/gui/views/timeline.py:139
 msgid "Timeline"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:713 ../lib/advene/gui/views/finder.py:836
+#: ../lib/advene/gui/main.py:714 ../lib/advene/gui/views/finder.py:836
 msgid "Package finder"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:714
+#: ../lib/advene/gui/main.py:715
 msgid "Transcription of annotations"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:715
+#: ../lib/advene/gui/main.py:716
 msgid "Annotation table"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:718
+#: ../lib/advene/gui/main.py:719
 msgid "Note-taking editor"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:719
+#: ../lib/advene/gui/main.py:720
 msgid "Active bookmarks"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:722 ../lib/advene/gui/views/tagbag.py:56
+#: ../lib/advene/gui/main.py:723 ../lib/advene/gui/views/tagbag.py:56
 msgid "Bag of tags"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:723
+#: ../lib/advene/gui/main.py:724
 msgid "TALES explorer"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:724
+#: ../lib/advene/gui/main.py:725
 msgid "Constraint checker"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:725
+#: ../lib/advene/gui/main.py:726
 msgid "Dynamic montage"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:726 ../lib/advene/gui/plugins/videoplayer.py:37
+#: ../lib/advene/gui/main.py:727 ../lib/advene/gui/plugins/videoplayer.py:37
 msgid "Video player"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:729
+#: ../lib/advene/gui/main.py:730
 msgid "Open a comment view in the web browser"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:730
+#: ../lib/advene/gui/main.py:731
 msgid "Create or open a comment view"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:733
+#: ../lib/advene/gui/main.py:734
 msgid ""
 "Edit window placeholder (annotation and relation edit windows will be put "
 "here)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:734
+#: ../lib/advene/gui/main.py:735
 msgid "Display edition history"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:758
+#: ../lib/advene/gui/main.py:759
 msgid "The webserver could not be started. Static views cannot be accessed."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:868
+#: ../lib/advene/gui/main.py:869
 msgid "Playing"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:869
+#: ../lib/advene/gui/main.py:870
 msgid "Pause"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:870
+#: ../lib/advene/gui/main.py:871
 msgid "Init"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:871 ../lib/advene/gui/views/table.py:331
+#: ../lib/advene/gui/main.py:872 ../lib/advene/gui/views/table.py:338
 #: ../lib/advene/gui/edit/elements.py:1880
 msgid "End"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:872
+#: ../lib/advene/gui/main.py:873
 msgid "Undefined"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:883
+#: ../lib/advene/gui/main.py:884
 #, python-format
 msgid ""
 "Wrong player shortcut modifier %s in configuration. Fallback on Control."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:902
+#: ../lib/advene/gui/main.py:903
 msgid "Exception in update_annotation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:930
+#: ../lib/advene/gui/main.py:931
 msgid "Exception in update_relation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:952
+#: ../lib/advene/gui/main.py:953
 msgid "Exception in update_view"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:980
+#: ../lib/advene/gui/main.py:981
 msgid "Exception in update_query"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1000
+#: ../lib/advene/gui/main.py:1001
 msgid "Exception in update_resource"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1020
+#: ../lib/advene/gui/main.py:1021
 msgid "Exception in update_schema"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1045
+#: ../lib/advene/gui/main.py:1046
 msgid "Exception in update_annotationtype"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1069
+#: ../lib/advene/gui/main.py:1070
 msgid "Exception in update_relationtype"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1188
+#: ../lib/advene/gui/main.py:1189
 msgid ""
 "The video does not seem to be a local resource. Cannot verify its checksum."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1197
+#: ../lib/advene/gui/main.py:1198
 msgid "Checksum was cancelled."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1202
+#: ../lib/advene/gui/main.py:1203
 #, python-format
 msgid ""
 "The %s checksum does not match the information that was stored in the "
@@ -784,88 +788,88 @@ msgid ""
 "update the stored checksum?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1207
+#: ../lib/advene/gui/main.py:1208
 #, python-format
 msgid "The %s checksum matches the stored checksum."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1210
+#: ../lib/advene/gui/main.py:1211
 msgid ""
 "No checksum was stored in the package. Do you want to store this information?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1215
+#: ../lib/advene/gui/main.py:1216
 msgid "Computing video checksum"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1216
+#: ../lib/advene/gui/main.py:1217
 msgid "Computing checksum"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1224
+#: ../lib/advene/gui/main.py:1225
 msgid "Enter the new time value"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1252
+#: ../lib/advene/gui/main.py:1253
 #, python-format
 msgid "Replace content in %d elements"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1265
+#: ../lib/advene/gui/main.py:1266
 msgid "Find word"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1272
+#: ../lib/advene/gui/main.py:1273
 msgid "Replace by"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1307
+#: ../lib/advene/gui/main.py:1308
 #, python-format
 msgid "%(search)s has been replaced by %(replace)s in %(count)d element(s)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1316
+#: ../lib/advene/gui/main.py:1317
 msgid "The video extracting feature is not available."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1319
+#: ../lib/advene/gui/main.py:1320
 #, python-format
 msgid "Destination filename (duration: %s)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1327
+#: ../lib/advene/gui/main.py:1328
 #, python-format
 msgid "Exporting to %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1329
+#: ../lib/advene/gui/main.py:1330
 #, python-format
 msgid ""
 "Exporting %(duration)s video to\n"
 "%(filename)s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1392
+#: ../lib/advene/gui/main.py:1393
 msgid ""
 "No media association is defined in the package. Please use the 'File/"
 "Associate a video file' menu item to associate a media file."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1394
+#: ../lib/advene/gui/main.py:1395
 #, python-format
 msgid ""
 "The associated media %s could not be found. Please use the 'File/Associate a "
 "video file' menu item to associate a media file."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1396
+#: ../lib/advene/gui/main.py:1397
 #, python-format
 msgid ""
 "You are now working with the following video:\n"
 "%s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1474
+#: ../lib/advene/gui/main.py:1475
 #, python-format
 msgid ""
 "<span background=\"#ff8888\" size=\"large\"><b>Advene %(version)s has been "
@@ -874,462 +878,462 @@ msgid ""
 "advene.org/</span>"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1479
+#: ../lib/advene/gui/main.py:1480
 msgid "Go to the website"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1485
+#: ../lib/advene/gui/main.py:1486
 msgid "Advene release"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1491
+#: ../lib/advene/gui/main.py:1492
 #, python-format
 msgid "You are using a up-to-date version of Advene (%(current)s)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1491
+#: ../lib/advene/gui/main.py:1492
 msgid "Advene is up-to-date"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1505
+#: ../lib/advene/gui/main.py:1506
 msgid "Choose a color"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1537
+#: ../lib/advene/gui/main.py:1538
 msgid "Select an annotation to loop on it"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1539
+#: ../lib/advene/gui/main.py:1540
 #, python-format
 msgid "Looping on %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1577 ../lib/advene/gui/main.py:2433
+#: ../lib/advene/gui/main.py:1578 ../lib/advene/gui/main.py:2434
 msgid "No active dynamic view"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1588
+#: ../lib/advene/gui/main.py:1589
 msgid "Create a new dynamic view."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1607
+#: ../lib/advene/gui/main.py:1608
 msgid "Edit the current dynamic view."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1619
+#: ../lib/advene/gui/main.py:1620
 msgid "No dynamic view"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1650
+#: ../lib/advene/gui/main.py:1651
 msgid "Playing rate"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1815
+#: ../lib/advene/gui/main.py:1816
 msgid "History"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1822
+#: ../lib/advene/gui/main.py:1823
 msgid "Popups"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1826
+#: ../lib/advene/gui/main.py:1827
 msgid ""
 "You can drag and drop view icons (timeline, treeview, transcription...) in "
 "notebooks to embed various views."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:1826 ../lib/advene/gui/main.py:4175
+#: ../lib/advene/gui/main.py:1827 ../lib/advene/gui/main.py:4176
 msgid "Information"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2128
+#: ../lib/advene/gui/main.py:2129
 msgid "Cannot create annotation. There is no schema to put it in."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2137
+#: ../lib/advene/gui/main.py:2138
 msgid "Default annotation type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2149
+#: ../lib/advene/gui/main.py:2150
 msgid "Annotation created"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2182
+#: ../lib/advene/gui/main.py:2183
 msgid "Play/Pause [Control-Tab / Control-Space]"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2186
+#: ../lib/advene/gui/main.py:2187
 #, python-format
 msgid "Rewind (%.02f s) [Control-Left]"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2190
+#: ../lib/advene/gui/main.py:2191
 #, python-format
 msgid "Forward (%.02f s) [Control-Right]"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2194
+#: ../lib/advene/gui/main.py:2195
 msgid "Previous frame [Control-Down]"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2198
+#: ../lib/advene/gui/main.py:2199
 msgid "Next frame [Control-Up]"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2202
+#: ../lib/advene/gui/main.py:2203
 msgid "Fullscreen"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2362
+#: ../lib/advene/gui/main.py:2363
 #, python-format
 msgid "Screenshot saved to %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2364
+#: ../lib/advene/gui/main.py:2365
 #, python-format
 msgid ""
 "Screenshot saved in\n"
 " %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2366
+#: ../lib/advene/gui/main.py:2367
 #, python-format
 msgid ""
 "Could not save screenshot:\n"
 " %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2377
+#: ../lib/advene/gui/main.py:2378
 msgid "Save screenshot to..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2395
+#: ../lib/advene/gui/main.py:2396
 msgid "Could not take snapshot with enough precision"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2413
+#: ../lib/advene/gui/main.py:2414
 msgid "Export package data"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2415
+#: ../lib/advene/gui/main.py:2416
 #, python-format
 msgid "Export annotation type %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2417
+#: ../lib/advene/gui/main.py:2418
 #, python-format
 msgid "Export element %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2590
+#: ../lib/advene/gui/main.py:2591
 msgid "Saved workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2644
+#: ../lib/advene/gui/main.py:2645
 msgid "Restoring workspace..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2650
+#: ../lib/advene/gui/main.py:2651
 #, python-format
 msgid "Do you wish to restore the %s workspace ?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2655
+#: ../lib/advene/gui/main.py:2656
 msgid "Clear the current workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2676
+#: ../lib/advene/gui/main.py:2677
 #, python-format
 msgid "View %s is not an adhoc view"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2687
+#: ../lib/advene/gui/main.py:2688
 #, python-format
 msgid "Cannot identify the adhoc view %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2701
+#: ../lib/advene/gui/main.py:2702
 msgid "Choose the annotation type to display as transcription."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2736
+#: ../lib/advene/gui/main.py:2737
 #, python-format
 msgid "Error: unable to find an edit popup for %(element)s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2743
+#: ../lib/advene/gui/main.py:2744
 #, python-format
 msgid "Editing %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2755
+#: ../lib/advene/gui/main.py:2756
 #, python-format
 msgid "Comment view (%s)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2805
+#: ../lib/advene/gui/main.py:2806
 msgid "Open this view..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2806 ../lib/advene/gui/plugins/actions.py:290
+#: ../lib/advene/gui/main.py:2807 ../lib/advene/gui/plugins/actions.py:290
 #: ../lib/advene/gui/views/viewbook.py:130
 msgid "...in its own window"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2807 ../lib/advene/gui/plugins/actions.py:291
+#: ../lib/advene/gui/main.py:2808 ../lib/advene/gui/plugins/actions.py:291
 #: ../lib/advene/gui/views/viewbook.py:131
 #: ../lib/advene/gui/views/__init__.py:398
 msgid "...embedded east of the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2808 ../lib/advene/gui/plugins/actions.py:292
+#: ../lib/advene/gui/main.py:2809 ../lib/advene/gui/plugins/actions.py:292
 #: ../lib/advene/gui/views/viewbook.py:132
 #: ../lib/advene/gui/views/__init__.py:399
 msgid "...embedded west of the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2809 ../lib/advene/gui/plugins/actions.py:293
+#: ../lib/advene/gui/main.py:2810 ../lib/advene/gui/plugins/actions.py:293
 #: ../lib/advene/gui/views/viewbook.py:133
 #: ../lib/advene/gui/views/__init__.py:400
 msgid "...embedded south of the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2810 ../lib/advene/gui/plugins/actions.py:294
+#: ../lib/advene/gui/main.py:2811 ../lib/advene/gui/plugins/actions.py:294
 #: ../lib/advene/gui/views/viewbook.py:134
 #: ../lib/advene/gui/views/__init__.py:401
 msgid "...embedded at the right of the window"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2865
+#: ../lib/advene/gui/main.py:2866
 #, python-format
 msgid "Package %(uri)s saved: %(annotations)s and %(relations)s."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2876
+#: ../lib/advene/gui/main.py:2877
 #, python-format
 msgid "Activating package %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2904
+#: ../lib/advene/gui/main.py:2905
 #, python-format
 msgid "Package %(uri)s loaded: %(annotations)s and %(relations)s."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2936
+#: ../lib/advene/gui/main.py:2937
 msgid "Do you want to restore the saved workspace ?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2943
+#: ../lib/advene/gui/main.py:2944
 msgid "Advene"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:2994
+#: ../lib/advene/gui/main.py:2995
 #, python-format
 msgid "Video player error: %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3177 ../lib/advene/gui/main.py:3198
+#: ../lib/advene/gui/main.py:3178 ../lib/advene/gui/main.py:3199
 msgid "Unknown"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3274
+#: ../lib/advene/gui/main.py:3275
 #, python-format
 msgid ""
 "The package(s) %s are modified.\n"
 "Save them now?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3299
+#: ../lib/advene/gui/main.py:3300
 #: ../lib/advene/gui/views/interactivequery.py:376
 msgid "Empty quicksearch string"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3302
+#: ../lib/advene/gui/main.py:3303
 #: ../lib/advene/gui/views/interactivequery.py:281
 #, python-format
 msgid "'%s'"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3317
+#: ../lib/advene/gui/main.py:3318
 msgid "Choose an annotation type."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3336 ../lib/advene/gui/views/timeline.py:3216
+#: ../lib/advene/gui/main.py:3337 ../lib/advene/gui/views/timeline.py:3216
 #: ../lib/advene/gui/edit/transcribe.py:1010
 msgid "Create a new annotation type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3361
+#: ../lib/advene/gui/main.py:3362
 msgid "No annotation type is defined."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3370
+#: ../lib/advene/gui/main.py:3371
 msgid "Creating a new type."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3374
+#: ../lib/advene/gui/main.py:3375
 msgid "Title of the new type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3375
+#: ../lib/advene/gui/main.py:3376
 msgid ""
 "Id of the new type. It is generated from the title, but you may change it if "
 "necessary."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3379
+#: ../lib/advene/gui/main.py:3380
 msgid "Specify the content-type for the annotation type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3381
+#: ../lib/advene/gui/main.py:3382
 msgid "Content type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3388 ../lib/advene/gui/main.py:3497
+#: ../lib/advene/gui/main.py:3389 ../lib/advene/gui/main.py:3498
 msgid "Create a new schema"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3401
+#: ../lib/advene/gui/main.py:3402
 msgid "Choose an existing schema for the new type, or create a new one"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3404 ../lib/advene/gui/main.py:3512
+#: ../lib/advene/gui/main.py:3405 ../lib/advene/gui/main.py:3513
 msgid "Specify the schema title"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3408
+#: ../lib/advene/gui/main.py:3409
 msgid "Title of the new schema"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3409
+#: ../lib/advene/gui/main.py:3410
 msgid ""
 "Id of the new schema. It is generated from the title, but you may change it "
 "if necessary."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3432
+#: ../lib/advene/gui/main.py:3433
 msgid ""
 "You specified a annotation-type identifier that already exists. Aborting."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3450
+#: ../lib/advene/gui/main.py:3451
 msgid "You specified a existing schema identifier. Using the existing schema."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3452
+#: ../lib/advene/gui/main.py:3453
 msgid ""
 "You specified an existing identifier that does not reference a schema. "
 "Aborting."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3479
+#: ../lib/advene/gui/main.py:3480
 msgid "Choose a schema."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3539
+#: ../lib/advene/gui/main.py:3540
 msgid "You specified an existing identifier. Aborting."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3560
+#: ../lib/advene/gui/main.py:3561
 #, python-format
 msgid "Package %s modified"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3561
+#: ../lib/advene/gui/main.py:3562
 #, python-format
 msgid ""
 "The package %s has been modified but not saved.\n"
 "Save it now?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3571
+#: ../lib/advene/gui/main.py:3572
 #, python-format
 msgid "%s snapshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3572
+#: ../lib/advene/gui/main.py:3573
 #, python-format
 msgid "Do you want to save the snapshots for media %s?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3579 ../lib/advene/gui/main.py:3588
+#: ../lib/advene/gui/main.py:3580 ../lib/advene/gui/main.py:3589
 #, python-format
 msgid "Cannot save imagecache for %(media)s: %(e)s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3610
+#: ../lib/advene/gui/main.py:3611
 msgid "first frame"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3611
+#: ../lib/advene/gui/main.py:3612
 msgid "last frame"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3619
+#: ../lib/advene/gui/main.py:3620
 #, python-format
 msgid "Click on %(bound)s of %(annotation)s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3622
+#: ../lib/advene/gui/main.py:3623
 #, python-format
 msgid "Update %(bound)s of %(annotation)s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3641
+#: ../lib/advene/gui/main.py:3642
 msgid "Click on the frame corresponding to the timestamp value"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3643
+#: ../lib/advene/gui/main.py:3644
 msgid "Set new timestamp value"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3650
+#: ../lib/advene/gui/main.py:3651
 msgid ""
 "<b>Annotation statistics</b>\n"
 "\n"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3723
+#: ../lib/advene/gui/main.py:3724
 msgid "Text annotation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3731 ../lib/advene/gui/main.py:3757
+#: ../lib/advene/gui/main.py:3732 ../lib/advene/gui/main.py:3758
 msgid "Cannot find an appropriate annotation type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3733 ../lib/advene/gui/views/bookmarks.py:290
+#: ../lib/advene/gui/main.py:3734 ../lib/advene/gui/views/bookmarks.py:290
 msgid "Comment here"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3750
+#: ../lib/advene/gui/main.py:3751
 msgid "Graphical annotation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3837
+#: ../lib/advene/gui/main.py:3838
 msgid "Package modified"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3838
+#: ../lib/advene/gui/main.py:3839
 msgid ""
 "The package that you want to close has been modified but not saved.\n"
 "Save it now?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3878
+#: ../lib/advene/gui/main.py:3879
 msgid "Load a package"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3893
+#: ../lib/advene/gui/main.py:3894
 msgid ""
 "A video file was selected. Pretend that the user selected 'Select a video "
 "file'..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3898
+#: ../lib/advene/gui/main.py:3899
 msgid "Unrecognized package extension"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3898
+#: ../lib/advene/gui/main.py:3899
 #, python-format
 msgid ""
 "The file %s does not look like a valid Advene package. It should have a .azp "
@@ -1337,44 +1341,44 @@ msgid ""
 "a package?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3911
+#: ../lib/advene/gui/main.py:3912
 msgid ""
 "You are trying to load a session file, but there are unsaved packages. "
 "Proceed anyway?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3920
+#: ../lib/advene/gui/main.py:3921
 #, python-format
 msgid ""
 "Cannot load package %(filename)s:\n"
 "%(error)s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3941 ../lib/advene/gui/main.py:4003
+#: ../lib/advene/gui/main.py:3942 ../lib/advene/gui/main.py:4004
 msgid "Do you want to save the current workspace ?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3949
+#: ../lib/advene/gui/main.py:3950
 msgid ""
 "Template option is activated - workspace will not be saved.\n"
 "Modify Edit/Package properties if this is an unwanted behaviour."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3965 ../lib/advene/gui/main.py:4018
+#: ../lib/advene/gui/main.py:3966 ../lib/advene/gui/main.py:4019
 #, python-format
 msgid "Could not save the package: %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3975
+#: ../lib/advene/gui/main.py:3976
 #, python-format
 msgid "Save the package %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3988
+#: ../lib/advene/gui/main.py:3989
 msgid "Invalid file extension"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3989
+#: ../lib/advene/gui/main.py:3990
 #, python-format
 msgid ""
 "Your package contains resources,\n"
@@ -1382,49 +1386,49 @@ msgid ""
 "Should I put the correct extension?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3993
+#: ../lib/advene/gui/main.py:3994
 msgid "OK, the resources will be lost."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:3995
+#: ../lib/advene/gui/main.py:3996
 msgid "Aborting package saving"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4026
+#: ../lib/advene/gui/main.py:4027
 msgid "Save the session in..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4037 ../lib/advene/gui/main.py:4979
+#: ../lib/advene/gui/main.py:4038 ../lib/advene/gui/main.py:4980
 #, python-format
 msgid "Session saved in %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4046
+#: ../lib/advene/gui/main.py:4047
 msgid "Do you confirm the creation of annotations matching the DVD chapters?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4052
+#: ../lib/advene/gui/main.py:4053
 msgid "Cannot import DVD chapters. Did you install the lsdvd software?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4060
+#: ../lib/advene/gui/main.py:4061
 msgid "The associated media is not a DVD."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4075
+#: ../lib/advene/gui/main.py:4076
 #, python-format
 msgid "Processing %s video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4078
+#: ../lib/advene/gui/main.py:4079
 msgid "No associated video file"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4097
+#: ../lib/advene/gui/main.py:4098
 msgid "Standard RuleSet"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4164
+#: ../lib/advene/gui/main.py:4165
 #, python-format
 msgid ""
 "Media information\n"
@@ -1440,32 +1444,32 @@ msgid ""
 "Image cache information: %(imagecache)s\n"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4190
+#: ../lib/advene/gui/main.py:4191
 msgid "Visit the Advene web site for examples and documentation."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4206
+#: ../lib/advene/gui/main.py:4207
 msgid "Select a movie file"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4219
+#: ../lib/advene/gui/main.py:4220
 msgid "Title/Chapter selection"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4262
+#: ../lib/advene/gui/main.py:4263
 msgid "Select a video stream"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4263
+#: ../lib/advene/gui/main.py:4264
 msgid "Enter the address of a video stream"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4267
+#: ../lib/advene/gui/main.py:4268
 #, python-format
 msgid "Successfully extracted the video stream address (%s) from the url.\n"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4327 ../lib/advene/gui/views/timeline.py:3712
+#: ../lib/advene/gui/main.py:4328 ../lib/advene/gui/views/timeline.py:3712
 #: ../lib/advene/gui/views/timeline.py:3890
 #: ../lib/advene/gui/views/tagbag.py:63
 #: ../lib/advene/gui/edit/properties.py:186
@@ -1474,838 +1478,838 @@ msgstr ""
 msgid "Preferences"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4329
+#: ../lib/advene/gui/main.py:4330
 msgid "Paths"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4331
+#: ../lib/advene/gui/main.py:4332
 msgid "Data"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4331
+#: ../lib/advene/gui/main.py:4332
 msgid "Standard directory for data files"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4332
+#: ../lib/advene/gui/main.py:4333
 msgid "Movie path"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4332
+#: ../lib/advene/gui/main.py:4333
 #, python-format
 msgid ""
 "List of directories (separated by %s) to search for movie files (_ means "
 "package directory)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4333
+#: ../lib/advene/gui/main.py:4334
 msgid "Imagecache"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4333
+#: ../lib/advene/gui/main.py:4334
 msgid "Directory for storing the snapshot cache"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4334
+#: ../lib/advene/gui/main.py:4335
 msgid "Shotdetect"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4334
+#: ../lib/advene/gui/main.py:4335
 msgid "Shotdetect application"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4336
+#: ../lib/advene/gui/main.py:4337
 msgid "GUI"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4337
+#: ../lib/advene/gui/main.py:4338
 msgid "Interface language (after restart)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4337
+#: ../lib/advene/gui/main.py:4338
 msgid ""
 "Language used for the interface (necessitates to restart the application)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4338 ../lib/advene/gui/util/initialconfig.py:89
+#: ../lib/advene/gui/main.py:4339 ../lib/advene/gui/util/initialconfig.py:89
 msgid "System default"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4343
+#: ../lib/advene/gui/main.py:4344
 msgid "Expert mode"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4343
+#: ../lib/advene/gui/main.py:4344
 msgid "Offer advanced possibilities"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4344
+#: ../lib/advene/gui/main.py:4345
 msgid "Prefer WYSIWYG"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4344
+#: ../lib/advene/gui/main.py:4345
 msgid "Use WYSIWYG editors when possible (HTML, SVG)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4345
+#: ../lib/advene/gui/main.py:4346
 msgid "Player control modifier"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4345
+#: ../lib/advene/gui/main.py:4346
 msgid ""
 "Generic player control modifier: key used in combination with arrows/space/"
 "tab to control the player. Click the button and press key+space to choose "
 "the modifier."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4346
+#: ../lib/advene/gui/main.py:4347
 msgid "Player control in edit popups"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4346
+#: ../lib/advene/gui/main.py:4347
 msgid ""
 "Enable generic player controls in edit windows. This may be undesirable "
 "since it overloads some standard text-edition behaviours (esp. control-left/"
 "right)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4347
+#: ../lib/advene/gui/main.py:4348
 msgid "Open popups"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4348
+#: ../lib/advene/gui/main.py:4349
 msgid "Where should we open adhoc views?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4349
+#: ../lib/advene/gui/main.py:4350
 msgid "as a popup window"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4350
+#: ../lib/advene/gui/main.py:4351
 msgid "embedded east of the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4351
+#: ../lib/advene/gui/main.py:4352
 msgid "embedded west of the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4352
+#: ../lib/advene/gui/main.py:4353
 msgid "embedded south of the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4353
+#: ../lib/advene/gui/main.py:4354
 msgid "embedded at the right of the window"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4356
+#: ../lib/advene/gui/main.py:4357
 msgid "History size"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4356
+#: ../lib/advene/gui/main.py:4357
 msgid "History filelist size limit"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4358
+#: ../lib/advene/gui/main.py:4359
 msgid "Remember window size"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4358
+#: ../lib/advene/gui/main.py:4359
 msgid "Remember the size of opened windows"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4359
+#: ../lib/advene/gui/main.py:4360
 msgid "Bookmark snapshot width"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4359
+#: ../lib/advene/gui/main.py:4360
 msgid "Width of the snapshots representing bookmarks"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4360
+#: ../lib/advene/gui/main.py:4361
 msgid "Bookmark snapshot precision"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4360
+#: ../lib/advene/gui/main.py:4361
 msgid "Precision (in ms) of the displayed bookmark snapshots."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4362
+#: ../lib/advene/gui/main.py:4363
 msgid "Frame selector (shotvalidation...)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4363
+#: ../lib/advene/gui/main.py:4364
 msgid "Frameselector snapshot width"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4363
+#: ../lib/advene/gui/main.py:4364
 msgid "Width of the snapshots in frameselector"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4364
+#: ../lib/advene/gui/main.py:4365
 msgid "Frameselector count"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4364
+#: ../lib/advene/gui/main.py:4365
 msgid "Number of frames displayed in frameselector."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4366
+#: ../lib/advene/gui/main.py:4367
 msgid "General"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4367
+#: ../lib/advene/gui/main.py:4368
 msgid "Use UUIDs"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4367
+#: ../lib/advene/gui/main.py:4368
 msgid "Use UUIDs for identifying elements instead of more readable shortnames"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4368
+#: ../lib/advene/gui/main.py:4369
 msgid "Weekly update check"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4368 ../lib/advene/gui/util/initialconfig.py:91
+#: ../lib/advene/gui/main.py:4369 ../lib/advene/gui/util/initialconfig.py:91
 msgid "Weekly check for updates on the Advene website"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4369
+#: ../lib/advene/gui/main.py:4370
 msgid "On exit,"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4370
+#: ../lib/advene/gui/main.py:4371
 msgid "How to handle screenshots on exit"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4371
+#: ../lib/advene/gui/main.py:4372
 msgid "never save screenshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4372
+#: ../lib/advene/gui/main.py:4373
 msgid "always save screenshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4373
+#: ../lib/advene/gui/main.py:4374
 msgid "ask before saving screenshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4375
+#: ../lib/advene/gui/main.py:4376
 msgid "Auto-save"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4376
+#: ../lib/advene/gui/main.py:4377
 msgid "Data auto-save functionality"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4377
+#: ../lib/advene/gui/main.py:4378
 msgid "is desactivated"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4378
+#: ../lib/advene/gui/main.py:4379
 msgid "is done automatically"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4379
+#: ../lib/advene/gui/main.py:4380
 msgid "is done after confirmation"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4381
+#: ../lib/advene/gui/main.py:4382
 msgid "Auto-save interval (in s)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4381
+#: ../lib/advene/gui/main.py:4382
 msgid "Interval (in seconds) between package auto-saves"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4383
+#: ../lib/advene/gui/main.py:4384
 msgid "Workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4385
+#: ../lib/advene/gui/main.py:4386
 msgid "On package saving,"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4386
+#: ../lib/advene/gui/main.py:4387
 msgid "Do you wish to save the default workspace with the package?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4387
+#: ../lib/advene/gui/main.py:4388
 msgid "never save the current workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4388
+#: ../lib/advene/gui/main.py:4389
 msgid "always save the current workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4389
+#: ../lib/advene/gui/main.py:4390
 msgid "ask before saving the current workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4391
+#: ../lib/advene/gui/main.py:4392
 msgid "Auto-validation of edited elements"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4391
+#: ../lib/advene/gui/main.py:4392
 msgid "Automatically validate modified elements when saving the package."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4393
+#: ../lib/advene/gui/main.py:4394
 msgid "On package load,"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4394
+#: ../lib/advene/gui/main.py:4395
 msgid "Do you wish to load the workspace saved with the package?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4395
+#: ../lib/advene/gui/main.py:4396
 msgid "never load the saved workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4396
+#: ../lib/advene/gui/main.py:4397
 msgid "always load the saved workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4397
+#: ../lib/advene/gui/main.py:4398
 msgid "ask before loading the saved workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4400
+#: ../lib/advene/gui/main.py:4401
 msgid "Video Player"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4401
+#: ../lib/advene/gui/main.py:4402
 msgid "Autostart"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4401
+#: ../lib/advene/gui/main.py:4402
 msgid ""
 "Automatically start the player when loading a media file (either directly or "
 "through a package)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4402
+#: ../lib/advene/gui/main.py:4403
 msgid "Fulscreen timestamp"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4402
+#: ../lib/advene/gui/main.py:4403
 msgid "Display the timestamp over the video when in fullscreen mode"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4403
+#: ../lib/advene/gui/main.py:4404
 msgid "Enable captions"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4403
+#: ../lib/advene/gui/main.py:4404
 msgid "Enable captions over the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4404
+#: ../lib/advene/gui/main.py:4405
 msgid "Caption font"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4404
+#: ../lib/advene/gui/main.py:4405
 msgid "TrueType font for captions"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4405
+#: ../lib/advene/gui/main.py:4406
 msgid "Enable SVG"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4405
+#: ../lib/advene/gui/main.py:4406
 msgid "Enable SVG captions over the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4407
+#: ../lib/advene/gui/main.py:4408
 msgid "Enable snapshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4408
+#: ../lib/advene/gui/main.py:4409
 msgid "Snapshot width"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4408
+#: ../lib/advene/gui/main.py:4409
 msgid "Snapshot width in pixels."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4409
+#: ../lib/advene/gui/main.py:4410
 msgid "Verbosity"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4409
+#: ../lib/advene/gui/main.py:4410
 msgid "Verbosity level. -1 for no messages."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4412
+#: ../lib/advene/gui/main.py:4413
 msgid "Devices"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4414
+#: ../lib/advene/gui/main.py:4415
 msgid "Standard"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4416
+#: ../lib/advene/gui/main.py:4417
 msgid "DVD drive"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4416
+#: ../lib/advene/gui/main.py:4417
 msgid "Drive letter for the DVD"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4417
+#: ../lib/advene/gui/main.py:4418
 msgid "Direct3D"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4418
+#: ../lib/advene/gui/main.py:4419
 msgid "OpenGL"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4419 ../lib/advene/gui/main.py:4425
+#: ../lib/advene/gui/main.py:4420 ../lib/advene/gui/main.py:4426
 msgid "Gtk"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4421
+#: ../lib/advene/gui/main.py:4422
 msgid "DVD device"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4421
+#: ../lib/advene/gui/main.py:4422
 msgid "Device for the DVD"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4422
+#: ../lib/advene/gui/main.py:4423
 msgid "X11"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4423
+#: ../lib/advene/gui/main.py:4424
 msgid "XVideo"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4424
+#: ../lib/advene/gui/main.py:4425
 msgid "GL"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4427
+#: ../lib/advene/gui/main.py:4428
 msgid "Video output"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4427
+#: ../lib/advene/gui/main.py:4428
 msgid "Video output module"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4429
+#: ../lib/advene/gui/main.py:4430
 msgid "Recorder options"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4430
+#: ../lib/advene/gui/main.py:4431
 msgid "Audio input"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4430
+#: ../lib/advene/gui/main.py:4431
 msgid "Device name for audio input (with gstrecorder plugin)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4431
+#: ../lib/advene/gui/main.py:4432
 msgid "Record video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4431
+#: ../lib/advene/gui/main.py:4432
 msgid "Record both video and audio"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4434
+#: ../lib/advene/gui/main.py:4435
 msgid "<i>Experimental</i>"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4435 ../lib/advene/gui/views/scroller.py:30
+#: ../lib/advene/gui/main.py:4436 ../lib/advene/gui/views/scroller.py:30
 msgid "Scroller"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4435
+#: ../lib/advene/gui/main.py:4436
 msgid "Embed the caption scroller below the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4436 ../lib/advene/gui/views/caption.py:29
+#: ../lib/advene/gui/main.py:4437 ../lib/advene/gui/views/caption.py:29
 msgid "Caption"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4436
+#: ../lib/advene/gui/main.py:4437
 msgid "Embed the caption view below the video"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4438
+#: ../lib/advene/gui/main.py:4439
 msgid "Time-related"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4439
+#: ../lib/advene/gui/main.py:4440
 msgid "Time format"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4439
+#: ../lib/advene/gui/main.py:4440
 msgid "Format used to display timecodes"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4453
+#: ../lib/advene/gui/main.py:4454
 msgid "Default FPS"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4454
+#: ../lib/advene/gui/main.py:4455
 msgid ""
 "Default FPS (frame-per-second) value, when the information cannot be read "
 "from the media."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4455
+#: ../lib/advene/gui/main.py:4456
 msgid "Time increment"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4455
+#: ../lib/advene/gui/main.py:4456
 msgid ""
 "Skip duration, when using control-left/right or forward/rewind buttons (in "
 "ms)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4456
+#: ../lib/advene/gui/main.py:4457
 msgid "Second time increment"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4456
+#: ../lib/advene/gui/main.py:4457
 msgid "Skip duration, when using control-shift-left/right (in ms)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4457
+#: ../lib/advene/gui/main.py:4458
 msgid "Third time increment"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4457
+#: ../lib/advene/gui/main.py:4458
 msgid "Skip duration, when using control-shift-up/down (in ms)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4458
+#: ../lib/advene/gui/main.py:4459
 msgid "Custom Up/Down"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4458
+#: ../lib/advene/gui/main.py:4459
 msgid ""
 "Use third time increment for up/down navigation without having to hold shift."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4460
+#: ../lib/advene/gui/main.py:4461
 msgid "Scroll increment"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4460
+#: ../lib/advene/gui/main.py:4461
 msgid ""
 "On most annotations, control+scrollwheel will increment/decrement their "
 "bounds by this value (in ms)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4461
+#: ../lib/advene/gui/main.py:4462
 msgid "Second scroll increment"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4461
+#: ../lib/advene/gui/main.py:4462
 msgid ""
 "On most annotations, control+shift+scrollwheel will increment/decrement "
 "their bounds by this value (in ms)."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4463
+#: ../lib/advene/gui/main.py:4464
 msgid "Player sync"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4463
+#: ../lib/advene/gui/main.py:4464
 msgid ""
 "Interval (in ms) with which we synchronize slave players. Setting a too-low "
 "value could render the application unusable. Use 0 to disable continuous "
 "synchronization."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4464
+#: ../lib/advene/gui/main.py:4465
 msgid "Timeline parameters"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4465 ../lib/advene/gui/edit/transcribe.py:166
+#: ../lib/advene/gui/main.py:4466 ../lib/advene/gui/edit/transcribe.py:166
 msgid "Font size"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4465
+#: ../lib/advene/gui/main.py:4466
 msgid "Font size for annotation widgets"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4466
+#: ../lib/advene/gui/main.py:4467
 msgid "Button height"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4466
+#: ../lib/advene/gui/main.py:4467
 msgid "Height of annotation widgets"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4467
+#: ../lib/advene/gui/main.py:4468
 msgid "Interline height"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4467
+#: ../lib/advene/gui/main.py:4468
 msgid "Height of interlines"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4469
+#: ../lib/advene/gui/main.py:4470
 msgid "Text content"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4470
+#: ../lib/advene/gui/main.py:4471
 msgid "Completion mode"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4470
+#: ../lib/advene/gui/main.py:4471
 msgid "Enable dynamic completion mode"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4471
+#: ../lib/advene/gui/main.py:4472
 msgid "Predefined terms only"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4471
+#: ../lib/advene/gui/main.py:4472
 msgid "If completion is enabled, complete only with predefined terms."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4472
+#: ../lib/advene/gui/main.py:4473
 msgid "Quick fill"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4472
+#: ../lib/advene/gui/main.py:4473
 msgid ""
 "For types with predefined completions, use a numeric (1-9) shortcut to fill "
 "the annotation with the corresponding completion."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4473
+#: ../lib/advene/gui/main.py:4474
 msgid "Abbreviation mode"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4473
+#: ../lib/advene/gui/main.py:4474
 msgid "Enable abbreviation mode"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4474
+#: ../lib/advene/gui/main.py:4475
 msgid "Abbreviations"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4474
+#: ../lib/advene/gui/main.py:4475
 msgid ""
 "Text abbreviations. 1 entry per line. Each line consists of the abbreviation "
 "followed by its replacement."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4476
+#: ../lib/advene/gui/main.py:4477
 msgid "Text-To-Speech"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4477
+#: ../lib/advene/gui/main.py:4478
 msgid "TTS language"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4478
+#: ../lib/advene/gui/main.py:4479
 msgid "What language settings should be used for text-to-speech"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4479
+#: ../lib/advene/gui/main.py:4480
 msgid "English"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4480
+#: ../lib/advene/gui/main.py:4481
 msgid "French"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4481
+#: ../lib/advene/gui/main.py:4482
 msgid "Spanish"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4483
+#: ../lib/advene/gui/main.py:4484
 msgid "TTS Encoding"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4484
+#: ../lib/advene/gui/main.py:4485
 msgid "What encoding should be used to communicate with the TTS engine"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4485
+#: ../lib/advene/gui/main.py:4486
 msgid "TTS Engine"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4486
+#: ../lib/advene/gui/main.py:4487
 msgid ""
 "Which TTS engine should be used (modification requires restarting Advene to "
 "take into account)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4487
+#: ../lib/advene/gui/main.py:4488
 msgid "Automatic"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4488
+#: ../lib/advene/gui/main.py:4489
 msgid "eSpeak"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4489
+#: ../lib/advene/gui/main.py:4490
 msgid "Custom script with standard input"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4490
+#: ../lib/advene/gui/main.py:4491
 msgid "Custom script with arguments"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4491
+#: ../lib/advene/gui/main.py:4492
 msgid "SAPI"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4492
+#: ../lib/advene/gui/main.py:4493
 msgid "MacOS X say"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4493
+#: ../lib/advene/gui/main.py:4494
 msgid "Generic (text output)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4539
+#: ../lib/advene/gui/main.py:4540
 msgid "You should restart Advene to take some options into account."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4549
+#: ../lib/advene/gui/main.py:4550
 #, python-format
 msgid "Imagecache saved to %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4551
+#: ../lib/advene/gui/main.py:4552
 #, python-format
 msgid "Cannot save imagecache for %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4564
+#: ../lib/advene/gui/main.py:4565
 msgid "Restarting player..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4662 ../lib/advene/gui/views/timeline.py:1216
+#: ../lib/advene/gui/main.py:4663 ../lib/advene/gui/views/timeline.py:1216
 #: ../lib/advene/rules/elements.py:1009
 msgid "Creation of a new annotation type"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4671 ../lib/advene/gui/views/timeline.py:1248
+#: ../lib/advene/gui/main.py:4672 ../lib/advene/gui/views/timeline.py:1248
 msgid ""
 "Select the schema where you want to\n"
 "create the new relation type."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4682
+#: ../lib/advene/gui/main.py:4683
 msgid "Select the package to merge"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4705
+#: ../lib/advene/gui/main.py:4706
 #, python-format
 msgid "Please confirm the merge of %d packages."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4721
+#: ../lib/advene/gui/main.py:4722
 #, python-format
 msgid "Merging %d packages"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4728
+#: ../lib/advene/gui/main.py:4729
 msgid "Select the package to import"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4748
+#: ../lib/advene/gui/main.py:4749
 #, python-format
 msgid ""
 "Template package update - created %(new)d view(s), updated "
 "%(update_content)d view(s)"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4757
+#: ../lib/advene/gui/main.py:4758
 msgid "Saving workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4760
+#: ../lib/advene/gui/main.py:4761
 msgid "Enter a view name to save the workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4761
+#: ../lib/advene/gui/main.py:4762
 msgid "Default workspace"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4762
+#: ../lib/advene/gui/main.py:4763
 msgid "Open this workspace when opening the package"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4785 ../lib/advene/gui/views/__init__.py:305
+#: ../lib/advene/gui/main.py:4786 ../lib/advene/gui/views/__init__.py:305
 #, python-format
 msgid "Error: the identifier %s contains invalid characters."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4796
+#: ../lib/advene/gui/main.py:4797
 #, python-format
 msgid "Error: the view %s exists and is not a workspace view."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4828
+#: ../lib/advene/gui/main.py:4829
 #, python-format
 msgid "Cannot save default workspace: %s"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4838
+#: ../lib/advene/gui/main.py:4839
 msgid "Standard workspace has been saved"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4860
+#: ../lib/advene/gui/main.py:4861
 msgid "This video player is not able to grab specific screenshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4866
+#: ../lib/advene/gui/main.py:4867
 #, python-format
 msgid "Updating %d snapshots"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4873
+#: ../lib/advene/gui/main.py:4874
 msgid "No snapshot to update"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4897
+#: ../lib/advene/gui/main.py:4898
 msgid "Directory to recursively search for packages"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4906
+#: ../lib/advene/gui/main.py:4907
 msgid "Select packages that are part of the corpus"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4907
+#: ../lib/advene/gui/main.py:4908
 msgid ""
 "{len(packages)} packages found in {rootdir.name}.\n"
 "Select those that must be included in the corpus."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4914
+#: ../lib/advene/gui/main.py:4915
 msgid ""
 "Loaded {len(selection)} packages.\n"
 "Do you want to save them as a corpus (.apl) file to load the whole corpus "
 "more easily (advised)?"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4930
+#: ../lib/advene/gui/main.py:4931
 msgid "Select the reference template"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:4967
+#: ../lib/advene/gui/main.py:4968
 msgid "Save the corpus in..."
 msgstr ""
 
-#: ../lib/advene/gui/main.py:5001
+#: ../lib/advene/gui/main.py:5002
 msgid "Select output directory for website export"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:5005
+#: ../lib/advene/gui/main.py:5006
 #, python-brace-format
 msgid "Corpus exported to {destination}"
 msgstr ""
 
-#: ../lib/advene/gui/main.py:5006
-#: ../lib/advene/gui/views/corpusstatistics.py:137
+#: ../lib/advene/gui/main.py:5007
+#: ../lib/advene/gui/views/corpusstatistics.py:136
 #: ../lib/advene/gui/edit/exporter.py:90
 #, python-format
 msgid ""
@@ -3189,23 +3193,28 @@ msgstr ""
 msgid "Export as CSV"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:283 ../lib/advene/gui/views/table.py:613
+#: ../lib/advene/gui/views/table.py:263
+#, python-brace-format
+msgid "{count} / {total} annotations"
+msgstr ""
+
+#: ../lib/advene/gui/views/table.py:290 ../lib/advene/gui/views/table.py:624
 msgid "Snapshot"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:296
+#: ../lib/advene/gui/views/table.py:303
 #: ../lib/advene/gui/views/timeline.py:1834
 msgid "Cannot update the annotation, its representation is too complex"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:327 ../lib/advene/gui/edit/elements.py:599
+#: ../lib/advene/gui/views/table.py:334 ../lib/advene/gui/edit/elements.py:599
 #: ../lib/advene/gui/edit/elements.py:689
 #: ../lib/advene/gui/edit/elements.py:749
 #: ../lib/advene/gui/edit/elements.py:1197
 msgid "Content"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:329 ../lib/advene/gui/views/table.py:745
+#: ../lib/advene/gui/views/table.py:336 ../lib/advene/gui/views/table.py:756
 #: ../lib/advene/gui/views/browser.py:366 ../lib/advene/gui/edit/create.py:94
 #: ../lib/advene/gui/edit/merge.py:232 ../lib/advene/gui/edit/elements.py:511
 #: ../lib/advene/gui/edit/elements.py:560
@@ -3213,15 +3222,15 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:330 ../lib/advene/gui/edit/elements.py:1871
+#: ../lib/advene/gui/views/table.py:337 ../lib/advene/gui/edit/elements.py:1871
 msgid "Begin"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:332 ../lib/advene/gui/edit/elements.py:811
+#: ../lib/advene/gui/views/table.py:339 ../lib/advene/gui/edit/elements.py:811
 msgid "Duration"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:333 ../lib/advene/gui/views/table.py:746
+#: ../lib/advene/gui/views/table.py:340 ../lib/advene/gui/views/table.py:757
 #: ../lib/advene/gui/util/dialog.py:521 ../lib/advene/gui/edit/rules.py:1092
 #: ../lib/advene/gui/edit/imports.py:327 ../lib/advene/gui/edit/elements.py:510
 #: ../lib/advene/gui/edit/elements.py:559
@@ -3234,96 +3243,96 @@ msgstr ""
 msgid "Id"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:334
-#: ../lib/advene/gui/views/corpusstatistics.py:194
-#: ../lib/advene/gui/views/corpusstatistics.py:250
+#: ../lib/advene/gui/views/table.py:341
+#: ../lib/advene/gui/views/corpusstatistics.py:193
+#: ../lib/advene/gui/views/corpusstatistics.py:249
 #: ../lib/advene/gui/views/finder.py:105
 #: ../lib/advene/gui/edit/corpusmerge.py:85 ../lib/advene/util/helper.py:281
 msgid "Package"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:427
+#: ../lib/advene/gui/views/table.py:434
 msgid "Filter annotations..."
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:433
-#: ../lib/advene/gui/views/corpusstatistics.py:149
+#: ../lib/advene/gui/views/table.py:440
+#: ../lib/advene/gui/views/corpusstatistics.py:148
 #: ../lib/advene/gui/edit/exporter.py:222
 msgid "Export"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:434
-#: ../lib/advene/gui/views/corpusstatistics.py:150
+#: ../lib/advene/gui/views/table.py:441
+#: ../lib/advene/gui/views/corpusstatistics.py:149
 msgid "Export data as CSV"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:495 ../lib/advene/gui/views/table.py:696
+#: ../lib/advene/gui/views/table.py:506 ../lib/advene/gui/views/table.py:707
 msgid "Export data to file..."
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:504 ../lib/advene/gui/views/table.py:705
+#: ../lib/advene/gui/views/table.py:515 ../lib/advene/gui/views/table.py:716
 #, python-format
 msgid "Error while exporting data to %(filename)s: %(error)s"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:515
+#: ../lib/advene/gui/views/table.py:526
 msgid "id"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:515
+#: ../lib/advene/gui/views/table.py:526
 msgid "type"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:515
+#: ../lib/advene/gui/views/table.py:526
 msgid "begin"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:515
+#: ../lib/advene/gui/views/table.py:526
 msgid "end"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:515
+#: ../lib/advene/gui/views/table.py:526
 msgid "content"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:519 ../lib/advene/gui/views/table.py:721
+#: ../lib/advene/gui/views/table.py:530 ../lib/advene/gui/views/table.py:732
 #: ../lib/advene/util/exporter.py:321
 #, python-format
 msgid "Data exported to %s"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:536
+#: ../lib/advene/gui/views/table.py:547
 #, python-format
 msgid "Set %(attr)s time to %(time)s"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:621
+#: ../lib/advene/gui/views/table.py:632
 msgid "Generic table view"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:623
+#: ../lib/advene/gui/views/table.py:634
 msgid "Display Advene elements in a table."
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:646
+#: ../lib/advene/gui/views/table.py:657
 #, python-format
 msgid "Error in source evaluation %(source)s: %(error)s"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:717
+#: ../lib/advene/gui/views/table.py:728
 msgid "Element title"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:717
+#: ../lib/advene/gui/views/table.py:728
 msgid "Element type"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:717
+#: ../lib/advene/gui/views/table.py:728
 msgid "Element id"
 msgstr ""
 
-#: ../lib/advene/gui/views/table.py:744
-#: ../lib/advene/gui/views/corpusstatistics.py:249
+#: ../lib/advene/gui/views/table.py:755
+#: ../lib/advene/gui/views/corpusstatistics.py:248
 #: ../lib/advene/gui/util/dialog.py:512 ../lib/advene/gui/edit/imports.py:333
 #: ../lib/advene/gui/edit/dvdselect.py:75
 #: ../lib/advene/gui/edit/transcribe.py:1038
@@ -3563,26 +3572,26 @@ msgstr ""
 msgid "as bookmarks"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:45
+#: ../lib/advene/gui/views/corpusstatistics.py:46
 msgid "Global analyses of multiple packages"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:126
+#: ../lib/advene/gui/views/corpusstatistics.py:125
 msgid "Give the CSV output filename"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:132
+#: ../lib/advene/gui/views/corpusstatistics.py:131
 #, python-brace-format
 msgid "Output file {filename} already exists. Remove it before proceeding."
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:195
+#: ../lib/advene/gui/views/corpusstatistics.py:194
 #: ../lib/advene/util/helper.py:283
 msgid "Relation"
 msgstr ""
 
-#: ../lib/advene/gui/views/corpusstatistics.py:196
-#: ../lib/advene/gui/views/corpusstatistics.py:251
+#: ../lib/advene/gui/views/corpusstatistics.py:195
+#: ../lib/advene/gui/views/corpusstatistics.py:250
 #: ../lib/advene/gui/views/corpusstatistics.py:309
 #: ../lib/advene/gui/views/interactivequery.py:464
 #: ../lib/advene/gui/edit/imports.py:183 ../lib/advene/gui/edit/imports.py:184
@@ -3590,7 +3599,7 @@ msgid "Annotations"
 msgstr ""
 
 #: ../lib/advene/gui/views/corpusstatistics.py:279
-msgid "Corpus summary"
+msgid "<big><b>Corpus summary</b></big>"
 msgstr ""
 
 #: ../lib/advene/gui/views/corpusstatistics.py:302
@@ -4022,7 +4031,7 @@ msgid "Restrict display to region"
 msgstr ""
 
 #: ../lib/advene/gui/views/timeline.py:2771
-#: ../lib/advene/gui/views/logwindow.py:121 ../lib/advene/gui/popup.py:502
+#: ../lib/advene/gui/views/logwindow.py:121 ../lib/advene/gui/popup.py:508
 #, python-format
 msgid "Go to %s"
 msgstr ""
@@ -4244,7 +4253,7 @@ msgstr ""
 msgid "Display all relations of the same type upon mouseover"
 msgstr ""
 
-#: ../lib/advene/gui/views/timeline.py:3894 ../lib/advene/gui/popup.py:505
+#: ../lib/advene/gui/views/timeline.py:3894 ../lib/advene/gui/popup.py:511
 msgid "Highlight"
 msgstr ""
 
@@ -4455,7 +4464,7 @@ msgstr ""
 msgid "View applied to %s\n"
 msgstr ""
 
-#: ../lib/advene/gui/views/finder.py:564 ../lib/advene/gui/popup.py:485
+#: ../lib/advene/gui/views/finder.py:564 ../lib/advene/gui/popup.py:491
 msgid "Activate"
 msgstr ""
 
@@ -4487,15 +4496,15 @@ msgstr ""
 msgid "Try to apply the query on..."
 msgstr ""
 
-#: ../lib/advene/gui/views/finder.py:687 ../lib/advene/gui/popup.py:826
+#: ../lib/advene/gui/views/finder.py:687 ../lib/advene/gui/popup.py:843
 msgid "the package"
 msgstr ""
 
-#: ../lib/advene/gui/views/finder.py:688 ../lib/advene/gui/popup.py:827
+#: ../lib/advene/gui/views/finder.py:688 ../lib/advene/gui/popup.py:844
 msgid "all annotations of the package"
 msgstr ""
 
-#: ../lib/advene/gui/views/finder.py:689 ../lib/advene/gui/popup.py:828
+#: ../lib/advene/gui/views/finder.py:689 ../lib/advene/gui/popup.py:845
 msgid "the first annotation of the package"
 msgstr ""
 
@@ -4533,7 +4542,7 @@ msgstr ""
 msgid "%(type)s %(title)s"
 msgstr ""
 
-#: ../lib/advene/gui/views/finder.py:817 ../lib/advene/gui/popup.py:445
+#: ../lib/advene/gui/views/finder.py:817 ../lib/advene/gui/popup.py:451
 #: ../lib/advene/gui/edit/transcribe.py:510
 msgid "Edit"
 msgstr ""
@@ -4858,15 +4867,15 @@ msgstr ""
 msgid "Results of _interactive query"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:135
+#: ../lib/advene/gui/popup.py:136
 msgid "Choose the file to insert"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:143
+#: ../lib/advene/gui/popup.py:144
 msgid "Select a valid identifier"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:144
+#: ../lib/advene/gui/popup.py:145
 #, python-format
 msgid ""
 "The filename %s contains invalid characters\n"
@@ -4874,20 +4883,20 @@ msgid ""
 "You can modify this identifier if necessary:"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:155
+#: ../lib/advene/gui/popup.py:156
 msgid "Choose the soundclip to insert"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:159
+#: ../lib/advene/gui/popup.py:160
 msgid "Choose the directory to insert"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:171
+#: ../lib/advene/gui/popup.py:172
 #, python-format
 msgid "Apply %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:175
+#: ../lib/advene/gui/popup.py:176
 msgid ""
 "Give the offset to use\n"
 "on specified element.\n"
@@ -4895,43 +4904,47 @@ msgid ""
 "either positive or negative."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:191
+#: ../lib/advene/gui/popup.py:192
 #, python-format
 msgid "Replace content in %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:194
+#: ../lib/advene/gui/popup.py:195
 #, python-format
 msgid "Replace content in annotations of type %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:197
+#: ../lib/advene/gui/popup.py:198
 msgid "Replace content in all annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:287
+#: ../lib/advene/gui/popup.py:201
+msgid "Replace content in all corpus annotations"
+msgstr ""
+
+#: ../lib/advene/gui/popup.py:291
 #, python-format
 msgid "Type %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:294
+#: ../lib/advene/gui/popup.py:298
 #, python-format
 msgid "Copy id %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:328
+#: ../lib/advene/gui/popup.py:334
 #, python-format
 msgid ""
 "<b>Statistics about %s</b>\n"
 "\n"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:334
+#: ../lib/advene/gui/popup.py:340
 #, python-format
 msgid "Renumbering annotations of type %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:341
+#: ../lib/advene/gui/popup.py:347
 msgid ""
 "<b>Renumber all annotations according to their order.</b>\n"
 "\n"
@@ -4945,31 +4958,31 @@ msgid ""
 "The offset parameter allows you to renumber from a given annotation."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:347 ../lib/advene/gui/popup.py:473
+#: ../lib/advene/gui/popup.py:353 ../lib/advene/gui/popup.py:479
 msgid "Offset"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:369
+#: ../lib/advene/gui/popup.py:375
 #, python-format
 msgid "Renumbering %d annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:378
+#: ../lib/advene/gui/popup.py:384
 #, python-format
 msgid "Annotation #%d"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:412
+#: ../lib/advene/gui/popup.py:418
 #, python-format
 msgid "Created %(name)s - %(n)d annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:415
+#: ../lib/advene/gui/popup.py:421
 #, python-format
 msgid "Splitting package according to %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:416
+#: ../lib/advene/gui/popup.py:422
 #, python-format
 msgid ""
 "For each of the %(count)d annotations in %(atype)s, create a package named "
@@ -4977,264 +4990,267 @@ msgid ""
 "annotations contained in the reference annotation."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:447
+#: ../lib/advene/gui/popup.py:453
 msgid "Browse"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:455 ../lib/advene/gui/popup.py:850
+#: ../lib/advene/gui/popup.py:461 ../lib/advene/gui/popup.py:867
 msgid "Open in web browser"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:461 ../lib/advene/gui/popup.py:465
+#: ../lib/advene/gui/popup.py:467 ../lib/advene/gui/popup.py:471
 #: ../lib/advene/gui/edit/shapewidget.py:1617
 msgid "Delete"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:468
+#: ../lib/advene/gui/popup.py:474
 msgid "Search/replace content"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:486
+#: ../lib/advene/gui/popup.py:492
 msgid "Desactivate"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:503
+#: ../lib/advene/gui/popup.py:509
 msgid "Loop"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:504
+#: ../lib/advene/gui/popup.py:510
 msgid "Duplicate"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:508
+#: ../lib/advene/gui/popup.py:514
 msgid "Save snapshot..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:510
+#: ../lib/advene/gui/popup.py:516
 msgid "Extract video fragment"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:540
+#: ../lib/advene/gui/popup.py:546
 msgid "Incoming"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:556
+#: ../lib/advene/gui/popup.py:562
 msgid "Outgoing"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:571
+#: ../lib/advene/gui/popup.py:577
 msgid "Related annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:578
+#: ../lib/advene/gui/popup.py:584
 msgid "Incoming relations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:585
+#: ../lib/advene/gui/popup.py:591
 msgid "Outgoing relations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:602
+#: ../lib/advene/gui/popup.py:608
 #, python-format
 msgid "Begin: %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:604
+#: ../lib/advene/gui/popup.py:610
 #, python-format
 msgid "End: %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:605
+#: ../lib/advene/gui/popup.py:611
 #, python-format
 msgid "Duration: %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:612
+#: ../lib/advene/gui/popup.py:618
 msgid "Members:"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:625
+#: ../lib/advene/gui/popup.py:631
 msgid "Edit package properties..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:626 ../lib/advene/gui/popup.py:752
-#: ../lib/advene/gui/popup.py:869
+#: ../lib/advene/gui/popup.py:632 ../lib/advene/gui/popup.py:650
+#: ../lib/advene/gui/popup.py:769 ../lib/advene/gui/popup.py:886
 #, python-format
 msgid "%d annotations(s) - statistics"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:627 ../lib/advene/gui/popup.py:866
+#: ../lib/advene/gui/popup.py:633 ../lib/advene/gui/popup.py:651
+#: ../lib/advene/gui/popup.py:883
 msgid "Offset all annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:628 ../lib/advene/gui/popup.py:867
+#: ../lib/advene/gui/popup.py:634 ../lib/advene/gui/popup.py:652
+#: ../lib/advene/gui/popup.py:884
 msgid "Search/replace content in all annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:629 ../lib/advene/gui/popup.py:868
+#: ../lib/advene/gui/popup.py:635 ../lib/advene/gui/popup.py:653
+#: ../lib/advene/gui/popup.py:885
 msgid "Display all annotations as a table"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:631 ../lib/advene/gui/popup.py:861
+#: ../lib/advene/gui/popup.py:637 ../lib/advene/gui/popup.py:878
 msgid "Create a new static view..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:632 ../lib/advene/gui/popup.py:862
+#: ../lib/advene/gui/popup.py:638 ../lib/advene/gui/popup.py:879
 msgid "Create a new dynamic view..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:633 ../lib/advene/gui/popup.py:747
+#: ../lib/advene/gui/popup.py:639 ../lib/advene/gui/popup.py:764
 msgid "Create a new annotation..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:635 ../lib/advene/gui/popup.py:864
+#: ../lib/advene/gui/popup.py:641 ../lib/advene/gui/popup.py:881
 msgid "Create a new schema..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:636 ../lib/advene/gui/popup.py:859
+#: ../lib/advene/gui/popup.py:642 ../lib/advene/gui/popup.py:876
 msgid "Create a new query..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:644
+#: ../lib/advene/gui/popup.py:661
 msgid "Create a new folder..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:645
+#: ../lib/advene/gui/popup.py:662
 msgid "Create a new resource file..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:646
+#: ../lib/advene/gui/popup.py:663
 msgid "Insert a new resource file..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:647
+#: ../lib/advene/gui/popup.py:664
 msgid "Insert a new resource directory..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:656 ../lib/advene/gui/popup.py:658
+#: ../lib/advene/gui/popup.py:673 ../lib/advene/gui/popup.py:675
 msgid "Insert a soundclip..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:669
+#: ../lib/advene/gui/popup.py:686
 msgid "Play sound"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:679
+#: ../lib/advene/gui/popup.py:696
 msgid "Create a new annotation type..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:681
+#: ../lib/advene/gui/popup.py:698
 msgid "Create a new relation type..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:683 ../lib/advene/gui/popup.py:746
-#: ../lib/advene/gui/popup.py:799
+#: ../lib/advene/gui/popup.py:700 ../lib/advene/gui/popup.py:763
+#: ../lib/advene/gui/popup.py:816
 msgid "Select a color"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:692
+#: ../lib/advene/gui/popup.py:709
 #, python-format
 msgid "A caption dynamic view for %s already seems to exist."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:701
+#: ../lib/advene/gui/popup.py:718
 #, python-format
 msgid "Caption %s annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:711 ../lib/advene/rules/actions.py:117
+#: ../lib/advene/gui/popup.py:728 ../lib/advene/rules/actions.py:117
 msgid "Caption the annotation"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:733
+#: ../lib/advene/gui/popup.py:750
 msgid "Create a comment view"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:734
+#: ../lib/advene/gui/popup.py:751
 msgid "Generate a caption dynamic view..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:735
+#: ../lib/advene/gui/popup.py:752
 msgid "Display as transcription"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:736
+#: ../lib/advene/gui/popup.py:753
 msgid "Display annotations in table"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:737
+#: ../lib/advene/gui/popup.py:754
 msgid "Export to another format..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:739
+#: ../lib/advene/gui/popup.py:756
 msgid "Extract video montage"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:740
+#: ../lib/advene/gui/popup.py:757
 msgid "Split according to annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:742
+#: ../lib/advene/gui/popup.py:759
 #, python-format
 msgid "Apply %s..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:748
+#: ../lib/advene/gui/popup.py:765
 msgid "Delete all annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:749
+#: ../lib/advene/gui/popup.py:766
 msgid "Renumber annotations..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:750
+#: ../lib/advene/gui/popup.py:767
 msgid "Shot validation view..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:762
+#: ../lib/advene/gui/popup.py:779
 #, python-format
 msgid "A follow dynamic view for %s already seems to exist."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:771
+#: ../lib/advene/gui/popup.py:788
 #, python-format
 msgid "Follow %s relation-type"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:780
+#: ../lib/advene/gui/popup.py:797
 msgid "Follow the relation"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:800
+#: ../lib/advene/gui/popup.py:817
 msgid "Delete all relations..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:801
+#: ../lib/advene/gui/popup.py:818
 msgid "Create montage from related annotations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:802
+#: ../lib/advene/gui/popup.py:819
 msgid "Create dynamic view following relations"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:803
+#: ../lib/advene/gui/popup.py:820
 msgid "Display all related annotations as a table"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:818 ../lib/advene/gui/edit/elements.py:711
+#: ../lib/advene/gui/popup.py:835 ../lib/advene/gui/edit/elements.py:711
 #, python-format
 msgid "Exception in query: %s"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:821
+#: ../lib/advene/gui/popup.py:838
 msgid "Apply query on..."
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:846
+#: ../lib/advene/gui/popup.py:863
 msgid "Activate view"
 msgstr ""
 
-#: ../lib/advene/gui/popup.py:848
+#: ../lib/advene/gui/popup.py:865
 msgid "Open adhoc view"
 msgstr ""
 
@@ -8121,24 +8137,28 @@ msgstr ""
 msgid "Corpus Xlsx exporter"
 msgstr ""
 
-#: ../lib/advene/plugins/corpusxlsxexporter.py:64
+#: ../lib/advene/plugins/corpusxlsxexporter.py:65
 #, python-brace-format
 msgid "Export {package_count} packages as Xlsx file."
 msgstr ""
 
-#: ../lib/advene/plugins/corpusxlsxexporter.py:67
+#: ../lib/advene/plugins/corpusxlsxexporter.py:68
 msgid "Create 1 tab per relation-type"
 msgstr ""
 
-#: ../lib/advene/plugins/corpusxlsxexporter.py:70
+#: ../lib/advene/plugins/corpusxlsxexporter.py:71
 msgid "Create 1 tab per annotation-type"
 msgstr ""
 
-#: ../lib/advene/plugins/corpusxlsxexporter.py:73
+#: ../lib/advene/plugins/corpusxlsxexporter.py:74
 msgid "Create 1 tab per package"
 msgstr ""
 
-#: ../lib/advene/plugins/corpusxlsxexporter.py:76
+#: ../lib/advene/plugins/corpusxlsxexporter.py:77
+msgid "Create a tab with relation types summaries"
+msgstr ""
+
+#: ../lib/advene/plugins/corpusxlsxexporter.py:80
 msgid "Create 1 global sheet with all annotations"
 msgstr ""
 
