@@ -1,0 +1,96 @@
+.TH ADVENE_EXPORT 1 "January 2025" "Advene Export Tool" "User Commands"
+
+.SH NAME
+advene_export \- export Advene data to various formats
+
+.SH SYNOPSIS
+.B ./bin/advene_export
+.RI [-o filter_options]
+.RI filter_name
+.RI input_file
+.RI [ output_file_or_dir ]
+
+.SH DESCRIPTION
+The \fBadvene_export\fP command is used to export Advene data to
+various formats. This tool supports various options for debugging,
+user configuration, and exporting data with specific filters.
+
+.SH OPTIONS
+.TP
+.BR \-f ", " \--filter " " \fIFILTER\fP
+Specify the export filter. If specified, input files will be automatically converted. Use \fIhelp\fP to get a list of valid export filters.
+
+.TP
+.BR \-o ", " \--option " " \fIOPTION-STRING\fP
+Specify filter-specific options as key=value items.
+
+.TP
+.BR \-s ", " \--settings-dir " " \fISETTINGSDIR\fP
+Specify an alternate configuration directory (default: \fI~/.config/advene\fP).
+
+.TP
+.BR \-u ", " \--user-id " " \fILOGIN-NAME\fP
+Specify the user name to set the author field of elements.
+
+.TP
+.BR \-n ", " \--dry-run
+Enable dry-run mode.
+
+.TP
+.BR \-h ", " \--help
+Display a help message and exit.
+
+.TP
+.BR \-d ", " \--debug
+Display debugging messages.
+
+.TP
+.BR \-i ", " \--info
+Display info messages.
+
+.TP
+.BR \-v ", " \--version
+Display version number and exit.
+
+.TP
+.B \--no-embedded
+Do not embed the video player.
+
+.TP
+.BR \-p ", " \--player " " \fI{dummy,gstreamer,gstrecorder}\fP
+Select the video player to use.
+
+.TP
+.BR \-w ", " \--webserver-port " " \fIPORT_NUMBER\fP
+Specify the webserver port number (default: 1234).
+
+.TP
+.BR \-m ", " \--webserver-mode " " \fIWEBSERVER_MODE\fP
+Set the webserver mode:
+.IP
+0: deactivated
+1: threaded mode.
+
+.SH EXAMPLES
+
+.B advene_export FlatJsonExporter foo.azp foo.json
+Export the foo.azp package as a flat JSON file.
+
+.B advene_export -o "video-url=../foo.mp4"  Website foo.azp foo-html/
+Export the generated views from foo.azp, using the Website export
+filter and specifying the video-url option.
+
+.B advene_export \-d \-s ~/.config/advene_custom \-p gstreamer
+Run with debugging enabled, using a custom settings directory and the GStreamer player.
+
+.B advene_export \-f help
+Get a list of valid export filters.
+
+.SH AUTHOR
+This manual page was written by Olivier Aubert <contact@olivieraubert.net>,
+for the Debian project.
+
+.SH SEE ALSO
+\fIadvene(1)\fP, \fIadvene_export(1)\fP
+
+.B Advene documentation: \fIhttps://www.advene.org\fP

@@ -1,0 +1,115 @@
+.TH ADVENE_IMPORT 1 "January 2025" "Advene Import Tool" "User Commands"
+
+.SH NAME
+advene_import \- import data as Advene packages using various filters.
+
+.SH SYNOPSIS
+.B ./bin/advene_import
+.RI [ \-o " filter_options" ]
+.IR filter_name
+.IR input_file
+.RI [ output_file ]
+
+.SH DESCRIPTION
+The \fBadvene_import\fP command is used to import data into Advene using specified filters. The tool supports a variety of options for customization and allows for the use of templates and additional metadata.
+
+.TP
+.BR filter_name
+Specify the filter to use for importing data. Use \fB"auto"\fP for autodetection (first valid importer) or \fB"list"\fP to display a list of valid importers for the file.
+
+.TP
+.BR input_file
+The input file to be imported.
+
+.TP
+.BR output_file
+The file to which output data will be written. If not specified, the data will be dumped to stdout in JSON format.
+
+.SH OPTIONS
+.TP
+.BR \-o " filter_options"
+Specify options for the chosen filter. Use \fB\-o help\fP to display parameter help for a specific filter. Filter parameters shown as \fB--long-option-name\fP in the help message should be passed as \fB\-o long-option-name=value\fP (strip the leading \fB--\fP and use one \fB\-o\fP option per parameter).
+
+.TP
+.BR \-o template_package=path.azp
+Specify a base template package to be loaded before the import takes place.
+
+.TP
+.BR \-o package_title="New title"
+Specify a title for the package being created.
+
+.TP
+.BR \-o media_file=path_to_video.mp4
+Specify the media file name to associate with the imported data.
+
+.SH AVAILABLE FILTERS
+The following filters are available for import (as of v. 3.15):
+
+.IP
+\(bu Aeidon_(subtitles)_importer
+\(bu AnnotationGraph_importer
+\(bu Anvil_importer
+\(bu Audio_segmentation
+\(bu Barcode_detection
+\(bu Blocking_importer
+\(bu CMML_importer
+\(bu Cinelab_importer
+\(bu DCP_importer
+\(bu DTMF_Tone_detector
+\(bu Deepgram_JSON_importer
+\(bu Dominant_color_importer
+\(bu Dummy_detection
+\(bu ELAN_importer
+\(bu Feature_detection_(face...)
+\(bu Final_Cut_Pro_XML_importer
+\(bu FlatJSON_importer
+\(bu HPI_Dominant_Color_Extractor
+\(bu HPI_concept_extraction
+\(bu IRIData_importer
+\(bu IRI_importer
+\(bu Keyword_extraction
+\(bu MPEG7_importer
+\(bu Motion_Dynamics_Extractor
+\(bu Motion_cell_detection
+\(bu OWL_(schema)_importer
+\(bu PRAAT_importer
+\(bu Scene_change_detection
+\(bu ShotdetectApp_importer
+\(bu Shotdetect_XML_importer
+\(bu Sound_enveloppe
+\(bu Subtitle_(SRT)_importer
+\(bu TED_importer
+\(bu Test_gstreamer_importer
+\(bu Text_importer
+\(bu Tobii_importer
+\(bu Transcriber_importer
+\(bu TurTLe_(RDF)_importer
+\(bu VIAN_importer
+\(bu WebAnnotation_importer
+\(bu XEmotion_importer
+\(bu Xi_importer
+\(bu Youtube_XML_importer
+\(bu chaplin_importer
+\(bu lsdvd_importer
+
+.SH EXAMPLES
+.TP
+.B ./bin/advene_import -o media_file=video.mp4 Subtitle_(SRT)_importer subtitles.srt
+Import subtitles from an SRT file and associate them with the specified media file.
+
+.TP
+.B ./bin/advene_import -o help Subtitle_(SRT)_importer
+Display parameter help for the Subtitle (SRT) importer.
+
+.TP
+.B ./bin/advene_import list input_file
+List valid importers for the specified input file.
+
+.SH AUTHOR
+This manual page was written by Olivier Aubert <contact@olivieraubert.net>,
+for the Debian project.
+
+.SH SEE ALSO
+\fIadvene(1)\fP, \fIadvene_export(1)\fP
+
+.B Advene documentation: \fIhttps://www.advene.org\fP
