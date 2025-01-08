@@ -89,30 +89,30 @@ def snapshot2png (image, output=None):
         logger.error("Error : 0 sized snapshot")
         return ""
 
-    png=None
+    png = None
 
-    code=fourcc2rawcode(image.type)
+    code = fourcc2rawcode(image.type)
     if code == 'PNG':
-        png=TypedString(image.data)
-        png.contenttype='image/png'
+        png = TypedString(image.data)
+        png.contenttype = 'image/png'
     elif code is not None:
         try:
             i = Image.fromstring ("RGB", (image.width, image.height), image.data,
                                   "raw", code)
             ostream = io.StringIO ()
             i.save(ostream, 'png')
-            png=TypedString(ostream.getvalue())
-            png.contenttype='image/png'
+            png = TypedString(ostream.getvalue())
+            png.contenttype = 'image/png'
         except NameError:
             logger.error("snapshot: conversion module not available")
     else:
         logger.error("snapshot: unknown image type %s", repr(image.type))
 
     if png is None:
-        png=ImageCache.not_yet_available_image
+        png = ImageCache.not_yet_available_image
 
     if output is not None:
-        f=open(output, 'wb')
+        f = open(output, 'wb')
         f.write(png)
         f.close()
         return ""
@@ -168,8 +168,8 @@ def format_time (val = 0):
 class InvalidTimestamp(Exception):
     pass
 
-small_time_regexp=re.compile(r'(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
-time_regexp=re.compile(r'((?P<h>\d+):)?(?P<m>\d+):(?P<s>\d+)((?P<sep>[.,:f])(?P<ms>\d+))?$')
+small_time_regexp = re.compile(r'(?P<m>\d+):(?P<s>\d+)(?P<sep>[.,f]?)(?P<ms>\d+)?$')
+time_regexp = re.compile(r'((?P<h>\d+):)?(?P<m>\d+):(?P<s>\d+)((?P<sep>[.,:f])(?P<ms>\d+))?$')
 float_regexp = re.compile(r'(?P<s>\d*)\.(?P<ms>\d*)')
 def parse_time(s):
     r"""Convert a time string as long.
@@ -230,9 +230,9 @@ def parse_time(s):
                     # Frame number
                     t['ms'] = int(int(t['ms']) * (1000 / config.data.preferences['default-fps']))
                 else:
-                    t['ms']=(t['ms'] + ("0" * 4))[:3]
+                    t['ms'] = (t['ms'] + ("0" * 4))[:3]
             else:
-                t['ms']=0
+                t['ms'] = 0
             for k in t:
                 if t[k] is None:
                     t[k] = 0
@@ -240,7 +240,7 @@ def parse_time(s):
                     t[k] = int(t[k] or 0)
                 except ValueError:
                     t[k] = 0
-            val= t.get('ms', 0) + t.get('s', 0) * 1000 + t.get('m', 0) * 60000 + t.get('h', 0) * 3600000
+            val =  t.get('ms', 0) + t.get('s', 0) * 1000 + t.get('m', 0) * 60000 + t.get('h', 0) * 3600000
         else:
             raise InvalidTimestamp("Unknown time format for %s" % s)
     return val
@@ -251,24 +251,24 @@ def matching_relationtypes(package, typ1, typ2):
     We use the id (i.e. the fragment part from the URI) to match.
     """
     # FIXME: works only on binary relations for the moment.
-    r=[]
+    r = []
     for rt in package.relationTypes:
         def get_id_from_fragment(uri):
             try:
-                i=uri[uri.index('#')+1:]
+                i = uri[uri.index('#')+1:]
             except ValueError:
-                i=uri
+                i = uri
             return str(i)
 
         # URI version
-        # lat=[ absolute_uri(package, t) for t in rt.getHackedMemberTypes() ]
-        # t1=typ1.uri
-        # t2=typ2.uri
+        # lat = [ absolute_uri(package, t) for t in rt.getHackedMemberTypes() ]
+        # t1 = typ1.uri
+        # t2 = typ2.uri
 
         # Id version
-        lat= [ get_id_from_fragment(t) for t in rt.getHackedMemberTypes() ]
-        t1=get_id_from_fragment(typ1.uri)
-        t2=get_id_from_fragment(typ2.uri)
+        lat =  [ get_id_from_fragment(t) for t in rt.getHackedMemberTypes() ]
+        t1 = get_id_from_fragment(typ1.uri)
+        t2 = get_id_from_fragment(typ2.uri)
 
         logger.debug("Testing (%s, %s) matching %s", t1, t2, lat)
         if len (lat) == 2 \
@@ -359,29 +359,29 @@ def get_valid_members (el):
     return items
 
 def import_element(package, element, controller, notify=True):
-    p=package
+    p = package
     if element.viewableClass == 'view':
-        v=p.importView(element)
+        v = p.importView(element)
         p.views.append(v)
         if notify:
             controller.notify("ViewCreate", view=v)
     elif element.viewableClass == 'schema':
-        s=p.importSchema(element)
+        s = p.importSchema(element)
         p.schemas.append(s)
         if notify:
             controller.notify("SchemaCreate", schema=s)
     elif element.viewableClass == 'annotation':
-        a=p.importAnnotation(element)
+        a = p.importAnnotation(element)
         p.annotations.append(a)
         if notify:
             controller.notify("AnnotationCreate", annotation=a)
     elif element.viewableClass == 'relation':
-        r=p.importRelation(element)
+        r = p.importRelation(element)
         p.relations.append(r)
         if notify:
             controller.notify("RelationCreate", relation=r)
     elif element.viewableClass == 'query':
-        q=p.importQuery(element)
+        q = p.importQuery(element)
         p.queries.append(q)
         if notify:
             controller.notify("QueryCreate", query=q)
@@ -389,7 +389,7 @@ def import_element(package, element, controller, notify=True):
         logger.warning("Import element of class %s not supported yet.", element.viewableClass)
 
 def unimport_element(package, element, controller, notify=True):
-    p=package
+    p = package
     if element.viewableClass == 'view':
         p.views.remove(element)
         if notify:
@@ -416,12 +416,12 @@ def unimport_element(package, element, controller, notify=True):
 def get_statistics(fname):
     """Return formatted statistics about the package.
     """
-    st=None
+    st = None
     if fname.lower().endswith('.azp'):
         # If the file is a .azp, then it may have a
         # META-INF/statistics.xml file. Use it.
         try:
-            z=zipfile.ZipFile(fname, 'r')
+            z = zipfile.ZipFile(fname, 'r')
         except Exception as e:
             raise AdveneException(_("Cannot read %(filename)s: %(error)s") % {'filename': fname,
                                                                               'error': str(e)})
@@ -436,9 +436,9 @@ def get_statistics(fname):
                                                                                                                  'type': typ})
 
         try:
-            st=z.read('META-INF/statistics.xml').decode('utf-8')
+            st = z.read('META-INF/statistics.xml').decode('utf-8')
         except KeyError:
-            st=None
+            st = None
 
         z.close()
 
@@ -446,19 +446,19 @@ def get_statistics(fname):
         # If we are here, it is that we could not get the statistics.xml.
         # Generate it (it can take some time)
         try:
-            p=Package(uri=fname)
+            p = Package(uri=fname)
         except Exception:
             raise _("Error:\n%s")
-        st=p.generate_statistics()
+        st = p.generate_statistics()
         p.close()
 
     # We have the statistics in XML format. Render it.
-    s=io.StringIO(st)
-    h=advene.model.package.StatisticsHandler()
-    data=h.parse_file(s)
+    s = io.StringIO(st)
+    h = advene.model.package.StatisticsHandler()
+    data = h.parse_file(s)
     s.close()
 
-    m=_("""Package %(title)s:
+    m = _("""Package %(title)s:
 %(schema)s
 %(annotation)s in %(annotation_type)s
 %(relation)s in %(relation_type)s
@@ -544,7 +544,7 @@ def get_schema_statistics(schema):
         relation_count=format_element_name('relation', sum(len(rt.relations) for rt in schema.relationTypes))
     )
 
-element_declinations={
+element_declinations = {
     'schema': (_('schema'), _('schemas')),
     'annotation': (_('annotation'), _('annotations')),
     'annotation_type': (_('annotation type'), _('annotation types')),
@@ -560,7 +560,7 @@ element_declinations={
 def format_element_name(name, count=None):
     """Formats an element name (from the model) according to count."""
     if name not in element_declinations:
-        return name
+        return f"{count} {name}(s)"
 
     if count is None:
         return element_declinations[name][0]
