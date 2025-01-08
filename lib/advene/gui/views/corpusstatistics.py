@@ -32,6 +32,7 @@ from gi.repository import Gtk
 from advene.gui.util import dialog
 from advene.gui.views import AdhocView
 from advene.gui.views.table import AnnotationTable
+from advene.util.helper import format_element_name
 from advene.util.tools import open_in_filebrowser
 
 name = "Corpus statistics"
@@ -110,12 +111,10 @@ class CorpusStatistics(AdhocView):
 
         def package_info(alias):
             p = self.packages[alias]
-            return f"{alias} - { p.title } - { len(p.annotationTypes) } types d'annotation - { len(p.annotations) } annotations"
+            return f"{alias} - { p.title } - { format_element_name('annotation_type', len(p.annotationTypes)) } - { format_element_name('annotation', len(p.annotations)) }"
 
         packages_info = "\n".join(package_info(alias) for alias in self.packages)
-        self.set_summary(f"""<big><b>Corpus statistics</b></big>
-
-        <b>{len(self.packages)} loaded packages</b>
+        self.set_summary(f"""<b>{len(self.packages)} loaded packages</b>
 {packages_info}
         """)
 
@@ -276,7 +275,8 @@ class CorpusStatistics(AdhocView):
 
     def build_summary(self):
         vbox = Gtk.VBox()
-        description = Gtk.Label.new(_("Corpus summary"))
+        description = Gtk.Label()
+        description.set_markup(_("<big><b>Corpus summary</b></big>"))
         description.set_line_wrap(True)
         vbox.pack_start(description, False, False, 0)
 
