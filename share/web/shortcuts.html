@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8"></meta>
-    <meta name="viewport" content="width=device-width"></meta>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="any" href="https://advene.org/img/favicon.png" />
+    <link rel="stylesheet" href="https://olivieraubert.net/main.css" type="text/css">
     <title>Advene Shortcuts</title>
   </head>
 
   <body>
-    <pre>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <pre id="content">
 Advene shortcuts
 ================
 
 This wiki documents the shortcuts available in the most recent version
-of Advene (3.3).
+of Advene (3.15).
 
 Generic player shortcuts
 ------------------------
@@ -96,14 +99,13 @@ Timeline
 -   `c` : center the timeline on the current player position
 -   draw a rectangle on the background: if the area covers at least one
     annotation, select covered annotations. Else, propose to either
-create an annotation or to zoom on the selected area.
-
--   control-Return: create an annotation using the current player time,
-    in the annotation type/line where the cursor is
+    create an annotation or to zoom on the selected area.
+-   Control-+/- : increase/decrease zoom level
+-   Control-1 to Control-9 : set zoom level to from 100% (Control-1)
+    to 2% (Control-9).
+-   Control-Return : create an annotation at current player position (its type depends on the cursor position).
 
 ### Annotation widget
-
-These apply when the cursor is over an annotation widget:
 
 -   simple click: player the annotation and lock the inspector on this
     annotation
@@ -121,10 +123,16 @@ These apply when the cursor is over an annotation widget:
 -   control+scroll : update the annotation begin or end (depending on
     the cursor position) time. Holding Shift uses a larger increment
 -   control+t : split the annotation at the current player position
-    (if the position is in the annotation’s bounds)
+    (if the position is in the annotation's bounds)
 -   `Delete` or `Backspace` : delete the annotation
 -   Drag-and-drop of an annotation on another one: popup a menu to
     propose to create a relation, merge annotations or align bounds.
+-   `1` to `9`: if the *Edit/Preferences/Text content/Quick fill*
+    option is active, set the content of the annotation to the nth
+    predefined keyword for the given type. If the annotation content
+    type is *Keyword list*, then multiple values can be entered and
+    `1` to `9` **toggle** the corresponding nth values from the
+    predefined list.
 
 ### Quick edit mode
 
@@ -145,6 +153,10 @@ content through a small text entry with the following shortcuts:
     when validating
 -   `Space` : restrict playing to annotations of the given annotation-type
     (toggle)
+-   `1` to `9`: if the *Edit/Preferences/Text content/Quick fill*
+    option is active, create a new annotation with the current
+    position as begin time, and set its content to the nth predefined
+    keyword for the type.
 
 Active bookmarks
 ----------------
@@ -160,6 +172,7 @@ Note-taking
 
 -   `Control-Return` : insert a timestamp mark (if the movie is playing)
 -   `Control-Shift-Return` : pause and insert a timestamp mark
+-  `Escape`: play/pause + seek -2 s
 -   `Control-PageDown/PageUp` : go to next/previous mark
 -   Control-Scroll on a mark: update the mark timestamp. If the
     play-on-scroll option is set, the player will be set to the new
@@ -173,9 +186,13 @@ Note-taking
 Table view
 ----------
 
-- `Return` edits the content of the annotation
+- `Return` edits the content of the annotation in place
+- `Control-Return` opens the edit form for the annotation
 - `Control-<`/`Control->` modifies begin/end time
-- `Space` or `Control-Return` plays the selected annotation
+- `Space` plays the annotation
+-  `1` to `9`: if the *Edit/Preferences/Text content/Quick fill*
+    option is active, set the content of the annotation to the nth
+    predefined keyword for the given type.
 
 Element Edition popup
 ---------------------
@@ -217,5 +234,9 @@ internal API. Feel free to tinker with it but there are no safeguards.
 -   Control-h: display docstring for element before cursor
 -   Control-H: display source for element before cursor
     </pre>
+    <script>
+      const element = document.getElementById('content')
+      element.innerHTML = marked.parse(element.innerText)
+    </script>
   </body>
 </html>
