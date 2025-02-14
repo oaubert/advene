@@ -4608,7 +4608,7 @@ Image cache information: %(imagecache)s
         self.controller.open_url ('https://github.com/oaubert/advene/')
         return True
 
-    @named_action(name="app.help-shorcuts")
+    @named_action(name="app.help-shortcuts")
     def on_helpshortcuts_activate (self, button=None, data=None):
         helpfile = Path(config.data.advenefile('shortcuts.html', 'web'))
         if helpfile.is_file():
