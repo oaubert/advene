@@ -131,8 +131,8 @@ class TTSEngine:
     def action_pronounce (self, context, parameters):
         """Pronounce action.
         """
-        message=self.parse_parameter(context, parameters, 'message', _("No message..."))
-        self.pronounce(message)
+        message = str(self.parse_parameter(context, parameters, 'message', _("No message...")))
+        self.pronounce(str(message))
         return True
 
 @ttsengine('festival')

@@ -321,7 +321,7 @@ class DefaultActionsRepository:
 
         This method is overriden in the GUI by self.log
         """
-        message=self.parse_parameter(context, parameters, 'message', "An event occurred.")
+        message = str(self.parse_parameter(context, parameters, 'message', "An event occurred."))
         logger.warning("** Message ** %s", message)
         return True
 
@@ -403,16 +403,16 @@ class DefaultActionsRepository:
 
         If the 'duration' parameter is not defined, a default duration will be used.
         """
-        message=self.parse_parameter(context, parameters, 'message', "Default caption.")
-        duration=self.parse_parameter(context, parameters, 'duration', None)
+        message = str(self.parse_parameter(context, parameters, 'message', "Default caption."))
+        duration = self.parse_parameter(context, parameters, 'duration', None)
 
         begin = self.controller.player.current_position_value
         if duration is not None:
-            duration=int(duration)
+            duration = int(duration)
         else:
-            duration=config.data.player_preferences['default_caption_duration']
+            duration = config.data.player_preferences['default_caption_duration']
 
-        c=self.controller
+        c = self.controller
         end = begin + duration
         if c.gui and c.gui.captionview:
             c.gui.captionview.display_text(message,
@@ -474,11 +474,11 @@ class DefaultActionsRepository:
     def AnnotationCaption (self, context, parameters):
         """Display a message as a caption during the triggering annotation timeframe.
         """
-        message=self.parse_parameter(context, parameters, 'message', "Default caption.")
-        annotation=context.evaluateValue('annotation')
+        message = str(self.parse_parameter(context, parameters, 'message', "Default caption."))
+        annotation = context.evaluateValue('annotation')
 
         if annotation is not None:
-            c=self.controller
+            c = self.controller
             begin = c.player.current_position_value
             end = annotation.fragment.end
             if c.gui and c.gui.captionview:
