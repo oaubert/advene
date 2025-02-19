@@ -247,14 +247,6 @@ class Player:
     def set_widget(self, drawable, container):
         return True
 
-    @debug
-    def set_visual(self, xid):
-        """Set the window id for the video output.
-
-        It is widget.get_window().xid on X, widget.get_window().handle on Win32.
-        """
-        return True
-
     def restart_player(self):
         return True
 
