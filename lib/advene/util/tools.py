@@ -277,6 +277,8 @@ root_elements = ('here', 'nothing', 'default', 'options', 'repeat', 'request',
                  'identifier',
                  # Root elements available in queries
                  'element',
+                 # In action parameters
+                 'context', 'controller',
                  )
 
 # Path elements followed by any syntax

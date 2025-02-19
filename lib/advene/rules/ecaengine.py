@@ -245,7 +245,8 @@ class ECAEngine:
         globals_={
             'annotation': None,
             'relation': None,
-            'context': None,
+            'context': context,
+            'controller': controller,
             'event': event
             }
         globals_.update(kw)
