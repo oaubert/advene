@@ -294,8 +294,14 @@ def is_valid_tales(expr):
     # Empty expressions are considered valid
     if expr == "":
         return True
+
+    if '|' in expr:
+        # Combination of TALES expressions with |
+        return all(is_valid_tales(subexpr) for subexpr in expr.split('|'))
+
     if path_any_re.match(expr):
         return True
+
     m = path_tales_re.match(expr)
     if m:
         return is_valid_tales(expr=m.group(2))
