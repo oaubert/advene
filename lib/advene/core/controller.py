@@ -2037,8 +2037,8 @@ class AdveneController:
             t = time.time()
             try:
                 p = Package(uri=uri)
-            except Exception:
-                logger.error("Cannot load package %s", uri, exc_info=True)
+            except Exception as e:
+                logger.error("Cannot load package %s: %s", uri, str(e))
                 return
             dur = time.time() - t
             logger.info("Loaded package in %f seconds", dur)
