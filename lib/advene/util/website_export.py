@@ -37,10 +37,10 @@ from advene.util.exporter import GenericExporter, register_exporter
 
 fragment_re           = re.compile('(.*)#(.+)')
 package_expression_re = re.compile(r'packages/(\w+)/(.*)')
-href_re               = re.compile(r'''(xlink:href|href|src|about|resource)=['"](.+?)['"> ]''')
+href_re               = re.compile(r'''(?P<name>xlink:href|href|src|about|resource)=['"](?P<link>[^ >].+?)['"]''')
 snapshot_re           = re.compile(r'/packages/[^/]+/imagecache/(\d+)')
 tales_re              = re.compile(r'(\w+)/(.+)')
-player_re             = re.compile(r'/media/play(/|\?position=)(\d+)(/(\d+))?')
+player_re             = re.compile(r'/media/play(/|\?position=)(?P<begin>\d+)(/(?P<end>\d+))?')
 overlay_re            = re.compile(r'/media/overlay/([^/]+)/([\w\d]+)(/.+)?')
 
 @register_exporter
@@ -316,43 +316,49 @@ class WebsiteExporter(GenericExporter):
         content = content.strip()
         if content.startswith('{') or content.startswith('[') or content.startswith('"'):
             return content
-        # Convert all links
-        for (attname, link) in href_re.findall(content):
-            if link.startswith('imagecache/'):
+        # Replace /media/play links (most frequent)
+
+        def translation(name, link):
+            """Return a string for converting the attribute
+
+            Generally it will be 'name="translated_link"' but it may also define other attributes:
+            'foo="bar" name="translated_link"'
+            """
+            if link.startswith('imagecache/') or link.startswith('#'):
                 # Already processed by the global regexp at the beginning
-                continue
-            if link.startswith('#'):
-                continue
+                return f'{name}="{link}"'
             m = fragment_re.search(link)
             if m:
                 fragment = m.group(2)
-                tr = self.url_translation.get(m.group(1))
+                translated_link = self.url_translation.get(m.group(1))
             else:
                 fragment = None
-                tr = self.url_translation.get(link)
-            if tr is None:
+                translated_link = self.url_translation.get(link)
+            if translated_link is None:
                 logger.error("website export bug: %s was not translated", link)
-                continue
-            if link != tr:
-                extra=[]
-                attr, reallink = self.video_player.fix_link(tr)
-                if attr is not None:
-                    extra.append(attr)
-                if reallink is not None:
-                    tr = reallink
-                if 'unconverted' in tr:
-                    extra.append('onClick="return false;"')
-                if fragment is not None:
-                    tr = tr + '#'+fragment
+                return f'{name}="ERROR:{link}"'
 
-                if extra:
-                    exp = '''(%s=['"])%s(['"> ])''' % (attname, re.escape(link))
-                    content = re.sub(exp, " ".join(extra) + r''' \1''' + tr + r'''\2''', content)
-                else:
-                    exp = '''(%s=['"])%s(['"> ])''' % (attname, re.escape(link))
-                    content = re.sub(exp, r'''\1''' + tr + r'''\2''', content)
+            extra = []
+            # Check if we need to add an extra property
+            attr, reallink = self.video_player.fix_link(translated_link)
+            if attr is not None:
+                extra.append(attr)
+            if reallink is not None:
+                translated_link = reallink
+            if 'unconverted' in translated_link:
+                extra.append('onClick="return false;"')
+            if fragment is not None:
+                translated_link = f'{translated_link}#{fragment}'
 
+            extra_string = " ".join(extra)
+            return f'{extra_string} {name}="{translated_link}"'
+
+        # Replace all links
+        content = href_re.sub(lambda m: translation(m.group('name'), m.group('link')), content)
+
+        # Inject additional js/html code
         content = self.video_player.transform_document(content)
+
         return content
 
     def write_data(self, url, content, used_snapshots, used_overlays, used_resources):
