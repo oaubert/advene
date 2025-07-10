@@ -57,9 +57,6 @@ class VIANImporter(GenericImporter):
         if not os.path.exists(hdfname):
             hdfname = None
         p, at = self.init_package(filename=dest)
-        p.setMetaData(config.data.namespace_prefix['dc'],
-                      'description',
-                      _("Converted from %s") % filename)
         self.convert(self.iterator(vian, hdfname))
         self.progress(1.0)
         return self.package

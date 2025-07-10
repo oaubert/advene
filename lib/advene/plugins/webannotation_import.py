@@ -123,9 +123,6 @@ class WebAnnotationImporter(GenericImporter):
             logger.error("Cannot parse source data")
             return self.package
         p, at = self.init_package(filename=dest)
-        p.setMetaData(config.data.namespace_prefix['dc'],
-                      'description',
-                      _("Converted from %s") % filename)
 
         items = [ i for items in self.get_items(data) for i in items ]
 

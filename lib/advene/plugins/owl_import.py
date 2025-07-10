@@ -83,9 +83,6 @@ class AdAOWLImporter(GenericImporter):
         graph = rdflib.Graph()
         graph.parse(filename)
         p, at = self.init_package(filename=dest)
-        p.setMetaData(config.data.namespace_prefix['dc'],
-                      'description',
-                      _("Converted from %s") % filename)
         self.convert(self.iterator(graph))
         self.progress(1.0)
         return self.package

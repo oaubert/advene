@@ -1145,9 +1145,6 @@ class FlatJSONImporter(GenericImporter):
             logger.error("Cannot parse source data")
             return self.package
         p, at = self.init_package()
-        p.setMetaData(config.data.namespace_prefix['dc'],
-                      'description',
-                      _("Converted from %s") % filename)
         if data['annotations']:
             self.package.setMedia(data['annotations'][0]['media'])
             self.convert(self.iterator(data['annotations']))
