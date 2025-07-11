@@ -203,9 +203,12 @@ class AnnotationTable(AdhocView):
         if elements is None:
             elements = []
         model = self.build_model(elements, custom_data)
-        self.widget.treeview.set_model(model)
+        self.filtered_model = model.filter_new()
+        self.filtered_model.set_visible_func(self.apply_filter)
+        self.widget.treeview.set_model(self.filtered_model)
         self.model = model
         self.elements = elements
+        self.update_label()
         if self.last_edited_path is not None:
             # We just edited an annotation. This update must come from
             # it, so let us try to set the cursor position at the next element.
