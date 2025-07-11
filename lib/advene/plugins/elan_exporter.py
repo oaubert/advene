@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 from gettext import gettext as _
 
+from itertools import chain
 import xml.etree.ElementTree as ET
 
 import advene.core.config as config
@@ -91,7 +92,7 @@ class ELANExporter(GenericExporter):
         # Time slots are defined with their timestamp
         begins = ( a.fragment.begin for a in package.annotations )
         ends = ( a.fragment.end for a in package.annotations )
-        timestamps = list(sorted([ *begins, *ends ]))
+        timestamps = list(sorted(set(chain(begins, ends))))
 
         tiers = [
             h('TIER', {
