@@ -409,6 +409,30 @@ class Menu:
         d.destroy()
         return True
 
+    def fix_overlapping_annotations(self, m, at):
+        """Fix overlapping annotations of a given type.
+
+        Make the assumption of a sequence of non-overlapping annotations
+        """
+        annotations = list(sorted(at.annotations))
+
+        overlapping = [ (a1, a2)
+                        for (a1, a2) in zip(annotations, annotations[1:])
+                        if a1.fragment.end >= a2.fragment.begin ]
+
+        validate = dialog.message_dialog(_(f"There are {len(overlapping)} overlapping annotations of type {at.title}. Do you want to fix overlappings?"),
+                                         icon=Gtk.MessageType.QUESTION)
+
+        if validate:
+            transaction = object()
+            for (a1, a2) in overlapping:
+                self.controller.notify('EditSessionStart', element=a1, immediate=True, batch=transaction)
+                a1.fragment.end = a2.fragment.begin - 1
+                self.controller.notify('AnnotationEditEnd', annotation=a1, batch=transaction)
+                self.controller.notify('EditSessionEnd', element=a1, batch=transaction)
+            self.controller.log(_(f"Fixed {len(overlapping)} overlapping annotations"))
+        return True
+
     def split_package_by_type(self, element):
         title = self.controller.get_title(element)
         count = len(element.annotations)
@@ -764,6 +788,7 @@ class Menu:
         add_item(_('Create a new annotation...'), self.create_element, Annotation, element)
         add_item(_('Delete all annotations'), self.delete_elements, element, element.annotations)
         add_item(_('Renumber annotations...'), self.renumber_annotations, element)
+        add_item(_('Fix overlapping...'), self.fix_overlapping_annotations, element)
         add_item(_('Shot validation view...'), lambda m, at: self.controller.gui.adjust_annotationtype_bounds(at), element)
         add_item('')
         add_item(_('%d annotations(s) - statistics') % len(element.annotations), self.display_stats, element)
