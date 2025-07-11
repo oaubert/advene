@@ -525,7 +525,7 @@ class AnnotationTable(AdhocView):
             source = tv.get_model()
         w.writerow( (_("id"), _("type"), _("begin"), _("end"), _("content")) )
         for r in source:
-            w.writerow( (r[COLUMN_ID], str(r[COLUMN_TYPE]).encode('utf-8'), r[COLUMN_BEGIN], r[COLUMN_END], str(r[COLUMN_ELEMENT].content.data).encode('utf-8') ) )
+            w.writerow( (r[COLUMN_ID], str(r[COLUMN_TYPE]), r[COLUMN_BEGIN], r[COLUMN_END], str(r[COLUMN_ELEMENT].content.data) ) )
         f.close()
         self.log(_("Data exported to %s") % name)
 
