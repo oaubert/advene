@@ -700,18 +700,24 @@ def main():
 filter_name can be "auto" for autodetection (first valid importer),
 "list" for a list of valid importers for the file
 
+* Filter options
+
 Use "-o help" as filter option for getting parameter help. Filter
 parameters displayed as --long-option-name in the help message should
 be entered as "-o long-option-name=value" (strip leading -- from
 option and use one "-o" option per parameter).
 
-A base template package can be specified using the "-o
-template_package=path.azp" option. The given package will be loaded
-before the import takes place.
+** Import-specific options
+
+A base template package can be specified using "-o template_package=path.azp"
+The given package will be loaded before the import takes place. It can
+be used in conjunction with source_type (see below) to process a specific annotation type.
 
 A package title can be specified using "-o package_title='New title'"
 
 A media file name can be specified using "-o media_file=path_to_video.mp4"
+
+A source annotation-type id can be specified using "-o source_type=annotation_type_id"
 
 If no output file is specified, then data will be dumped to stdout in a JSON format.
 
@@ -736,10 +742,12 @@ Available filters:
     template_package = config.data.options.options.get('template_package')
     package_title = config.data.options.options.get('package_title')
     media_file = config.data.options.options.get('media_file')
+    source_type_id = config.data.options.options.get('source_type')
+
     # Rebuild filter option string from config.data.options.options dict
     option_list = [ (f"--{k}={v}" if v else f"--{k}")
                     for (k, v) in config.data.options.options.items()
-                    if k not in ('template_package', 'package_title', 'media_file') ]
+                    if k not in ('template_package', 'package_title', 'media_file', 'source_type') ]
 
     # If template_package is None, then the controller will use the
     # standard template package
@@ -773,8 +781,11 @@ Available filters:
     else:
         i = None
         cl = [ f for f in controller.advene.util.importer.IMPORTERS if f.name.startswith(filtername) ]
+        source_type = None
+        if source_type_id:
+            source_type = c.package.get_element_by_id(source_type_id)
         if len(cl) == 1:
-            i = cl[0](package=c.package, controller=c, callback=progress)
+            i = cl[0](package=c.package, controller=c, callback=progress, source_type=source_type)
         elif len(cl) > 1:
             logger.error("Too many possibilities:\n%s", "\n".join(f.name for f in cl))
             sys.exit(1)
