@@ -632,7 +632,8 @@ class Menu:
         add_item(_('Begin: %s')
                  % helper.format_time (element.fragment.begin), lambda i: self.controller.gui.adjust_annotation_bound(element, 'begin'))
         add_item(_('End: %s') % helper.format_time (element.fragment.end), lambda i: self.controller.gui.adjust_annotation_bound(element, 'end'))
-        add_item(_('Duration: %s') % helper.format_time (element.fragment.duration))
+        add_item(_('Duration: %s = %dms') % (helper.format_time (element.fragment.duration),
+                                             element.fragment.duration))
         return
 
     def make_relation_menu(self, element, menu):
