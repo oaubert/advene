@@ -135,12 +135,13 @@ class AnnotationDisplay(AdhocView):
                 'begin': helper.format_time(self.annotation.fragment.begin),
                 'end': helper.format_time(self.annotation.fragment.end),
                 'duration': helper.format_time(self.annotation.fragment.duration),
+                'raw_duration': self.annotation.fragment.duration,
                 'color': self.controller.get_element_color(self.annotation),
                 }
             if d['color']:
-                d['title']='<span background="%(color)s">Annotation <b>%(id)s</b></span> (d: %(duration)s)' % d
+                d['title']='<span background="%(color)s">Annotation <b>%(id)s</b></span> (d: %(duration)s = %(raw_duration)dms)' % d
             else:
-                d['title']='Annotation <b>%(id)s</b> (d: %(duration)s)' % d
+                d['title']='Annotation <b>%(id)s</b> (d: %(duration)s = %(raw_duration)dms)' % d
             svg_data=None
             if self.annotation.content.mimetype.startswith('image/svg'):
                 svg_data=self.annotation.content.data
