@@ -3767,7 +3767,7 @@ class TimeLine(AdhocView):
         selectedtree.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
 
         notselectedtree = Gtk.TreeView(model=notselected_store)
-        for (label, index) in ((_('Displayed'), 0),
+        for (label, index) in ((_('Not displayed'), 0),
                                (_('Schema'), 2),
                                (_('Ann. count'), 3)):
             cell = Gtk.CellRendererText()
