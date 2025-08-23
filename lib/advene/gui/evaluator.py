@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 import builtins
 import inspect
 import io
-import os
 import re
 import time
 import traceback
+from pathlib import Path
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -77,7 +77,7 @@ class Evaluator:
 
         self.historyfile=historyfile
         if historyfile:
-            self.bookmarkfile=historyfile + '-bookmarks'
+            self.bookmarkfile = historyfile + '-bookmarks'
         else:
             self.bookmarkfile=None
         self.load_history()
@@ -881,8 +881,8 @@ def center_on_mouse(w):
 
 def launch(globals_=None, locals_=None, historyfile=None):
     if historyfile is None:
-        historyfile=os.path.join(os.getenv('HOME'), '.pyeval.log')
-    ev = Evaluator(globals_=globals_, locals_=locals_, historyfile=historyfile)
+        historyfile = Path.home() / '.pyeval.log'
+    ev = Evaluator(globals_=globals_, locals_=locals_, historyfile=str(historyfile))
     ev.run()
 
 if __name__ == "__main__":
