@@ -1,0 +1,40 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: 'Advene: active reading through hypervideo'
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - family-names: Aubert
+    given-names: Olivier
+    orcid: 'https://orcid.org/0000-0001-8204-1567'
+  - family-names: Prié
+    given-names: Yannick
+    orcid: 'https://orcid.org/0000-0002-7068-0836'
+identifiers:
+  - type: doi
+    value: 10.1145/1083356.1083405
+repository-code: 'https://github.com/oaubert/advene/'
+url: 'https://advene.org'
+abstract: >-
+  The cross-platform Advene application allows users to
+  easily create comments and analyses of video documents,
+  through the definition of time-aligned annotations and
+  their mobilisation into automatically-generated or
+  user-written comment views (HTML documents). Annotations
+  can also be used to modify the rendition of the
+  audiovisual document, thus providing virtual montage,
+  captioning, navigation... capabilities. Users can exchange
+  their comments/analyses in the form of Advene packages,
+  independently from the video itself.
+keywords:
+  - video
+  - annotation
+  - structure
+  - hypervideo
+license: GPL-2.0+
+commit: 945374834bb34508fe4bf01a24b81e0d7e80acc4
+version: 3.15
+date-released: '2025-01-08'
+doi: 10.1145/1083356.1083405
