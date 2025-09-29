@@ -1,11 +1,26 @@
-Purpose of the software
-=======================
+Advene video annotation software
+================================
 
-The Advene project (Annotate Digital Video, Exchange on the NEt) aims
-at providing a model and a format to share annotations about digital
-video documents (movies, courses, conferences...), as well as tools to
-edit and visualize the hypervideos generated from both the annotations
-and the audiovisual documents.
+[![Build Status](https://github.com/oaubert/advene/workflows/packaging/badge.svg?branch=master)](https://github.com/oaubert/advene/actions/workflows/packaging.yml?query=branch%3Amaster)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1003149.svg)](https://doi.org/10.5281/zenodo.1003149)
+![License: GPL2.0](https://img.shields.io/github/license/oaubert/advene)
+[![Project homepage](https://img.shields.io/badge/Project%20homepage-advene.org-ff0080)](https://advene.org)
+
+The cross-platform Advene (Annotate Digital Video, Exchange on the
+NEt) application allows users to easily create comments and analyses
+of video documents, through the definition of time-aligned annotations
+and their mobilisation into automatically-generated or user-written
+comment views (HTML documents). Annotations can also be used to modify
+the rendition of the audiovisual document, thus providing virtual
+montage, captioning, navigation... capabilities. Users can exchange
+their comments/analyses in the form of Advene packages, independently
+from the video itself.
+
+The Advene project aims at providing a model and a format to share
+annotations about digital video documents (movies, courses,
+conferences...), as well as tools to edit and visualize the
+hypervideos generated from both the annotations and the audiovisual
+documents.
 
 With the Advene software, teachers, moviegoers, etc. can exchange
 multimedia comments and analyses about video documents. The project
