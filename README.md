@@ -1,7 +1,6 @@
 Advene video annotation software
 ================================
 
-[![Build Status](https://github.com/oaubert/advene/workflows/packaging/badge.svg?branch=master)](https://github.com/oaubert/advene/actions/workflows/packaging.yml?query=branch%3Amaster)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1003149.svg)](https://doi.org/10.5281/zenodo.1003149)
 ![License: GPL2.0](https://img.shields.io/github/license/oaubert/advene)
 [![Project homepage](https://img.shields.io/badge/Project%20homepage-advene.org-ff0080)](https://advene.org)
