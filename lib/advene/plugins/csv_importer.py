@@ -59,10 +59,14 @@ class CSVImporter(GenericImporter):
         self.time_column = ""
         self.end_column = ""
         self.relative = False
+        self.encoding = 'utf-8'
         self.columns = ""
         self.optionparser.add_option("-d", "--dialect",
                                      action="store", type="choice", dest="dialect", choices=csv.list_dialects(), default=self.dialect,
                                      help=_("CSV dialect"))
+        self.optionparser.add_option("-x", "--encoding",
+                                     action="store", type="choice", dest="encoding", choices=[ 'utf-8', 'utf-16', 'cp1252', 'latin1', 'latin9' ], default=self.encoding,
+                                     help=_("Text encoding"))
         self.optionparser.add_option("-t", "--time-column",
                                      action="store", type="str", dest="time_column", default=self.time_column,
                                      help=_("Name of the time column. Leave empty for first column."))
@@ -79,7 +83,7 @@ class CSVImporter(GenericImporter):
     def process_file(self, filename, dest=None):
         p, at = self.init_package(filename=dest)
 
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding=self.encoding) as f:
             rows = csv.DictReader(f, dialect=self.dialect)
             if len(rows.fieldnames) == 1:
                 # Only 1 field detected, probably the dialect is wrong
@@ -141,7 +145,7 @@ class CSVImporter(GenericImporter):
                         'begin': begin,
                         'end': end,
                         'type': self.name2type[col],
-                        'content': rows[col]
+                        'content': row[col]
                     }
             else:
                 # Complete and send previous data
