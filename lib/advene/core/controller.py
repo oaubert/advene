@@ -2868,7 +2868,7 @@ class AdveneController:
         def valid_for_package(view):
             return view.is_valid_for('package')
         def valid_for_annotationtype(view):
-            view.is_valid_for('annotation-type')
+            return view.is_valid_for('annotation-type')
 
         valid_filter = always_valid
         if isinstance(element, Package):
