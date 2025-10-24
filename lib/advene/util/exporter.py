@@ -172,7 +172,9 @@ class GenericExporter:
         else:
             for k in (n
                       for n in dir(options)
-                      if not n.startswith('_')):
+                      # It should be a optparser.Options object, ignore its own attributes
+                      if not n.startswith('_')
+                      and n not in ('ensure_value', 'read_file', 'read_module')):
                 k = k.replace('-', '_')
                 if hasattr(self, k):
                     v = getattr(options, k)
@@ -409,14 +411,14 @@ def init_templateexporters():
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    USAGE = f"{sys.argv[0]} [-o filter_options] filter_name input_file [output_file]"
+    USAGE = f"{sys.argv[0]} [-o source-id=ID] [-o filter_options] filter_name input_file [output_file]"
 
     import advene.core.controller as controller
     c = controller.AdveneController()
     c.init_plugins()
     controller.init_templateexporters()
 
-    if (len(config.data.args) < 2
+    if (len(config.data.args) < 1
         or config.data.args[0] == 'list'):
         logger.error("""Syntax: %s
 
@@ -428,16 +430,15 @@ Available filters:
 
     # Handle input parameters/options
     filtername = config.data.args[0]
-    inputfile = config.data.args[1]
-    if config.data.args[2:]:
-        outputfile = config.data.args[2]
-    else:
-        outputfile = ''
+
+    # --o source-id=ID option special processing
+    source_id = config.data.options.options.get('source-id')
 
     # Filter options are passed using the -o option
     # Rebuild filter option string from config.data.options.options dict
     option_list = [ (f"--{k}={v}" if v else f"--{k}")
-                    for (k, v) in config.data.options.options.items() ]
+                    for (k, v) in config.data.options.options.items()
+                    if k != 'source-id' ]
 
     e = None
     cl = [ f for f in c.get_export_filters() if f.get_id().startswith(filtername) ]
@@ -454,8 +455,23 @@ Available filters:
     e.optionparser.set_usage(USAGE)
     e.process_options(option_list)
 
+    if len(config.data.args) < 2:
+        # A filter was specified, but no package - display its help
+        option_list.append('--help')
+        e.process_options(option_list)
+        sys.exit(1)
+
+    inputfile = config.data.args[1]
+    if config.data.args[2:]:
+        outputfile = config.data.args[2]
+    else:
+        outputfile = ''
+
     c.load_package(inputfile)
-    e.set_source(c.package)
+    source = c.package
+    if source_id is not None:
+        source = c.package.get_element_by_id(source_id)
+    e.set_source(source)
 
     if outputfile:
         outputfile = e.get_filename(outputfile)
