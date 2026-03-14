@@ -79,21 +79,21 @@ def png_to_pixbuf (png_data, width=None, height=None):
     """
     loader = GdkPixbuf.PixbufLoader.new_with_type('png')
     if not isinstance(png_data, bytes):
-        png_data=bytes(png_data)
+        png_data = bytes(png_data)
     try:
         loader.write(png_data)
-        pixbuf = loader.get_pixbuf ()
         loader.close ()
+        pixbuf = loader.get_pixbuf ()
     except GObject.GError:
         # The PNG data was invalid.
-        pixbuf=GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(config.data.advenefile( ( 'pixmaps', 'notavailable.png' ) ))
 
     if width and not height:
         height = int(width * pixbuf.get_height() / pixbuf.get_width())
     if height and not width:
         width = int(height * pixbuf.get_width() / pixbuf.get_height())
     if width and height:
-        p=pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+        p = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
         return p
     else:
         return pixbuf
